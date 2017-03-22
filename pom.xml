@@ -5,7 +5,7 @@
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
 
-	<version>0.2.1</version>
+	<version>0.2.2</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -14,6 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
+		<generated.statuses.directory>${project.build.directory}/generated-sources/irked</generated.statuses.directory>
 
 		<java.version>1.8</java.version>
 		<maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
@@ -42,15 +43,64 @@
 			<version>[3,)</version>
 		</dependency>
 	</dependencies>
-	
-		<build>
+
+	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
+				<version>${maven.compiler.plugin.version}</version>
+				<executions>
+					<execution>
+						<id>generators</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>tech/greenfield/vertx/irked/generators/*.java</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>statuses</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<generatedSourcesDirectory>${generated.statuses.directory}</generatedSourcesDirectory>
+							<includes>
+							<include>tech/greenfield/vertx/irked/status/*.java</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<id>generateHTTPStatus</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<classpathScope>compile</classpathScope>
+					<mainClass>tech.greenfield.vertx.irked.generators.StatusClassGenerator</mainClass>
+					<arguments>
+						<argument>${generated.statuses.directory}</argument>
+						<argument>tech.greenfield.vertx.irked.status</argument>
+					</arguments>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -82,6 +132,43 @@
 				</executions>
 			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											exec-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.6.0,)
+										</versionRange>
+										<goals>
+											<goal>java</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute></execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
-	
+
 </project>
