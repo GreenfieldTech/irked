@@ -15,7 +15,7 @@ package:
 
 s3:
  stage: deploy
- images: python
+ image: python
  script:
   - pip install awscli
   - aws s3 sync --storage-class REDUCED_REDUNDANCY --acl public-read maven-repo/ s3://cloudonix-dist/maven2/
