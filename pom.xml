@@ -5,7 +5,7 @@
 	<groupId>tech.greenfield.vertx</groupId>
 	<artifactId>irked</artifactId>
 
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx-web</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
