@@ -1,4 +1,4 @@
-package net.gftc.vertx.irked;
+package tech.greenfield.vertx.irked;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import net.gftc.vertx.irked.annotations.Endpoint;
+import tech.greenfield.vertx.irked.annotations.Endpoint;
 
 public class Controller {
 

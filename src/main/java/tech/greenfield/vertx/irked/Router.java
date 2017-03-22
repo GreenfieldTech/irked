@@ -1,4 +1,4 @@
-package net.gftc.vertx.irked;
+package tech.greenfield.vertx.irked;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -11,7 +11,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
-import net.gftc.vertx.irked.annotations.*;
+import tech.greenfield.vertx.irked.annotations.*;
 
 public class Router {
 	

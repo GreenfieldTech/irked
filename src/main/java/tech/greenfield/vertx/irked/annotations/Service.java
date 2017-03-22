@@ -1,11 +1,9 @@
-package net.gftc.vertx.irked.annotations;
+package tech.greenfield.vertx.irked.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Put {
-
-	String value();
+public @interface Service {
 
 }

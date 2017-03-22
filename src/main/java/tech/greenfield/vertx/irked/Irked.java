@@ -1,4 +1,4 @@
-package net.gftc.vertx.irked;
+package tech.greenfield.vertx.irked;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
