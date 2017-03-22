@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>tech.greenfield.vertx</groupId>
-	<artifactId>irked</artifactId>
+	<groupId>tech.greenfield</groupId>
+	<artifactId>irked-vertx</artifactId>
 
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 	<packaging>jar</packaging>
-	<name>irked-vertx-web</name>
+	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
 
 	<properties>
