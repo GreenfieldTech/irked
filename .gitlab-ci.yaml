@@ -1,0 +1,21 @@
+image: java:jdk
+
+stages:
+ - build
+ - deploy
+
+package:
+ stage: build
+ script:
+  - mvn -B package
+  - mvn -DaltDeploymentRepository=repo::default::file:./maven-repo/repo deploy
+ artifacts:
+  paths:
+   - maven-repo/*
+
+s3:
+ stage: deploy
+ images: python
+ script:
+  - pip install awscli
+  - aws s3 sync --storage-class REDUCED_REDUNDANCY --acl public-read maven-repo/ s3://cloudonix-dist/maven2/
