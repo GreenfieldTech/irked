@@ -8,7 +8,7 @@ package:
  image: maven
  script:
   - mvn -B package
-  - mvn -DaltDeploymentRepository=repo::default::file:./maven-repo/repo deploy
+  - mvn -DaltDeploymentRepository=repo::default::file:./maven-repo/releases deploy
  artifacts:
   paths:
    - maven-repo/*
