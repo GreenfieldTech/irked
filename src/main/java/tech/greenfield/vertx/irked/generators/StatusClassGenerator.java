@@ -61,11 +61,11 @@ public class StatusClassGenerator {
 		writer.format("package %s;\n\n", packageName);
 		writer.format("import tech.greenfield.vertx.irked.HttpError;\n\n");
 		writer.format("public class %s extends HttpError {\n\n", className);
-		writer.format("\tprivate static final long serialVersionUID = %dL;\n\n", new SecureRandom(fullyQualified.getBytes()).nextLong());
-		writer.format("\tpublic %s() {\nsuper(%d,\"%s\");\n}\n\n", className, code, phrase);
-		writer.format("\tpublic %s(Throwable t) {\nsuper(%d,\"%s\", t);\n}\n\n", className, code, phrase);
-		writer.format("\tpublic %s(String m) {\nsuper(%d,\"%s\", m);\n}\n\n", className, code, phrase);
-		writer.format("\tpublic %s(String m, Throwable t) {\nsuper(%d,\"%s\", m, t);\n}\n\n", className, code, phrase);
+		writer.format("private static final long serialVersionUID = %dL;\n\n", new SecureRandom(fullyQualified.getBytes()).nextLong());
+		writer.format("public %s() {\nsuper(%d,\"%s\");\n}\n\n", className, code, phrase);
+		writer.format("public %s(Throwable t) {\nsuper(%d,\"%s\", t);\n}\n\n", className, code, phrase);
+		writer.format("public %s(String m) {\nsuper(%d,\"%s\", m);\n}\n\n", className, code, phrase);
+		writer.format("public %s(String m, Throwable t) {\nsuper(%d,\"%s\", m, t);\n}\n\n", className, code, phrase);
 		writer.format("}\n");
 		writer.close();
 	}
