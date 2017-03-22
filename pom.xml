@@ -6,7 +6,7 @@
 	<artifactId>irked</artifactId>
 
 	<version>0.1.0</version>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<name>irked-vertx-web</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
 
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-web</artifactId>
-			<version>${vertx.version}</version>
+			<version>[3,)</version>
 		</dependency>
 	</dependencies>
 	

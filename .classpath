@@ -1,10 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
 		<attributes>
-			<attribute name="owner.project.facets" value="java"/>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="build/classes"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="M2_REPO/io/vertx/vertx-web/3.4.1/vertx-web-3.4.1.jar" sourcepath="M2_REPO/io/vertx/vertx-web/3.4.1/vertx-web-3.4.1-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/vertx/vertx-auth-common/3.4.1/vertx-auth-common-3.4.1.jar" sourcepath="M2_REPO/io/vertx/vertx-auth-common/3.4.1/vertx-auth-common-3.4.1-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/vertx/vertx-core/3.4.1/vertx-core-3.4.1.jar" sourcepath="M2_REPO/io/vertx/vertx-core/3.4.1/vertx-core-3.4.1-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-common/4.1.8.Final/netty-common-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-common/4.1.8.Final/netty-common-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-buffer/4.1.8.Final/netty-buffer-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-buffer/4.1.8.Final/netty-buffer-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-transport/4.1.8.Final/netty-transport-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-transport/4.1.8.Final/netty-transport-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-resolver/4.1.8.Final/netty-resolver-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-resolver/4.1.8.Final/netty-resolver-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-handler/4.1.8.Final/netty-handler-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-handler/4.1.8.Final/netty-handler-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-codec/4.1.8.Final/netty-codec-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-codec/4.1.8.Final/netty-codec-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-handler-proxy/4.1.8.Final/netty-handler-proxy-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-handler-proxy/4.1.8.Final/netty-handler-proxy-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-codec-socks/4.1.8.Final/netty-codec-socks-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-codec-socks/4.1.8.Final/netty-codec-socks-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-codec-http/4.1.8.Final/netty-codec-http-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-codec-http/4.1.8.Final/netty-codec-http-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-codec-http2/4.1.8.Final/netty-codec-http2-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-codec-http2/4.1.8.Final/netty-codec-http2-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-resolver-dns/4.1.8.Final/netty-resolver-dns-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-resolver-dns/4.1.8.Final/netty-resolver-dns-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/io/netty/netty-codec-dns/4.1.8.Final/netty-codec-dns-4.1.8.Final.jar" sourcepath="M2_REPO/io/netty/netty-codec-dns/4.1.8.Final/netty-codec-dns-4.1.8.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.7.4/jackson-core-2.7.4.jar" sourcepath="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.7.4/jackson-core-2.7.4-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-databind/2.7.4/jackson-databind-2.7.4.jar" sourcepath="M2_REPO/com/fasterxml/jackson/core/jackson-databind/2.7.4/jackson-databind-2.7.4-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-annotations/2.7.0/jackson-annotations-2.7.0.jar" sourcepath="M2_REPO/com/fasterxml/jackson/core/jackson-annotations/2.7.0/jackson-annotations-2.7.0-sources.jar"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
