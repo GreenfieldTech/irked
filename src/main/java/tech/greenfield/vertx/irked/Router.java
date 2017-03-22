@@ -91,11 +91,12 @@ public class Router {
 		try {
 			Route route = method.setRoute(path);
 			Handler<RoutingContext> handler = new RequestWrapper(Objects.requireNonNull(api.getHandler(field)), requestWrapper);
+			if (isFailHandler(field))
+				route.failureHandler(handler);
 			if (isBlocking(field))
 				route.blockingHandler(handler);
 			else
 				route.handler(handler);
-			//route.failureHandler(r -> new JSONFailureHandler().handle(new LocalContext(r)));
 			return true;
 		} catch (NullPointerException e) {
 			// ignore NPEs created by api.getHandler - it means the field is not a handler and we skip it
@@ -107,6 +108,10 @@ public class Router {
 
 	private static boolean isBlocking(Field field) {
 		return Objects.nonNull(field.getAnnotation(Blocking.class));
+	}
+
+	private static boolean isFailHandler(Field field) {
+		return Objects.nonNull(field.getAnnotation(OnFail.class));
 	}
 
 	private static <T extends Annotation> String uriFromRoutingAnnotation(Field field, Class<T> anot) {
