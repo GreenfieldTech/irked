@@ -1,11 +1,11 @@
-image: java:jdk
-
+# Build and deploy Irked
 stages:
  - build
  - deploy
 
 package:
  stage: build
+ image: maven
  script:
   - mvn -B package
   - mvn -DaltDeploymentRepository=repo::default::file:./maven-repo/repo deploy
