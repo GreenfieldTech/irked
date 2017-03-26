@@ -14,8 +14,27 @@ import io.vertx.ext.web.impl.RoutingContextDecorator;
  */
 public class Request extends RoutingContextDecorator {
 
+	private RoutingContext outerContext;
+
 	public Request(RoutingContext outerContext) {
 		super(outerContext.currentRoute(), outerContext);
+		this.outerContext = outerContext;
+	}
+
+	@Override
+	public void fail(int statusCode) { 
+		// we're overriding the fail handlers, which for some reason the decorator 
+		// feels should be moved to another thread. Instead, use the outer implementation
+		// and let it do what's right
+		this.outerContext.fail(statusCode);
+	}
+
+	@Override
+	public void fail(Throwable throwable) {
+		// we're overriding the fail handlers, which for some reason the decorator 
+		// feels should be moved to another thread. Instead, use the outer implementation
+		// and let it do what's right
+		this.outerContext.fail(throwable);
 	}
 
 }
