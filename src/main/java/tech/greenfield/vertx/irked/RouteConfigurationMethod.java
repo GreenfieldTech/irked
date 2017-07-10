@@ -4,7 +4,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import tech.greenfield.vertx.irked.handlers.WebHandler;
+import io.vertx.core.Handler;
+import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 
 public class RouteConfigurationMethod extends RouteConfiguration {
@@ -37,9 +38,8 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	}
 
 	@Override
-	WebHandler getHandler() throws IllegalArgumentException, IllegalAccessException {
-		if (!method.isAccessible())
-			throw new IllegalAccessError("Invalid access permissions for " + this);
+	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException {
+		method.setAccessible(true);
 		Class<?>[] params = method.getParameterTypes();
 		if (params.length == 1 || params[0].isAssignableFrom(Request.class) || 
 				// we should support working with methods that take specializations for Request, we'll rely on the specific implementation's

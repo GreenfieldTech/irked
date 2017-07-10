@@ -3,7 +3,8 @@ package tech.greenfield.vertx.irked;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-import tech.greenfield.vertx.irked.handlers.WebHandler;
+import io.vertx.core.Handler;
+import io.vertx.ext.web.RoutingContext;
 
 public class RouteConfigurationField extends RouteConfiguration {
 
@@ -34,9 +35,11 @@ public class RouteConfigurationField extends RouteConfiguration {
 		return field.getName();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	WebHandler getHandler() throws IllegalArgumentException, IllegalAccessException {
-		return (WebHandler) field.get(impl);
+	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException {
+		Object value = field.get(impl);
+		return (Handler<RoutingContext>)value;
 	}
 
 }

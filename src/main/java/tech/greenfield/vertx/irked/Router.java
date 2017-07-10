@@ -2,8 +2,6 @@ package tech.greenfield.vertx.irked;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -24,14 +22,14 @@ public class Router {
 
 		private Controller ctr;
 		private Function<RoutingContext, Request> wrapper;
-		private Handler<RoutingContext> handler;
+		private Handler<? super RoutingContext> handler;
 
 		public RequestWrapper(Controller ctr, Function<RoutingContext, Request> requestWrapper) {
 			this.ctr = Objects.requireNonNull(ctr, "Controller instance is not set!");
 			this.wrapper = requestWrapper;
 		}
 
-		public RequestWrapper(Handler<RoutingContext> handler, Function<RoutingContext, Request> requestWrapper) {
+		public RequestWrapper(Handler<? super RoutingContext> handler, Function<RoutingContext, Request> requestWrapper) {
 			this.handler = Objects.requireNonNull(handler, "Handler instance is not set!");
 			this.wrapper = requestWrapper;
 		}
