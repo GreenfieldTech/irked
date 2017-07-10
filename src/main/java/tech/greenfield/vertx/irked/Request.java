@@ -56,9 +56,11 @@ public class Request extends RoutingContextDecorator {
 	public void sendJSON(JsonObject json, HttpError status) {
 		String content = json.encode();
 		response()
-			.putHeader("Content-Type", "application/json")
-			.putHeader("Content-Length", String.valueOf(content.length()))
-			.end(content);
+				.setStatusCode(status.getStatusCode())
+				.setStatusMessage(status.getStatusText())
+				.putHeader("Content-Type", "application/json")
+				.putHeader("Content-Length", String.valueOf(content.length()))
+				.end(content);
 	}
 	
 	/**
