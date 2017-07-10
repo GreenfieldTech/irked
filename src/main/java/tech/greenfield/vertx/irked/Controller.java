@@ -1,13 +1,13 @@
 package tech.greenfield.vertx.irked;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import tech.greenfield.vertx.irked.annotations.Endpoint;
 
 public class Controller {
 
@@ -30,12 +30,11 @@ public class Controller {
 	 * Helper method for {@link Router} to discover routing endpoints
 	 * @return list of fields that are routing endpoints
 	 */
-	List<Field> getRoutingFields() {
-		Package annotationPackage = Endpoint.class.getPackage();
-		return Stream.of(getClass().getDeclaredFields())
-				.filter(f -> Stream.of(f.getAnnotations())
-						.map(a -> a.annotationType().getPackage())
-						.anyMatch(p -> p.equals(annotationPackage)))
+	List<RouteConfiguration> getRoutes() {
+		return Stream.concat(
+				Arrays.stream(getClass().getDeclaredFields()).map(f -> RouteConfiguration.wrap(this, f)),
+				Arrays.stream(getClass().getDeclaredMethods()).map(f -> RouteConfiguration.wrap(this, f)))
+				.filter(RouteConfiguration::isValid)
 				.collect(Collectors.toList());
 	}
 
