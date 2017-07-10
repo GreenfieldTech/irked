@@ -1,5 +1,6 @@
 package tech.greenfield.vertx.irked;
 
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
@@ -55,9 +56,7 @@ public class Request extends RoutingContextDecorator {
 	 */
 	public void sendJSON(JsonObject json, HttpError status) {
 		String content = json.encode();
-		response()
-				.setStatusCode(status.getStatusCode())
-				.setStatusMessage(status.getStatusText())
+		response(status)
 				.putHeader("Content-Type", "application/json")
 				.putHeader("Content-Length", String.valueOf(content.length()))
 				.end(content);
@@ -72,6 +71,15 @@ public class Request extends RoutingContextDecorator {
 	 */
 	public void sendError(HttpError err) {
 		sendJSON(new JsonObject().put("status", false).put("message", err.getMessage()), err);
+	}
+
+	/**
+	 * Helper method to generate response with the specified HTTP status
+	 * @param status HTTP status code and text to set on the response
+	 * @return HTTP response created using {@link RoutingContext#response()}
+	 */
+	public HttpServerResponse response(HttpError status) {
+		return response().setStatusCode(status.getStatusCode()).setStatusMessage(status.getStatusText());
 	}
 
 }
