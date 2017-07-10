@@ -86,7 +86,7 @@
 						<configuration>
 							<generatedSourcesDirectory>${generated.statuses.directory}</generatedSourcesDirectory>
 							<includes>
-							<include>tech/greenfield/vertx/irked/status/*.java</include>
+								<include>tech/greenfield/vertx/irked/status/*.java</include>
 							</includes>
 						</configuration>
 					</execution>
@@ -95,6 +95,24 @@
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/irked</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
