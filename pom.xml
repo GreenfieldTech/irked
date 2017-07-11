@@ -83,12 +83,6 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
-						<configuration>
-							<generatedSourcesDirectory>${generated.statuses.directory}</generatedSourcesDirectory>
-							<includes>
-								<include>tech/greenfield/vertx/irked/status/*.java</include>
-							</includes>
-						</configuration>
 					</execution>
 				</executions>
 				<configuration>
@@ -117,7 +111,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.6.0</version>
 				<executions>
 					<execution>
 						<id>generateHTTPStatus</id>
@@ -144,7 +137,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>${maven.shade.version}</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
