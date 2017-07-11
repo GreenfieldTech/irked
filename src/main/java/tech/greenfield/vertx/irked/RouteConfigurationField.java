@@ -38,6 +38,7 @@ public class RouteConfigurationField extends RouteConfiguration {
 	@SuppressWarnings("unchecked")
 	@Override
 	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException {
+		field.setAccessible(true);
 		Object value = field.get(impl);
 		return (Handler<RoutingContext>)value;
 	}
