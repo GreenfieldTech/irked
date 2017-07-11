@@ -22,7 +22,7 @@ packagecloud-snapshot:
  script:
   - mkdir -p $HOME/.m2
   - echo "<settings><servers><server><id>packagecloud-GreenfieldTech</id><password>$PC_TOKEN</password></server></servers></settings>' > $HOME/.m2/settings.xml
-  - export VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:2.2:evaluate -Dexpression=project.version | fgrep -v '[')
+  - export VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:2.2:evaluate -Dexpression=project.version | grep -Ev '(^\[|Download\w+:))
   - xmlstarlet ed -P -L -O -N p=http://maven.apache.org/POM/4.0.0 -u '/p:project/p:version' -v $VERSION-SNAPSHOT pom.xml
   - mvn deploy
 
