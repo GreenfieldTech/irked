@@ -1,21 +1,17 @@
 package tech.greenfield.vertx.irked;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import tech.greenfield.vertx.irked.annotations.*;
+import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.server.Server;
 
 @RunWith(VertxUnitRunner.class)
