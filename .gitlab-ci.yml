@@ -20,6 +20,7 @@ packagecloud-snapshot:
  except:
   - master
  script:
+  - apt-get update && apt-get install -qy xmlstarlet
   - mkdir -p $HOME/.m2
   - echo "<settings><servers><server><id>packagecloud-GreenfieldTech</id><password>$PC_TOKEN</password></server></servers></settings>" > $HOME/.m2/settings.xml
 #  - export VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:2.2:evaluate -Dexpression=project.version | grep -Ev '(^\[|Download\w+:))
