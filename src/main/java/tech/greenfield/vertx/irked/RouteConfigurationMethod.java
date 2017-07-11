@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 
 public class RouteConfigurationMethod extends RouteConfiguration {
@@ -38,7 +39,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	}
 
 	@Override
-	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException {
+	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
 		method.setAccessible(true);
 		Class<?>[] params = method.getParameterTypes();
 		if (params.length == 1 || params[0].isAssignableFrom(Request.class) || 
@@ -53,7 +54,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 					throw new InternalServerError("Invalid request handler " + this + ": " + e, e).uncheckedWrap();
 				}
 			};
-		throw new IllegalArgumentException("Invalid arguments for " + this);
+		throw new InvalidRouteConfiguration("Invalid arguments list for " + this);
 	}
 
 }

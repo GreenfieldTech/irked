@@ -5,7 +5,7 @@
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
 
-	<version>1.0.1</version>
+	<version>1.1.0</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -26,12 +26,12 @@
 
 	<distributionManagement>
 		<repository>
-			<id>repo</id>
-			<url>http://cloudonix-dist.s3-website-us-west-1.amazonaws.com/maven2/releases</url>
+			<id>packagecloud-GreenfieldTech</id>
+			<url>packagecloud+https://packagecloud.io/GreenfieldTech/oss</url>
 		</repository>
 		<snapshotRepository>
-			<id>snapshot-repo</id>
-			<url>http://cloudonix-dist.s3-website-us-west-1.amazonaws.com/mavent2/snapshots</url>
+			<id>packagecloud-GreenfieldTech</id>
+			<url>packagecloud+https://packagecloud.io/GreenfieldTech/oss</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -83,12 +83,6 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
-						<configuration>
-							<generatedSourcesDirectory>${generated.statuses.directory}</generatedSourcesDirectory>
-							<includes>
-								<include>tech/greenfield/vertx/irked/status/*.java</include>
-							</includes>
-						</configuration>
 					</execution>
 				</executions>
 				<configuration>
@@ -117,7 +111,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.6.0</version>
 				<executions>
 					<execution>
 						<id>generateHTTPStatus</id>
@@ -144,7 +137,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>${maven.shade.version}</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -226,6 +218,13 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<extensions>
+			<extension>
+				<groupId>io.packagecloud.maven.wagon</groupId>
+				<artifactId>maven-packagecloud-wagon</artifactId>
+				<version>[0,)</version>
+			</extension>
+		</extensions>
 	</build>
 
 </project>

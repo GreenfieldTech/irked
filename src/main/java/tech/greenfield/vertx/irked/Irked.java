@@ -3,6 +3,7 @@ package tech.greenfield.vertx.irked;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
+import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
 public class Irked {
 
@@ -12,9 +13,10 @@ public class Irked {
 		this.vertx = vertx;
 	}
 
-	public Handler<HttpServerRequest> setupRequestHandler(Controller api) {
+	public Handler<HttpServerRequest> setupRequestHandler(Controller... apis) throws InvalidRouteConfiguration {
 		Router router = new Router(vertx);
-		router.configure(api);
+		for (Controller api : apis)
+			router.configure(api);
 		return router::accept;
 	}
 	

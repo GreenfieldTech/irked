@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
 public class RouteConfigurationField extends RouteConfiguration {
 
@@ -37,10 +38,11 @@ public class RouteConfigurationField extends RouteConfiguration {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException {
+	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
+		if (!Handler.class.isAssignableFrom(field.getType()))
+			throw new InvalidRouteConfiguration(this + " is not a valid handler or controller");
 		field.setAccessible(true);
-		Object value = field.get(impl);
-		return (Handler<RoutingContext>)value;
+		return (Handler<RoutingContext>)field.get(impl);
 	}
 
 }
