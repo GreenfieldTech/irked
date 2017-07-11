@@ -26,12 +26,12 @@
 
 	<distributionManagement>
 		<repository>
-			<id>repo</id>
-			<url>http://cloudonix-dist.s3-website-us-west-1.amazonaws.com/maven2/releases</url>
+			<id>packagecloud-GreenfieldTech</id>
+			<url>packagecloud+https://packagecloud.io/GreenfieldTech/oss</url>
 		</repository>
 		<snapshotRepository>
-			<id>snapshot-repo</id>
-			<url>http://cloudonix-dist.s3-website-us-west-1.amazonaws.com/mavent2/snapshots</url>
+			<id>packagecloud-GreenfieldTech</id>
+			<url>packagecloud+https://packagecloud.io/GreenfieldTech/oss</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -226,6 +226,13 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<extensions>
+			<extension>
+				<groupId>io.packagecloud.maven.wagon</groupId>
+				<artifactId>maven-packagecloud-wagon</artifactId>
+				<version>[0,)</version>
+			</extension>
+		</extensions>
 	</build>
 
 </project>
