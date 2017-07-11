@@ -12,6 +12,7 @@ import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.annotations.Blocking;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.OnFail;
+import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
 public abstract class RouteConfiguration {
 	static Package annotationPackage = Endpoint.class.getPackage();
@@ -61,7 +62,7 @@ public abstract class RouteConfiguration {
 
 	abstract protected String getName();
 
-	abstract Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException;
+	abstract Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
 
 	boolean isBlocking() {
 		return Objects.nonNull(getAnnotation(Blocking.class));

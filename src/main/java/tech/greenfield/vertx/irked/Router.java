@@ -13,6 +13,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.annotations.*;
+import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
 public class Router {
 	
@@ -58,11 +59,11 @@ public class Router {
 		router.accept(request);
 	}
 
-	public void configure(Controller api) {
+	public void configure(Controller api) throws InvalidRouteConfiguration {
 		configure(api, "", new RequestWrapper(api, Request::new));
 	}
 
-	private void configure(Controller api, String prefix, RequestWrapper requestWrapper) {
+	private void configure(Controller api, String prefix, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
 		// clean up mount path
 		if (prefix.endsWith("/"))
 			prefix = prefix.substring(0, prefix.length() - 1);
@@ -77,7 +78,7 @@ public class Router {
 	}
 
 	private <T extends Annotation> boolean tryConfigureRoute(RoutingMethod method, 
-			String prefix, RouteConfiguration conf, Class<T> anot, RequestWrapper requestWrapper) {
+			String prefix, RouteConfiguration conf, Class<T> anot, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
 		String path = conf.uriForAnnotation(anot);
 		if (Objects.isNull(path))
 			return false;
