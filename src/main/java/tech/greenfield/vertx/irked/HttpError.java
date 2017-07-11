@@ -2,6 +2,8 @@ package tech.greenfield.vertx.irked;
 
 import java.util.Objects;
 
+import tech.greenfield.vertx.irked.status.InternalServerError;
+
 public class HttpError extends Exception {
 
 	private static final long serialVersionUID = -7084405660609573926L;
@@ -62,5 +64,19 @@ public class HttpError extends Exception {
 			t = t.getCause();
 		return t;
 	}
-
+	
+	/**
+	 * Helper methods for OnFail handlers to locate a wrapped HttpError or
+	 * create an InternalServerError from an unexpected exception (whether it
+	 * is wrapped or not)
+	 * @param t Throwable to be analyzed
+	 * @return the wrapped HttpError instance or a new {@link InternalServerError} wrapping
+	 *   the real exception
+	 */
+	public static HttpError toHttpError(Throwable t) {
+		t = unwrap(t);
+		if (t instanceof HttpError)
+			return (HttpError)t;
+		return new InternalServerError(t);
+	}
 }
