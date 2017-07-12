@@ -47,7 +47,7 @@ ossrh-staging:
  script:
   - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
   - echo "$GPG_PRIVATE_KEY" | gpg --batch --import --passphrase "$GPG_PASSPHRASE" -
-  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" target/*.pom)
+  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)-SNAPSHOT
   - mvn gpg:sign-and-deploy-file -DpomFile=irked-vertx-${VERSION}.pom -Dfile=target/irked-vertx-${VERSION}.jar -Durl=$REPO_URL -DrepositoryId=sonatype_oss
 
 ossrh-release:
@@ -60,7 +60,7 @@ ossrh-release:
  script:
   - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
   - echo "$GPG_PRIVATE_KEY" | gpg --batch --import --passphrase "$GPG_PASSPHRASE" -
-  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" target/*.pom)
+  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
   - mvn gpg:sign-and-deploy-file -DpomFile=irked-vertx-${VERSION}.pom -Dfile=target/irked-vertx-${VERSION}.jar -Durl=$REPO_URL -DrepositoryId=sonatype_oss
 
 s3:
