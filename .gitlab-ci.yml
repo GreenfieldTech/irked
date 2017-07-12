@@ -38,6 +38,32 @@ packagecloud:
   - echo "<settings><servers><server><id>packagecloud-GreenfieldTech</id><password>$PC_TOKEN</password></server></servers></settings>" > $HOME/.m2/settings.xml
   - mvn deploy
 
+ossrh-staging:
+ stage: deploy
+ image: maven
+ environment:
+  REPO_URL: https://oss.sonatype.org/content/repositories/snapshots
+ except:
+  - master
+ script:
+  - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
+  - echo "$GPG_PRIVATE_KEY" | gpg --batch --import --passphrase "$GPG_PASSPHRASE" -
+  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
+  - mvn gpg:sign-and-deploy-file -DpomFile=irked-vertx-${VERSION}.pom -Dfile=target/irked-vertx-${VERSION}.jar -Durl=$REPO_URL -DrepositoryId=sonatype_oss
+
+ossrh-release:
+ stage: deploy
+ image: maven
+ environment:
+  REPO_URL: http://oss.sonatype.org/service/local/staging/deploy/maven2/
+ only:
+  - master
+ script:
+  - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
+  - echo "$GPG_PRIVATE_KEY" | gpg --batch --import --passphrase "$GPG_PASSPHRASE" -
+  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
+  - mvn gpg:sign-and-deploy-file -DpomFile=irked-vertx-${VERSION}.pom -Dfile=target/irked-vertx-${VERSION}.jar -Durl=$REPO_URL -DrepositoryId=sonatype_oss
+
 s3:
  stage: deploy
  image: python
