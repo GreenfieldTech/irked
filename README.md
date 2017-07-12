@@ -276,8 +276,8 @@ vertx.createHttpServer()
 #### Mounting Middle-Ware
 
 Under Vert.x its often useful to have a "middle-ware" that parse all your requests, for example:
-the Vert.x Web `BodyHandler` implementation reads the HTTP request body and handles all kinds of
-body formats for you.
+the [Vert.x Web BodyHandler](https://github.com/vert-x3/vertx-examples/blob/master/web-examples/src/main/java/io/vertx/example/web/rest/SimpleREST.java#L50)
+implementation reads the HTTP request body and handles all kinds of body formats for you.
 
 This type of middle-ware can be easily used in irked by registering it on a catch all end-point,
 very similar to how you set it up using the Vert.X web's `Router` implementation. In your root
