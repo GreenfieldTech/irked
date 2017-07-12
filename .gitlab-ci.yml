@@ -41,7 +41,7 @@ packagecloud:
 ossrh-staging:
  stage: deploy
  image: maven
- environment:
+ variables:
   REPO_URL: https://oss.sonatype.org/content/repositories/snapshots
  except:
   - master
@@ -54,7 +54,7 @@ ossrh-staging:
 ossrh-release:
  stage: deploy
  image: maven
- environment:
+ variables:
   REPO_URL: http://oss.sonatype.org/service/local/staging/deploy/maven2/
  only:
   - master
