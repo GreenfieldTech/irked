@@ -203,24 +203,38 @@ import tech.greenfield.vertx.irked.status.*;
 
 class Root extends Controller {
 
-	@Put("/:id")
-	void Update(Request r) {
-		store(r.pathParam("id"),r.getBodyAsJson());
-		// and we don't send a response - we stop handling the request and let
-		// the next handler send the response
-	}
+	@Endpoint("/*")
+	BodyHandler bodyHandler = BodyHandler.create();
+
+	@Put("/")
+	WebHandler update = r -> {
+		// start an async operation to store the new data
+		Future<Void> f = Future.future();
+		store(r.pathParam("id"), r.getBodyAsJson(), f.completer());
+		f.setHandler(res -> { // once the operation completes
+			if (res.failed()) // if it failed
+				r.sendError(new InternalServerError(res.cause())); // send an 500 error
+			else // but if it succeeds
+				r.next(); // we don't send a response - we stop handling the request and let
+				// the next handler send the response
+		});
+	};
 	
-	@Put("/:id")
-	@Get("/:id")
-	void retrieve(Request r) {
-		// handle both GET requests and the response part of PUT the same way
-		r.sendJSON(load(r.pathParam("id"));
-	}
+	@Put("/")
+	@Get("/")
+	WebHandler retrieve = r -> {
+		r.sendJSON(data);
+	};
+
 }
 ```
 
 You can of course pass data between handlers using the `RoutingContext`'s `put()`, `get()` and
-`data()` methods as you do normally in Vert.X
+`data()` methods as you do normally in Vert.X.
+
+**Important note**: request cascading only works when degining handlers as handler _fields_. Using
+methods is not supported because the JVM reflection API doesn't keep the order of methods, while it
+does keep the order for fields.
 
 ### Handle Failures
 
