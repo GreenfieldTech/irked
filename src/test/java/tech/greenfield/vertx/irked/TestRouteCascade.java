@@ -1,7 +1,5 @@
 package tech.greenfield.vertx.irked;
 
-import java.util.logging.Logger;
-
 import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
@@ -26,10 +24,8 @@ public class TestRouteCascade extends TestBase {
 
 		@Put("/")
 		WebHandler update = r -> {
-			Logger.getAnonymousLogger().warning("Starting update");
 			rule.vertx().executeBlocking(f -> {
 				data.mergeIn(r.getBodyAsJson());
-				Logger.getAnonymousLogger().warning("Finished update");
 				f.complete();
 			}, f -> {
 				if (f.failed())
@@ -42,7 +38,6 @@ public class TestRouteCascade extends TestBase {
 		@Put("/")
 		@Get("/")
 		WebHandler retrieve = r -> {
-			Logger.getAnonymousLogger().warning("Starting get");
 			r.sendJSON(data);
 		};
 	}
