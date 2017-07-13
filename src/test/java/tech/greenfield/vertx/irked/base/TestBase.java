@@ -1,6 +1,7 @@
 package tech.greenfield.vertx.irked.base;
 
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 
@@ -17,7 +18,7 @@ import tech.greenfield.vertx.irked.Controller;
 import tech.greenfield.vertx.irked.server.Server;
 
 @RunWith(VertxUnitRunner.class)
-public class TestBase {
+@Ignore public class TestBase {
 
 	@ClassRule
 	public static RunTestOnContext rule = new RunTestOnContext();
