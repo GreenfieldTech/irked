@@ -203,24 +203,38 @@ import tech.greenfield.vertx.irked.status.*;
 
 class Root extends Controller {
 
-	@Put("/:id")
-	void Update(Request r) {
-		store(r.pathParam("id"),r.getBodyAsJson());
-		// and we don't send a response - we stop handling the request and let
-		// the next handler send the response
-	}
+	@Endpoint("/*")
+	BodyHandler bodyHandler = BodyHandler.create();
+
+	@Put("/")
+	WebHandler update = r -> {
+		// start an async operation to store the new data
+		Future<Void> f = Future.future();
+		store(r.pathParam("id"), r.getBodyAsJson(), f.completer());
+		f.setHandler(res -> { // once the operation completes
+			if (res.failed()) // if it failed
+				r.sendError(new InternalServerError(res.cause())); // send an 500 error
+			else // but if it succeeds
+				r.next(); // we don't send a response - we stop handling the request and let
+				// the next handler send the response
+		});
+	};
 	
-	@Put("/:id")
-	@Get("/:id")
-	void retrieve(Request r) {
-		// handle both GET requests and the response part of PUT the same way
-		r.sendJSON(load(r.pathParam("id"));
-	}
+	@Put("/")
+	@Get("/")
+	WebHandler retrieve = r -> {
+		r.sendJSON(data);
+	};
+
 }
 ```
 
 You can of course pass data between handlers using the `RoutingContext`'s `put()`, `get()` and
-`data()` methods as you do normally in Vert.X
+`data()` methods as you do normally in Vert.X.
+
+**Important note**: request cascading only works when degining handlers as handler _fields_. Using
+methods is not supported because the JVM reflection API doesn't keep the order of methods, while it
+does keep the order for fields.
 
 ### Handle Failures
 
@@ -276,8 +290,8 @@ vertx.createHttpServer()
 #### Mounting Middle-Ware
 
 Under Vert.x its often useful to have a "middle-ware" that parse all your requests, for example:
-the Vert.x Web `BodyHandler` implementation reads the HTTP request body and handles all kinds of
-body formats for you.
+the [Vert.x Web BodyHandler](https://github.com/vert-x3/vertx-examples/blob/master/web-examples/src/main/java/io/vertx/example/web/rest/SimpleREST.java#L50)
+implementation reads the HTTP request body and handles all kinds of body formats for you.
 
 This type of middle-ware can be easily used in irked by registering it on a catch all end-point,
 very similar to how you set it up using the Vert.X web's `Router` implementation. In your root
