@@ -51,6 +51,15 @@ public class Request extends RoutingContextDecorator {
 	}
 	
 	/**
+	 * Helper method to terminate request processing with a success (200 OK) response 
+	 * containing a JSON body.
+	 * @param json {@link JsonArray} containing the output to encode
+	 */
+	public void sendJSON(JsonArray json) {
+		sendJSON(json, new OK());
+	}
+	
+	/**
 	 * Helper method to terminate request processing with a custom response 
 	 * containing a JSON body and the specified status line.
 	 * @param json {@link JsonObject} containing the output to encode
