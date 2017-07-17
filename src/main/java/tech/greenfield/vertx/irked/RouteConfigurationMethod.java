@@ -49,7 +49,9 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			return r -> {
 				try {
 					method.invoke(impl, r);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				} catch (InvocationTargetException e) {
+					r.fail(e.getCause());
+				} catch (IllegalAccessException | IllegalArgumentException e) {
 					// shouldn't happen
 					throw new InternalServerError("Invalid request handler " + this + ": " + e, e).uncheckedWrap();
 				}
