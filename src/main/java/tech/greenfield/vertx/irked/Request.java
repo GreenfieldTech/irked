@@ -1,6 +1,7 @@
 package tech.greenfield.vertx.irked;
 
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
@@ -41,7 +42,8 @@ public class Request extends RoutingContextDecorator {
 	}
 	
 	/**
-	 * Helper method to terminate request processing with a success (200 OK) response containing a JSON body.
+	 * Helper method to terminate request processing with a success (200 OK) response 
+	 * containing a JSON body.
 	 * @param json {@link JsonObject} containing the output to encode
 	 */
 	public void sendJSON(JsonObject json) {
@@ -49,17 +51,36 @@ public class Request extends RoutingContextDecorator {
 	}
 	
 	/**
-	 * Helper method to terminate request processing with a custom response containing a JSON body and the specified
-	 * status line.
+	 * Helper method to terminate request processing with a custom response 
+	 * containing a JSON body and the specified status line.
 	 * @param json {@link JsonObject} containing the output to encode
 	 * @param status HTTP status to send
 	 */
 	public void sendJSON(JsonObject json, HttpError status) {
-		String content = json.encode();
+		sendContent(json.encode(), status);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response 
+	 * containing a JSON body and the specified status line.
+	 * @param json {@link JsonArray} containing the output to encode
+	 * @param status HTTP status to send
+	 */
+	public void sendJSON(JsonArray json, HttpError status) {
+		sendContent(json.encode(), status);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response
+	 * containing some text and the specifeid status line.
+	 * @param content
+	 * @param status
+	 */
+	public void sendContent(String content, HttpError status) {
 		response(status)
-				.putHeader("Content-Type", "application/json")
-				.putHeader("Content-Length", String.valueOf(content.length()))
-				.end(content);
+		.putHeader("Content-Type", "application/json")
+		.putHeader("Content-Length", String.valueOf(content.length()))
+		.end(content);
 	}
 	
 	/**
