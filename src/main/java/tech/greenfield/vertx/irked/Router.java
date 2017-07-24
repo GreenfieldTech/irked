@@ -12,6 +12,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.impl.BlockingHandlerDecorator;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
@@ -95,10 +96,10 @@ public class Router {
 		try {
 			Route route = method.setRoute(path);
 			Handler<RoutingContext> handler = new RequestWrapper(Objects.requireNonNull(conf.getHandler()), requestWrapper);
+			if (conf.isBlocking())
+				handler = new BlockingHandlerDecorator(handler, true);
 			if (conf.isFailHandler())
 				route.failureHandler(handler);
-			if (conf.isBlocking())
-				route.blockingHandler(handler);
 			else
 				route.handler(handler);
 			return true;
