@@ -14,8 +14,8 @@ in the public Maven repository) as an element under `<project>`:
 ```
 <repositories>
   <repository>
-    <id>GreenfieldTech-oss</id>
-    <url>https://packagecloud.io/GreenfieldTech/oss/maven2</url>
+    <id>cloudonix-dist</id>
+    <url>http://cloudonix-dist.s3-website-us-west-1.amazonaws.com/maven2/releases</url>
   </repository>
 </repositories>
 ```
@@ -24,8 +24,8 @@ Then add Irked as a dependency:
 
 ```
 <dependency>
-	<groupId>tech.greenfield.vertx</groupId>
-	<artifactId>irked</artifactId>
+	<groupId>tech.greenfield</groupId>
+	<artifactId>irked-vertx</artifactId>
 	<version>[0,)</version>
 </dependency>
 ```
