@@ -1,5 +1,7 @@
 package tech.greenfield.vertx.irked;
 
+import java.util.Objects;
+
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -39,6 +41,38 @@ public class Request extends RoutingContextDecorator {
 		// feels should be moved to another thread. Instead, use the outer implementation
 		// and let it do what's right
 		this.outerContext.fail(throwable);
+	}
+	
+	/**
+	 * Helper failure handler for CompletableFuture users.
+	 * Use at the end of an async chain to succinctly propagate exceptions, as
+	 * thus: <code>.exceptionally(req::handleFailure)</code>.
+	 * This method will call {@link #fail(Throwable)} after unwrapping
+	 * {@link RuntimeException}s as needed.
+	 * @param throwable A {@link Throwable} error to fail on
+	 * @return null
+	 */
+	public Void handleFailure(Throwable throwable) {
+		fail(HttpError.unwrap(throwable));
+		return null;
+	}
+	
+	/**
+	 * Helper failure handler for CompletableFuture users.
+	 * Use in the middle an async chain to succinctly propagate exceptions, or
+	 * success values as thus: <code>.whenComplete(req::handlePossibleFailure)</code>.
+	 * This method will call {@link Request#fail(Throwable)} if a failure occured,
+	 * after unwrapping {@link RuntimeException}s as needed. It will also pass on
+	 * the success value (or null if there was a failure) for the next async
+	 * element. Subsequent code can check whether a failure was propagated
+	 * by calling {@link #failed()}
+	 * @param throwable A {@link Throwable} error to fail on
+	 * @return null
+	 */
+	public <V> V handlePossibleFailure(V successValue, Throwable throwable) {
+		if (Objects.nonNull(throwable))
+			fail(HttpError.unwrap(throwable));
+		return successValue;
 	}
 	
 	/**
