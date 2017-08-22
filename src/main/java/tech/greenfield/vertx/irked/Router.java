@@ -46,6 +46,9 @@ public class Router {
 			this.handler.handle(wrapper.apply(r));
 		}
 
+		public String toString() {
+			return "[" + (Objects.nonNull(ctr) ? "Controller:"+ctr : "Handler:"+handler) + (Objects.nonNull(wrapper) ? "->" + wrapper : "") + "]"; 
+		}
 	}
 
 	private Vertx vertx;
@@ -78,11 +81,16 @@ public class Router {
 		}
 	}
 
-	private <T extends Annotation> boolean tryConfigureRoute(RoutingMethod method, 
+	private <T extends Annotation> void tryConfigureRoute(RoutingMethod method, 
 			String prefix, RouteConfiguration conf, Class<T> anot, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
-		String path = conf.uriForAnnotation(anot);
+		for (String uri : conf.uriForAnnotation(anot))
+			tryConfigureRoute(method, prefix, conf, uri, requestWrapper);
+	}
+	
+	private void tryConfigureRoute(RoutingMethod method, String prefix, RouteConfiguration conf, String path, 
+			RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
 		if (Objects.isNull(path))
-			return false;
+			return;
 		path = prefix + path;
 		if (path.length() > 1 && path.endsWith("/"))
 			path = path.substring(0, path.length() - 1); // normalize extra paths
@@ -90,7 +98,7 @@ public class Router {
 		if (conf.isController()) {
 			Controller ctr = Objects.requireNonNull(conf.getController(), "Sub-Controller for " + conf + " is not set!");
 			configure(ctr, path, new RequestWrapper(ctr, requestWrapper));
-			return true;
+			return;
 		}
 		
 		try {
@@ -102,13 +110,11 @@ public class Router {
 				route.failureHandler(handler);
 			else
 				route.handler(handler);
-			return true;
 		} catch (NullPointerException e) {
 			// ignore NPEs created by api.getHandler - it means the field is not a handler and we skip it
 		} catch (IllegalArgumentException | SecurityException | IllegalAccessException e) {
 			log.error("Failed to configure handler for " + path + ": " + e,e);
 		}
-		return false;
 	}
 
 	/**

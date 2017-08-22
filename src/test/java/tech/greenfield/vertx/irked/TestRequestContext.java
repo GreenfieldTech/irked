@@ -61,9 +61,9 @@ public class TestRequestContext extends TestBase {
 	public void testPassIdToMethod(TestContext context) {
 		Async async = context.async();
 		String id = "item-name";
-		getClient().get(port, "localhost", "/" + id).handler(res -> {
+		getClient().get(port, "localhost", "/" + id).exceptionHandler(t -> context.fail(t)).handler(res -> {
 			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.bodyHandler(body -> {
+			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				try {
 					JsonObject o = body.toJsonObject();
 					context.assertEquals(id, o.getString("id"));
@@ -79,9 +79,9 @@ public class TestRequestContext extends TestBase {
 	public void testPassIdToField(TestContext context) {
 		Async async = context.async();
 		String id = "item-name";
-		getClient().put(port, "localhost", "/" + id).handler(res -> {
+		getClient().put(port, "localhost", "/" + id).exceptionHandler(t -> context.fail(t)).handler(res -> {
 			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.bodyHandler(body -> {
+			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				try {
 					JsonObject o = body.toJsonObject();
 					context.assertEquals(id, o.getString("id"));

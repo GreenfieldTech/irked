@@ -17,8 +17,8 @@ public class RouteConfigurationField extends RouteConfiguration {
 	}
 
 	@Override
-	protected <T extends Annotation> T getAnnotation(Class<T> anot) {
-		return field.getAnnotation(anot);
+	protected <T extends Annotation> T[] getAnnotation(Class<T> anot) {
+		return field.getDeclaredAnnotationsByType(anot);
 	}
 
 	@Override
