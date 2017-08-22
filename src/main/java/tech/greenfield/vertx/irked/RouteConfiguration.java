@@ -2,7 +2,6 @@ package tech.greenfield.vertx.irked;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
@@ -38,18 +37,29 @@ public abstract class RouteConfiguration {
 		return Arrays.stream(annotations).map(a -> a.annotationType().getPackage()).anyMatch(p -> p.equals(annotationPackage));
 	}
 	
-	<T extends Annotation> String uriForAnnotation(Class<T> anot) {
-		Annotation spec = getAnnotation(anot);
-		if (spec == null) return null;
+	<T extends Annotation> String[] uriForAnnotation(Class<T> anot) {
+		Annotation[] spec = getAnnotation(anot);
+		if (spec.length == 0) return new String[] {};
 		try {
 			// all routing annotations store the URI path in `value()`
-			return spec.getClass().getMethod("value").invoke(spec).toString();
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			return Arrays.stream(spec)
+					.map(s -> annotationToValue(s))
+					.filter(s -> Objects.nonNull(s))
+					.toArray(size -> { return new String[size]; });
+		} catch (RuntimeException e) {
 			return null; // I don't know what it failed on, but it means it doesn't fit
 		} 
 	}
 
-	abstract protected <T extends Annotation> T getAnnotation(Class<T> anot);
+	private String annotationToValue(Annotation anot) {
+		try {
+			return anot.getClass().getMethod("value").invoke(anot).toString();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	abstract protected <T extends Annotation> T[] getAnnotation(Class<T> anot);
 
 	abstract boolean isController();
 
@@ -65,11 +75,11 @@ public abstract class RouteConfiguration {
 	abstract Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
 
 	boolean isBlocking() {
-		return Objects.nonNull(getAnnotation(Blocking.class));
+		return getAnnotation(Blocking.class).length > 0;
 	}
 
 	boolean isFailHandler() {
-		return Objects.nonNull(getAnnotation(OnFail.class));
+		return getAnnotation(OnFail.class).length > 0;
 	}
 
 	
