@@ -12,7 +12,7 @@ public class HttpError extends Exception {
 	private String statusText;
 	
 	public HttpError(int statusCode, String statusText) {
-		super();
+		super(statusText);
 		this.statusCode = statusCode;
 		this.statusText = statusText;
 	}
@@ -24,7 +24,7 @@ public class HttpError extends Exception {
 	}
 	
 	public HttpError(int statusCode, String statusText, Throwable throwable) {
-		super(throwable);
+		super(statusText, throwable);
 		this.statusCode = statusCode;
 		this.statusText = statusText;
 	}
