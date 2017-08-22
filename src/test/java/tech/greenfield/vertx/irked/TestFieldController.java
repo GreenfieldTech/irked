@@ -46,9 +46,9 @@ public class TestFieldController extends TestBase {
 	@Test
 	public void testGet(TestContext context) {
 		Async async = context.async();
-		getClient().get(port, "localhost", "/get").handler(res -> {
+		getClient().get(port, "localhost", "/get").exceptionHandler(t -> context.fail(t)).handler(res -> {
 			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.bodyHandler(body -> {
+			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				try {
 					JsonObject o = body.toJsonObject();
 					context.assertEquals(Boolean.TRUE, o.getValue("success"));
@@ -63,9 +63,9 @@ public class TestFieldController extends TestBase {
 	@Test
 	public void testPost(TestContext context) {
 		Async async = context.async();
-		getClient().post(port, "localhost", "/post").handler(res -> {
+		getClient().post(port, "localhost", "/post").exceptionHandler(t -> context.fail(t)).handler(res -> {
 			context.assertEquals(new BadRequest().getStatusCode(), res.statusCode(), "Incorrect response status");
-			res.bodyHandler(body -> {
+			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				try {
 					JsonObject o = body.toJsonObject();
 					context.assertEquals(Boolean.TRUE, o.getValue("message"));
@@ -80,9 +80,9 @@ public class TestFieldController extends TestBase {
 	@Test
 	public void testPut(TestContext context) {
 		Async async = context.async();
-		getClient().put(port, "localhost", "/put").handler(res -> {
+		getClient().put(port, "localhost", "/put").exceptionHandler(t -> context.fail(t)).handler(res -> {
 			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.bodyHandler(body -> {
+			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				context.assertEquals("success", body.toString());
 			});
 			async.complete();
@@ -92,9 +92,9 @@ public class TestFieldController extends TestBase {
 	@Test
 	public void testDelete(TestContext context) {
 		Async async = context.async();
-		getClient().delete(port, "localhost", "/delete").handler(res -> {
+		getClient().delete(port, "localhost", "/delete").exceptionHandler(t -> context.fail(t)).handler(res -> {
 			context.assertEquals(new NoContent().getStatusCode(), res.statusCode(), "Incorrect response status");
-			res.bodyHandler(body -> {
+			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				context.assertEquals(0, body.length());
 			});
 			async.complete();

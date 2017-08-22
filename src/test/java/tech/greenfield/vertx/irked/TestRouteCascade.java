@@ -50,9 +50,9 @@ public class TestRouteCascade extends TestBase {
 	private void executeTest(TestContext context) {
 		int newVal = 5;
 		Async async = context.async();
-		getClient().put(port, "localhost", "/").handler(r -> {
+		getClient().put(port, "localhost", "/").exceptionHandler(t -> context.fail(t)).handler(r -> {
 			context.assertEquals(200, r.statusCode(), "Failed to call PUT");
-			r.bodyHandler(body -> {
+			r.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				context.assertEquals(newVal, body.toJsonObject().getInteger(fieldName));
 				async.complete();
 			});

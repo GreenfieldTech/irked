@@ -34,9 +34,9 @@ public class TestFailController extends TestBase {
 	@Test
 	public void testFail(TestContext context) {
 		Async async = context.async();
-		getClient().get(port, "localhost", "/").handler(res -> {
+		getClient().get(port, "localhost", "/").exceptionHandler(t -> context.fail(t)).handler(res -> {
 			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.bodyHandler(body -> {
+			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				try {
 					JsonObject o = body.toJsonObject();
 					context.assertEquals(Boolean.FALSE, o.getValue("success"));
