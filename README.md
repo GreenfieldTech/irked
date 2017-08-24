@@ -338,7 +338,7 @@ Then the `@OnFail` handler can be configured to automatically forward this statu
 @OnFail
 @Endpoint("/*")
 Handler<Request> failureHandler = r -> {
-	r.sendError(HttpError.toHttpError(r.failure()));
+	r.sendError(HttpError.toHttpError(r));
 };
 ```
 
