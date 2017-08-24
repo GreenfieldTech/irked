@@ -3,6 +3,8 @@ package tech.greenfield.vertx.irked.generators;
 import java.io.*;
 import java.net.URL;
 import java.security.SecureRandom;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -26,18 +28,19 @@ public class StatusClassGenerator {
 		this.destDir = destDir;
 		String text = loadDefinisions();
 		try {
-			new JsonArray(text).forEach(e -> {
+			generateMapClass(new JsonArray(text).stream().map(e -> {
 						JsonObject o = (JsonObject)e;
 						try {
 							int code = Integer.parseInt(o.getString("code"));
 							String phrase = o.getString("phrase");
-							generateClass(code, phrase);
+							return generateClass(code, phrase);
 						} catch (NumberFormatException err) {
-							// ignore "class codes"
+							return null; // ignore "class codes"
 						} catch (IOException err) {
 							throw new RuntimeException(err);
 						}
-					});
+					})
+			.filter(e -> Objects.nonNull(e)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 			System.err.println("Generated HTTP status codes classes");
 		} catch (io.vertx.core.json.DecodeException e) {
 			int line = ((JsonParseException)e.getCause()).getLocation().getLineNr();
@@ -51,7 +54,35 @@ public class StatusClassGenerator {
 		return new BufferedReader(new InputStreamReader(definitions.openStream())).lines().collect(Collectors.joining("\n"));
 	}
 
-	private void generateClass(int code, String phrase) throws IOException {
+	private void generateMapClass(Map<Integer, String> statusClasses) throws IOException {
+		String className = "HttpStatuses";
+		String fullyQualified = packageName + "." + className;
+		new File(destDir + "/" + packageName.replace(".", "/")).mkdirs();
+		File file = new File(destDir + "/" + fullyQualified.replace(".", "/") + ".java");
+		PrintWriter writer = new PrintWriter(new FileWriter(file));
+		writer.format("package %s;\n\n", packageName);
+		for (String imp : new String[] {
+				"java.util.TreeMap", "java.util.Map",
+				"tech.greenfield.vertx.irked.HttpError"
+
+		}) {
+			writer.format("import %s;\n", imp);
+		}
+		writer.format("public class %s {\n\n", className);
+		writer.format("public static Map<Integer, Class<? extends HttpError>> HTTP_STATUS_CODES = new TreeMap<Integer, Class<? extends HttpError>>();\n");
+		writer.format("static {\n");
+		statusClasses.forEach((code, errorclass) -> {
+			writer.format("HTTP_STATUS_CODES.put(%d,%s.class);\n", code, errorclass);
+		});
+		writer.format("};");
+		writer.format("public static HttpError create(int statusCode) throws InstantiationException, IllegalAccessException {\n");
+		writer.format("return HTTP_STATUS_CODES.get(statusCode).newInstance();\n");
+		writer.format("}\n");
+		writer.format("}\n");
+		writer.close();
+	}
+	
+	private Map.Entry<Integer, String> generateClass(int code, String phrase) throws IOException {
 		String className = phrase.replaceAll("[^a-zA-Z]+", "");
 		String fullyQualified = packageName + "." + className;
 		new File(destDir + "/" + packageName.replace(".", "/")).mkdirs();
@@ -68,6 +99,22 @@ public class StatusClassGenerator {
 		writer.format("public %s(String m, Throwable t) {\nsuper(%d,\"%s\", m, t);\n}\n\n", className, code, phrase);
 		writer.format("}\n");
 		writer.close();
+		return new Map.Entry<Integer, String>() {
+			@Override
+			public Integer getKey() {
+				return code;
+			}
+
+			@Override
+			public String getValue() {
+				return fullyQualified;
+			}
+
+			@Override
+			public String setValue(String value) {
+				return getValue();
+			}
+		};
 	}
 
 	public static void main(String...args) throws IOException {
