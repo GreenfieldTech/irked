@@ -2,7 +2,10 @@ package tech.greenfield.vertx.irked;
 
 import java.util.Objects;
 
+import io.vertx.ext.web.RoutingContext;
+import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.InternalServerError;
+import tech.greenfield.vertx.irked.status.OK;
 
 public class HttpError extends Exception {
 
@@ -66,7 +69,7 @@ public class HttpError extends Exception {
 	}
 	
 	/**
-	 * Helper methods for OnFail handlers to locate a wrapped HttpError or
+	 * Helper method for OnFail handlers to locate a wrapped HttpError or
 	 * create an InternalServerError from an unexpected exception (whether it
 	 * is wrapped or not)
 	 * @param t Throwable to be analyzed
@@ -78,5 +81,34 @@ public class HttpError extends Exception {
 		if (t instanceof HttpError)
 			return (HttpError)t;
 		return new InternalServerError(t);
+	}
+	
+	/**
+	 * Helper method for OnFail handlers to create an appropriate HTTP error class
+	 * for a failed {@link RoutingContext}, by reading the failed status code or
+	 * failure exception. 
+	 * 
+	 * If {@link RoutingContext#failure()} returns a (possibly wrapped) 
+	 * {@link HttpError} then that what will be returned, otherwise either an
+	 * {@link InternalServerError} will be returned (for an exception failure) or
+	 * an appropriate default HTTP status instance according to the failed status code.
+	 * 
+	 * Note that if the {@link RoutingContext#failed()} {@code == false}, then an {@link OK}
+	 * HTTP status class instance will be returned.
+	 * @param ctx failed {@code RoutingContext} to investigate
+	 * @return an {@code HttpError} instance representing the status of the {@code RoutingContext}
+	 */
+	public static HttpError toHttpError(RoutingContext ctx) {
+		if (!ctx.failed())
+			return new OK();
+		HttpError failedStatus = toHttpError(ctx.failure());
+		if (Objects.nonNull(failedStatus))
+			return failedStatus;
+		try {
+			return HttpStatuses.create(ctx.statusCode());
+		} catch (InstantiationException | IllegalAccessException | NullPointerException e) {
+			// should never happen
+			return new InternalServerError("Failed to translate failed context to HTTP error");
+		}
 	}
 }
