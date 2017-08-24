@@ -68,7 +68,7 @@ public class TestFieldController extends TestBase {
 			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				try {
 					JsonObject o = body.toJsonObject();
-					context.assertEquals(Boolean.TRUE, o.getValue("message"));
+					context.assertEquals(new BadRequest().getMessage(), o.getValue("message"));
 				} catch (Exception e) {
 					context.fail(e);
 				}
