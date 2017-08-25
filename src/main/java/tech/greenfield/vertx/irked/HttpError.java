@@ -101,9 +101,8 @@ public class HttpError extends Exception {
 	public static HttpError toHttpError(RoutingContext ctx) {
 		if (!ctx.failed())
 			return new OK();
-		HttpError failedStatus = toHttpError(ctx.failure());
-		if (Objects.nonNull(failedStatus))
-			return failedStatus;
+		if (Objects.nonNull(ctx.failure()))
+			return toHttpError(ctx.failure());
 		try {
 			return HttpStatuses.create(ctx.statusCode());
 		} catch (InstantiationException | IllegalAccessException | NullPointerException e) {
