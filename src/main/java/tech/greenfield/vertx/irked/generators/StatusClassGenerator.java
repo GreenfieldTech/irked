@@ -74,7 +74,7 @@ public class StatusClassGenerator {
 		statusClasses.forEach((code, errorclass) -> {
 			writer.format("HTTP_STATUS_CODES.put(%d,%s.class);\n", code, errorclass);
 		});
-		writer.format("};");
+		writer.format("};\n");
 		writer.format("public static HttpError create(int statusCode) throws InstantiationException, IllegalAccessException {\n");
 		writer.format("return HTTP_STATUS_CODES.get(statusCode).newInstance();\n");
 		writer.format("}\n");
