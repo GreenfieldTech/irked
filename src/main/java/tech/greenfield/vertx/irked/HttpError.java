@@ -103,9 +103,11 @@ public class HttpError extends Exception {
 			return new OK();
 		if (Objects.nonNull(ctx.failure()))
 			return toHttpError(ctx.failure());
+		if (!HttpStatuses.HTTP_STATUS_CODES.containsKey(ctx.statusCode()))
+			return new InternalServerError("Unknown HTTP status code " + ctx.statusCode());
 		try {
 			return HttpStatuses.create(ctx.statusCode());
-		} catch (InstantiationException | IllegalAccessException | NullPointerException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			// should never happen
 			return new InternalServerError("Failed to translate failed context to HTTP error");
 		}
