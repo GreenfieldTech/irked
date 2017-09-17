@@ -78,6 +78,7 @@ public class Router {
 			tryConfigureRoute(router::get, prefix, f, Get.class, requestWrapper);
 			tryConfigureRoute(router::put, prefix, f, Put.class, requestWrapper);
 			tryConfigureRoute(router::delete, prefix, f, Delete.class, requestWrapper);
+			tryConfigureRoute(router::patch, prefix, f, Patch.class, requestWrapper);
 		}
 	}
 
