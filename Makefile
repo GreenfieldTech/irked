@@ -11,7 +11,7 @@ ifeq (release,$(firstword $(MAKECMDGOALS)))
 endif
 
 all: $(MODEL) compile
-	$(MVNCMD)
+	$(MVNCMD) package
 
 compile: $(wildcard src/main/java/**/*.java)
 	$(MVNCMD) compile
