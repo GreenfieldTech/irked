@@ -346,3 +346,38 @@ The `HttpError.toHttpError()` helper method detects `RuntimeException`s and unwr
 automatically. If the underlying cause is an `HttpError`, it will deliver it to be sent using
 `Request.sendError()`, otherwise it will create an `InternalServerError` exception (HTTP status 500)
 that contains the unexpected exception, which will also be reported using `Request.sendError()`.
+
+#### Using classic Java methods for handlers, while keeping handler order
+
+As discussed above, while Irked supports both using fields to route requests too as well as
+methods, when annotating methods to handle incoming requests, the order of registration in the
+Vert.x Web router is not guaranteed - and as a result the `Request.next()` calls may not go
+where you expected them to.
+
+If you still want to order your requests logically (which is useful, for example, as detailed
+under "Cascading Request Handling"), but you really want to write your complex business logic
+using classic Java methods, it is simple to seperate the logic and the registration order, in
+a similar fashion to how it can be done with the Vert.X Web Router, except using Irked
+annotations. A simple example might look like this:
+
+```
+package com.example.api;
+
+import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.status.*;
+
+class Sample extends Controller {
+	
+	public void helloWorld(Request r) {
+		r.sendContent(r.get("message"), new OK());
+	}
+	
+	public void thisComesFirst(Request r) {
+		r.put("message","Hello World!");
+		r.next();
+	}
+	
+	@Get("/") WebHandler messageMiddleware = this::thisComesFirst;
+	@Get("/") WebHandler helloHandler = this::helloWorld;
+}
+```
