@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
+import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.OK;
 
 /**
@@ -100,7 +101,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param status HTTP status to send
 	 */
 	public void sendJSON(JsonObject json, HttpError status) {
-		sendContent(json.encode(), status);
+		sendContent(json.encode(), status, "application/json");
 	}
 	
 	/**
@@ -110,7 +111,34 @@ public class Request extends RoutingContextDecorator {
 	 * @param status HTTP status to send
 	 */
 	public void sendJSON(JsonArray json, HttpError status) {
-		sendContent(json.encode(), status);
+		sendContent(json.encode(), status, "application/json");
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response
+	 * containing some text and the specifeid status line.
+	 * @param content
+	 * @param status
+	 * @param contentType
+	 */
+	public void sendContent(String content, HttpError status, String contentType) {
+		response(status)
+		.putHeader("Content-Type", contentType)
+		.putHeader("Content-Length", String.valueOf(content.length()))
+		.end(content);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response
+	 * containing some text and the specifeid status line.
+	 * @param content
+	 * @param contentType
+	 */
+	public void sendContent(String content, String contentType) {
+		response(new OK())
+		.putHeader("Content-Type", contentType)
+		.putHeader("Content-Length", String.valueOf(content.length()))
+		.end(content);
 	}
 	
 	/**
@@ -121,7 +149,19 @@ public class Request extends RoutingContextDecorator {
 	 */
 	public void sendContent(String content, HttpError status) {
 		response(status)
-		.putHeader("Content-Type", "application/json")
+		.putHeader("Content-Type", "text/plain")
+		.putHeader("Content-Length", String.valueOf(content.length()))
+		.end(content);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response
+	 * containing some text and the specifeid status line.
+	 * @param content
+	 */
+	public void sendContent(String content) {
+		response(new OK())
+		.putHeader("Content-Type", "text/plain")
 		.putHeader("Content-Length", String.valueOf(content.length()))
 		.end(content);
 	}
