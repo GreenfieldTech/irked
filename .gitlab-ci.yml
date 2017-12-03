@@ -43,7 +43,7 @@ ossrh-staging:
  variables:
   REPO_URL: https://oss.sonatype.org/content/repositories/snapshots
  except:
-  - master
+  - features/ossrh
  script:
   - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
   - echo "$GPG_PRIVATE_KEY" | gpg --batch --import --passphrase "$GPG_PASSPHRASE" -
@@ -57,7 +57,7 @@ ossrh-release:
  variables:
   REPO_URL: http://oss.sonatype.org/service/local/staging/deploy/maven2/
  only:
-  - master
+  - features/ossrh
  script:
   - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
   - echo "$GPG_PRIVATE_KEY" | gpg --batch --import --passphrase "$GPG_PASSPHRASE" -
