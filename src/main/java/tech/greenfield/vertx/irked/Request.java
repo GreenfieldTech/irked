@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
-import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.OK;
 
 /**
