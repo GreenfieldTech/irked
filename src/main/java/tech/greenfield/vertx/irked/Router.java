@@ -104,7 +104,7 @@ public class Router {
 		}
 		
 		try {
-			Route route = method.setRoute(path);
+			Route route = conf.getRoute(method, path);
 			Handler<RoutingContext> handler = new RequestWrapper(Objects.requireNonNull(conf.getHandler()), requestWrapper);
 			if (conf.isBlocking())
 				handler = new BlockingHandlerDecorator(handler, true);

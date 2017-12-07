@@ -7,8 +7,11 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import io.vertx.core.Handler;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
+import tech.greenfield.vertx.irked.Router.RoutingMethod;
 import tech.greenfield.vertx.irked.annotations.Blocking;
+import tech.greenfield.vertx.irked.annotations.Consumes;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.OnFail;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
@@ -77,9 +80,19 @@ public abstract class RouteConfiguration {
 	boolean isBlocking() {
 		return getAnnotation(Blocking.class).length > 0;
 	}
-
+	
 	boolean isFailHandler() {
 		return getAnnotation(OnFail.class).length > 0;
+	}
+
+	String consumes() {
+		Consumes[] consumes = getAnnotation(Consumes.class);
+	}
+	
+	public Route getRoute(RoutingMethod method, String path) {
+		Route route = method.setRoute(path);
+		
+		return route;
 	}
 
 	
