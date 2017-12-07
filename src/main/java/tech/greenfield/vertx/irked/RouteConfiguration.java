@@ -5,9 +5,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import io.vertx.core.Handler;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.impl.BlockingHandlerDecorator;
+import tech.greenfield.vertx.irked.Router.RoutingMethod;
 import tech.greenfield.vertx.irked.annotations.Blocking;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.OnFail;
@@ -82,5 +87,33 @@ public abstract class RouteConfiguration {
 		return getAnnotation(OnFail.class).length > 0;
 	}
 
-	
+	public <T extends Annotation> Stream<String> pathsForAnnotation(String prefix, Class<T> anot) {
+		return Arrays.stream(uriForAnnotation(anot))
+				.filter(s -> Objects.nonNull(s))
+				.map(s -> prefix + s)
+				.map(s -> s.matches("./$") ? s.substring(0, s.length() - 1) : s) // normalize extra paths
+		;
+	}
+
+	public <T extends Annotation> void buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method, RequestWrapper requestWrapper) throws IllegalArgumentException, InvalidRouteConfiguration {
+		for (Route r : pathsForAnnotation(prefix, anot).map(s ->  method.setRoute(s)).collect(Collectors.toList()))
+			if (isFailHandler())
+				r.failureHandler(getHandler(requestWrapper));
+			else
+				r.handler(getHandler(requestWrapper));
+
+	}
+
+	private Handler<RoutingContext> getHandler(RequestWrapper parent) throws IllegalArgumentException, InvalidRouteConfiguration {
+		Handler<RoutingContext> handler;
+		try {
+			handler = new RequestWrapper(Objects.requireNonNull(getHandler()), parent);
+		} catch (IllegalAccessException e) {
+			throw new InvalidRouteConfiguration("Illegal access error while trying to configure " + this);
+		}
+		if (isBlocking())
+			handler = new BlockingHandlerDecorator(handler, true);
+		return handler;
+	}
+
 }
