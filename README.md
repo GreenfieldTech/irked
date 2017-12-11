@@ -49,8 +49,9 @@ the relevant method annotations and URIs that those handlers should receive requ
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
 import tech.greenfield.vertx.irked.status.*;
+import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
@@ -80,7 +81,8 @@ to be accessible under.
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
+import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
@@ -93,7 +95,8 @@ class Root extends Controller {
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
+import tech.greenfield.vertx.irked.annotations.*;
 
 class BlockApi extends Controller {
 
@@ -126,7 +129,8 @@ handlers and sub-controllers through a well defined API, by overriding the
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
+import tech.greenfield.vertx.irked.annotations.*;
 
 class MyRequest extend Request {
 
@@ -147,8 +151,9 @@ class MyRequest extend Request {
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
 import tech.greenfield.vertx.irked.status.*;
+import tech.greenfield.vertx.irked.annotations.*; 
 
 class Root extends Controller {
 
@@ -170,7 +175,8 @@ class Root extends Controller {
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
+import tech.greenfield.vertx.irked.annotations.*;
 
 class BlockApi extends Controller {
 
@@ -198,8 +204,9 @@ and is the order they will be called:
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
 import tech.greenfield.vertx.irked.status.*;
+import tech.greenfield.vertx.irked.annotations.*; 
 
 class Root extends Controller {
 
@@ -250,8 +257,9 @@ configured properly for a URI and HTTP method - so we often find it useful to us
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
 import tech.greenfield.vertx.irked.status.*;
+import tech.greenfield.vertx.irked.annotations.*; 
 
 class Root extends Controller {
 
@@ -268,6 +276,23 @@ it with an `application/json` body with a JSON object containing the fields "`st
 to `false` and "`message`" set to the exception's detail message.
 
 Also see the tips section below for a more complex failure handler that may be useful.
+
+### Request Content-Type specific handlers
+
+Irked supports the Vert.x Web `consumes()` filter to specify request handlers
+that only handle specific request content-types, using the `@Consumes`
+annotation. Specify it like URI annotations with the expected request content type. Like the `consumes()` method, it supports wild cards.
+
+#### A Request Content-Type Handler Sample
+
+```
+@Post("/upload")
+@Consumes("multipart/form-data")
+WebHandler fileUpload = r -> {
+	for (FileUpload f : r.fileUploads()) saveFile(f);
+	r.sendContent("Uploaded!");
+};
+```
 
 ### Initializing
 
@@ -356,15 +381,16 @@ where you expected them to.
 
 If you still want to order your requests logically (which is useful, for example, as detailed
 under "Cascading Request Handling"), but you really want to write your complex business logic
-using classic Java methods, it is simple to seperate the logic and the registration order, in
+using classic Java methods, it is simple to separate the logic and the registration order, in
 a similar fashion to how it can be done with the Vert.X Web Router, except using Irked
 annotations. A simple example might look like this:
 
 ```
 package com.example.api;
 
-import tech.greenfield.vertx.irked.*
+import tech.greenfield.vertx.irked.*;
 import tech.greenfield.vertx.irked.status.*;
+import tech.greenfield.vertx.irked.annotations.*;
 
 class Sample extends Controller {
 	

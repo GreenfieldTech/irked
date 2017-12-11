@@ -3,16 +3,12 @@ package tech.greenfield.vertx.irked;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.Route;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.impl.BlockingHandlerDecorator;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
@@ -20,37 +16,6 @@ public class Router {
 	
 	static Logger log = LoggerFactory.getLogger(Router.class);
 	
-	public class RequestWrapper implements Function<RoutingContext, Request>, Handler<RoutingContext> {
-
-		private Controller ctr;
-		private Function<RoutingContext, Request> wrapper;
-		private Handler<? super RoutingContext> handler;
-
-		public RequestWrapper(Controller ctr, Function<RoutingContext, Request> requestWrapper) {
-			this.ctr = Objects.requireNonNull(ctr, "Controller instance is not set!");
-			this.wrapper = requestWrapper;
-		}
-
-		public RequestWrapper(Handler<? super RoutingContext> handler, Function<RoutingContext, Request> requestWrapper) {
-			this.handler = Objects.requireNonNull(handler, "Handler instance is not set!");
-			this.wrapper = requestWrapper;
-		}
-
-		@Override
-		public Request apply(RoutingContext r) {
-			return ctr.getRequestContext(wrapper.apply(r));
-		}
-
-		@Override
-		public void handle(RoutingContext r) {
-			this.handler.handle(wrapper.apply(r));
-		}
-
-		public String toString() {
-			return "[" + (Objects.nonNull(ctr) ? "Controller:"+ctr : "Handler:"+handler) + (Objects.nonNull(wrapper) ? "->" + wrapper : "") + "]"; 
-		}
-	}
-
 	private Vertx vertx;
 	private io.vertx.ext.web.Router router;
 
@@ -85,40 +50,16 @@ public class Router {
 
 	private <T extends Annotation> void tryConfigureRoute(RoutingMethod method, 
 			String prefix, RouteConfiguration conf, Class<T> anot, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
-		for (String uri : conf.uriForAnnotation(anot))
-			tryConfigureRoute(method, prefix, conf, uri, requestWrapper);
-	}
-	
-	private void tryConfigureRoute(RoutingMethod method, String prefix, RouteConfiguration conf, String path, 
-			RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
-		if (Objects.isNull(path))
-			return;
-		path = prefix + path;
-		if (path.length() > 1 && path.endsWith("/"))
-			path = path.substring(0, path.length() - 1); // normalize extra paths
-		
 		if (conf.isController()) {
 			Controller ctr = Objects.requireNonNull(conf.getController(), "Sub-Controller for " + conf + " is not set!");
-			configure(ctr, path, new RequestWrapper(ctr, requestWrapper));
+			for (String path : conf.pathsForAnnotation(prefix, anot).collect(Collectors.toList()))
+				configure(ctr, path, new RequestWrapper(ctr, requestWrapper));
 			return;
 		}
 		
-		try {
-			Route route = method.setRoute(path);
-			Handler<RoutingContext> handler = new RequestWrapper(Objects.requireNonNull(conf.getHandler()), requestWrapper);
-			if (conf.isBlocking())
-				handler = new BlockingHandlerDecorator(handler, true);
-			if (conf.isFailHandler())
-				route.failureHandler(handler);
-			else
-				route.handler(handler);
-		} catch (NullPointerException e) {
-			// ignore NPEs created by api.getHandler - it means the field is not a handler and we skip it
-		} catch (IllegalArgumentException | SecurityException | IllegalAccessException e) {
-			log.error("Failed to configure handler for " + path + ": " + e,e);
-		}
+		conf.buildRoutesFor(prefix, anot, method, requestWrapper);
 	}
-
+	
 	/**
 	 * Helper interface for {@link Router#tryConfigureRoute(RoutingMethod, Field, Class)}
 	 * @author odeda

@@ -1,13 +1,11 @@
 package tech.greenfield.vertx.irked.annotations;
 
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-@Repeatable(Deletes.class)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Delete {
+public @interface ConsumesSpecs {
 
-	String value();
-
+	Consumes[] value();
+	
 }
