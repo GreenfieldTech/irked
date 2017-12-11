@@ -118,7 +118,7 @@ public abstract class RouteConfiguration {
 	private Stream<Route> getRoutes(RoutingMethod method, String s) {
 		if (!hasConsumes())
 			return Stream.of(method.setRoute(s));
-		return consumes().map(c -> method.setRoute(c).consumes(c));
+		return consumes().map(c -> method.setRoute(s).consumes(c));
 	}
 
 	private Handler<RoutingContext> getHandler(RequestWrapper parent) throws IllegalArgumentException, InvalidRouteConfiguration {
