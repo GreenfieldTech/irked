@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
@@ -96,11 +97,12 @@ public abstract class RouteConfiguration {
 		return Arrays.stream(getAnnotation(Consumes.class)).map(a -> a.value());
 	}
 	
+	Pattern trailingSlashRemover = Pattern.compile("./$");
 	public <T extends Annotation> Stream<String> pathsForAnnotation(String prefix, Class<T> anot) {
 		return Arrays.stream(uriForAnnotation(anot))
 				.filter(s -> Objects.nonNull(s))
 				.map(s -> prefix + s)
-				.map(s -> s.matches("./$") ? s.substring(0, s.length() - 1) : s) // normalize extra paths
+				.map(s -> trailingSlashRemover.matcher(s).find() ? s.substring(0, s.length() - 1) : s) // normalize trailing slashes because https://github.com/vert-x3/vertx-web/issues/786 
 		;
 	}
 
