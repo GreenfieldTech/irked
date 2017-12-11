@@ -6,13 +6,11 @@ import org.junit.Test;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
-import tech.greenfield.vertx.irked.annotations.*;
+import tech.greenfield.vertx.irked.annotations.Endpoint;
+import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.base.TestBase;
-import tech.greenfield.vertx.irked.status.BadRequest;
-import tech.greenfield.vertx.irked.status.NoContent;
 
 public class TestMountController extends TestBase {
 
