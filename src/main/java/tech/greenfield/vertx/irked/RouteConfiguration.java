@@ -14,6 +14,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.BlockingHandlerDecorator;
 import tech.greenfield.vertx.irked.Router.RoutingMethod;
 import tech.greenfield.vertx.irked.annotations.Blocking;
+import tech.greenfield.vertx.irked.annotations.Consumes;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.OnFail;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
@@ -82,11 +83,19 @@ public abstract class RouteConfiguration {
 	boolean isBlocking() {
 		return getAnnotation(Blocking.class).length > 0;
 	}
-
+	
 	boolean isFailHandler() {
 		return getAnnotation(OnFail.class).length > 0;
 	}
+	
+	boolean hasConsumes() {
+		return getAnnotation(Consumes.class).length > 0;
+	}
 
+	Stream<String> consumes() {
+		return Arrays.stream(getAnnotation(Consumes.class)).map(a -> a.value());
+	}
+	
 	public <T extends Annotation> Stream<String> pathsForAnnotation(String prefix, Class<T> anot) {
 		return Arrays.stream(uriForAnnotation(anot))
 				.filter(s -> Objects.nonNull(s))
@@ -96,12 +105,20 @@ public abstract class RouteConfiguration {
 	}
 
 	public <T extends Annotation> void buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method, RequestWrapper requestWrapper) throws IllegalArgumentException, InvalidRouteConfiguration {
-		for (Route r : pathsForAnnotation(prefix, anot).map(s ->  method.setRoute(s)).collect(Collectors.toList()))
+		for (Route r : pathsForAnnotation(prefix, anot)
+				.flatMap(s -> getRoutes(method, s))
+				.collect(Collectors.toList()))
 			if (isFailHandler())
 				r.failureHandler(getHandler(requestWrapper));
 			else
 				r.handler(getHandler(requestWrapper));
 
+	}
+
+	private Stream<Route> getRoutes(RoutingMethod method, String s) {
+		if (!hasConsumes())
+			return Stream.of(method.setRoute(s));
+		return consumes().map(c -> method.setRoute(s).consumes(c));
 	}
 
 	private Handler<RoutingContext> getHandler(RequestWrapper parent) throws IllegalArgumentException, InvalidRouteConfiguration {
