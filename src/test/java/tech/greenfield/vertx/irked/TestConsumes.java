@@ -9,7 +9,6 @@ import io.vertx.ext.unit.TestContext;
 import tech.greenfield.vertx.irked.annotations.Consumes;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.base.TestBase;
-import tech.greenfield.vertx.irked.status.OK;
 
 public class TestConsumes extends TestBase {
 	
@@ -17,7 +16,7 @@ public class TestConsumes extends TestBase {
 		public static String message = "no limit";
 		@Endpoint("/none")
 		WebHandler handler = r -> {
-			r.sendContent(message, new OK());
+			r.sendContent(message);
 		};
 	}
 
@@ -26,7 +25,7 @@ public class TestConsumes extends TestBase {
 		@Endpoint("/one")
 		@Consumes("text/plain")
 		WebHandler handler = r -> {
-			r.sendContent(message, new OK());
+			r.sendContent(message);
 		};
 	}
 
@@ -36,7 +35,7 @@ public class TestConsumes extends TestBase {
 		@Consumes("application/json")
 		@Consumes("application/rss+xml")
 		WebHandler handler = r -> {
-			r.sendContent(message, new OK());
+			r.sendContent(message);
 		};
 	}
 	
@@ -45,7 +44,29 @@ public class TestConsumes extends TestBase {
 		@Endpoint("/glob")
 		@Consumes("image/*")
 		WebHandler handler = r -> {
-			r.sendContent(message, new OK());
+			r.sendContent(message);
+		};
+	}
+	
+	public static class TestConsumesFallback extends Controller {
+		public static String message = "consumes fallback - strict";
+		public static String messagePartial = "consumes fallback - partial";
+		public static String messageFallback = "consumes fallback - fallback";
+		@Endpoint("/fallback")
+		@Consumes("application/xml")
+		WebHandler strict = r -> {
+			r.sendContent(message);
+		};
+		
+		@Endpoint("/fallback")
+		@Consumes("application/*")
+		WebHandler partial = r -> {
+			r.sendContent(messagePartial);
+		};
+		
+		@Endpoint("/fallback")
+		WebHandler fallback = r -> {
+			r.sendContent(messageFallback);
 		};
 	}
 
@@ -139,6 +160,34 @@ public class TestConsumes extends TestBase {
 				.putHeader("Content-Type", "text/xpm")
 				.exceptionHandler(context::fail)
 				.handler(verifyMissHandler(context, f4)).end();
+			});
+		}));
+	}
+	
+	@Test
+	public void testConsumesWithFallback(TestContext context) {
+		deployController (new TestConsumesFallback(), context.asyncAssertSuccess(s -> {
+			Async f1 = context.async();
+			
+			getClient().post(port, "localhost", "/fallback")
+			.putHeader("Content-Type", "application/xml")
+			.exceptionHandler(context::fail)
+			.handler(compareBodyHandler(TestConsumesFallback.message, context, f1)).end();
+	
+			Async f2 = context.async();
+			f1.handler(r -> {
+				getClient().post(port, "localhost", "/fallback")
+				.putHeader("Content-Type", "application/octet-stream")
+				.exceptionHandler(context::fail)
+				.handler(compareBodyHandler(TestConsumesFallback.messagePartial, context, f2)).end();
+			});
+			
+			Async f3 = context.async();
+			f2.handler(r -> {
+				getClient().post(port, "localhost", "/fallback")
+				.putHeader("Content-Type", "text/plain")
+				.exceptionHandler(context::fail)
+				.handler(compareBodyHandler(TestConsumesFallback.messageFallback, context, f3)).end();
 			});
 		}));
 	}
