@@ -1,5 +1,7 @@
 package tech.greenfield.vertx.irked.base;
 
+import java.util.Random;
+
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -24,7 +26,7 @@ import tech.greenfield.vertx.irked.server.Server;
 	public static RunTestOnContext rule = new RunTestOnContext();
 	@Rule
 	public Timeout timeoutRule = Timeout.seconds(3600);
-	protected final Integer port = 1234;
+	protected final Integer port = new Random().nextInt(30000)+10000;
 
 	protected HttpClient getClient() {
 		return rule.vertx().createHttpClient(new HttpClientOptions().setIdleTimeout(0));
