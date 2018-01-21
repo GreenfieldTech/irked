@@ -1,5 +1,7 @@
 package tech.greenfield.vertx.irked;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import io.vertx.core.http.HttpServerResponse;
@@ -106,11 +108,51 @@ public class Request extends RoutingContextDecorator {
 	/**
 	 * Helper method to terminate request processing with a custom response 
 	 * containing a JSON body and the specified status line.
+	 * @param json {@link JsonObject} containing the output to encode
+	 * @param status HTTP status to send
+	 * @param headers
+	 */
+	public void sendJSON(JsonObject json, HttpError status, HashMap<String, String> headers) {
+		sendContent(json.encode(), status, "application/json", headers);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response 
+	 * containing a JSON body and the specified status line.
 	 * @param json {@link JsonArray} containing the output to encode
 	 * @param status HTTP status to send
 	 */
 	public void sendJSON(JsonArray json, HttpError status) {
 		sendContent(json.encode(), status, "application/json");
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response 
+	 * containing a JSON body and the specified status line.
+	 * @param json {@link JsonArray} containing the output to encode
+	 * @param status HTTP status to send
+	 * @param status HTTP status to send
+	 */
+	public void sendJSON(JsonArray json, HttpError status, HashMap<String, String> headers) {
+		sendContent(json.encode(), status, "application/json", headers);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response
+	 * containing some text and the specifeid status line.
+	 * @param content
+	 * @param status
+	 * @param contentType
+	 * @paeam headers
+	 */
+	public void sendContent(String content, HttpError status, String contentType, HashMap<String, String> headers) {
+		HttpServerResponse response = response(status)
+		.putHeader("Content-Type", contentType)
+		.putHeader("Content-Length", String.valueOf(content.length()));
+		for(Map.Entry<String, String> header : headers.entrySet()) {
+			response.putHeader(header.getKey(), header.getValue());
+		}
+		response.end(content);
 	}
 	
 	/**
