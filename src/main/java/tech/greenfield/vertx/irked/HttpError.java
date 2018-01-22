@@ -1,11 +1,12 @@
 package tech.greenfield.vertx.irked;
 
-import java.util.Objects;
+import java.util.*;
 
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 import tech.greenfield.vertx.irked.status.OK;
+import io.vertx.ext.stomp.utils.Headers;
 
 public class HttpError extends Exception {
 
@@ -13,6 +14,7 @@ public class HttpError extends Exception {
 	
 	private int statusCode;
 	private String statusText;
+	private Headers headers = new Headers();
 	
 	public HttpError(int statusCode, String statusText) {
 		super(statusText);
@@ -44,6 +46,15 @@ public class HttpError extends Exception {
 	
 	public String getStatusText() {
 		return statusText;
+	}
+	
+	public HttpError addHeader(String header, String value) {
+		this.headers.add(header, value);
+		return this;
+	}
+	
+	public Headers getHeaders() {
+		return headers;
 	}
 	
 	/**

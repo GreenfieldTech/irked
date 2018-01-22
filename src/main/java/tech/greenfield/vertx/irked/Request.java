@@ -1,12 +1,11 @@
 package tech.greenfield.vertx.irked;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.stomp.utils.Headers;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.status.OK;
@@ -112,7 +111,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param status HTTP status to send
 	 * @param headers
 	 */
-	public void sendJSON(JsonObject json, HttpError status, HashMap<String, String> headers) {
+	public void sendJSON(JsonObject json, HttpError status, Headers headers) {
 		sendContent(json.encode(), status, "application/json", headers);
 	}
 	
@@ -131,21 +130,20 @@ public class Request extends RoutingContextDecorator {
 	 * containing a JSON body and the specified status line.
 	 * @param json {@link JsonArray} containing the output to encode
 	 * @param status HTTP status to send
-	 * @param status HTTP status to send
+	 * @param headers
 	 */
-	public void sendJSON(JsonArray json, HttpError status, HashMap<String, String> headers) {
+	public void sendJSON(JsonArray json, HttpError status, Headers headers) {
 		sendContent(json.encode(), status, "application/json", headers);
 	}
-	
 	/**
 	 * Helper method to terminate request processing with a custom response
 	 * containing some text and the specifeid status line.
 	 * @param content
 	 * @param status
 	 * @param contentType
-	 * @paeam headers
+	 * @param headers
 	 */
-	public void sendContent(String content, HttpError status, String contentType, HashMap<String, String> headers) {
+	public void sendContent(String content, HttpError status, String contentType, Headers headers) {
 		HttpServerResponse response = response(status)
 		.putHeader("Content-Type", contentType)
 		.putHeader("Content-Length", String.valueOf(content.length()));
@@ -215,7 +213,10 @@ public class Request extends RoutingContextDecorator {
 	 * @param err
 	 */
 	public void sendError(HttpError err) {
-		sendJSON(new JsonObject().put("status", false).put("message", err.getMessage()), err);
+		if(Objects.nonNull(err.getHeaders())) 
+			sendJSON(new JsonObject().put("status", false).put("message", err.getMessage()), err, err.getHeaders());
+		else
+			sendJSON(new JsonObject().put("status", false).put("message", err.getMessage()), err);
 	}
 
 	/**
