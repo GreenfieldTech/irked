@@ -354,8 +354,8 @@ Handler<Request> retrieve = r -> {
 
 The `HttpError.uncheckedWrap()` method wraps the business logic's HTTP status exception with a
 `RuntimeException` so it can jump out of lambdas and other non-declaring code easily without
-boiler-plate code. The Vert.X web request handling glue will pick up the exception and deliver it
-to an appropriate `@OnFail` handler.
+boiler-plate exception handling. The Vert.X web request handling glue will pick up the exception and 
+deliver it to an appropriate `@OnFail` handler.
 
 Then the `@OnFail` handler can be configured to automatically forward this status to the client:
 
@@ -368,9 +368,38 @@ Handler<Request> failureHandler = r -> {
 ```
 
 The `HttpError.toHttpError()` helper method detects `RuntimeException`s and unwrap their content
-automatically. If the underlying cause is an `HttpError`, it will deliver it to be sent using
+automatically. If the underlying cause is an `HttpError`, it will deliver it to the client using
 `Request.sendError()`, otherwise it will create an `InternalServerError` exception (HTTP status 500)
 that contains the unexpected exception, which will also be reported using `Request.sendError()`.
+
+##### "OK" Exceptions
+
+By the way, it is possible to use the throwable `HttpError` types to `throw` any kind of HTTP status,
+including a "200 OK", like this: `throw new OK().uncheckedWrap()`.  
+
+#### Specify Custom Headers
+
+Sometimes a response needs to include custom headers, for example setting the `Location` header for
+a "302 Found" response. Irked `Request` objects offer the same support as the standard `RoutingContext`
+Vert.x implementation it derives from using the regular `r.response().putHeader(name,value)` method,
+but in addition - to augment the ability of deep business logic execution to quickly return results by
+throwing an `HttpError` type - instead of sending a `Request` or `HttpServerResponse` instance deep
+into business logic code, your business logic can attach the needed headers to the `HttpError` status
+object they throw. 
+
+For example:
+
+```
+throw new Found().addHeader("Location", "https://example.com");
+```
+
+Because of the usefulness of such patterns, Irked supplies the helpers `Redirect` and `PermanentRedirect`
+that implement adding `Location` headers to `Found` and `MovedPermanently` respectively, so the above
+example is equivalent to:
+
+```
+throw new Redirect("https://example.com");
+```
 
 #### Using classic Java methods for handlers, while keeping handler order
 
