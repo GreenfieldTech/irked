@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.UpgradeRejectedException;
 import io.vertx.core.http.WebsocketRejectedException;
 import io.vertx.core.http.impl.headers.VertxHttpHeaders;
 import io.vertx.ext.unit.Async;
@@ -17,12 +18,13 @@ import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.Unauthorized;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
+@SuppressWarnings("deprecation")
 public class TestWebSocket extends TestBase {
 	private static final String PING = "ping";
 	private static final String PONG = "pong";
 
 	@Rule
-	public Timeout timeout = Timeout.seconds(2);
+	public Timeout timeout = new Timeout(2000);
 	
 	public class TestControllerTextPinger extends Controller {
 		@WebSocket("/ping")
@@ -174,6 +176,11 @@ public class TestWebSocket extends TestBase {
 			}, t -> {
 				if (t instanceof WebsocketRejectedException) {
 					WebsocketRejectedException e = (WebsocketRejectedException)t;
+					context.assertEquals(401, e.getStatus());
+					rule.vertx().undeploy(s);
+					async.complete();
+				} else if (t instanceof UpgradeRejectedException) {
+					UpgradeRejectedException e = (UpgradeRejectedException)t;
 					context.assertEquals(401, e.getStatus());
 					rule.vertx().undeploy(s);
 					async.complete();

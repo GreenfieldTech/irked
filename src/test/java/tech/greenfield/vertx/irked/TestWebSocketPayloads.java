@@ -28,7 +28,7 @@ public class TestWebSocketPayloads extends TestBase {
 	private static Logger log = LoggerFactory.getLogger(TestWebSocketPayloads.class);
 
 	@Rule
-	public Timeout timeout = Timeout.seconds(30);
+	public Timeout timeout = new Timeout(30000);
 
 	public class TestControllerForLargePayloads extends Controller {
 		Buffer checksumIn, checksumOut, request, response;

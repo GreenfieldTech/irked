@@ -22,7 +22,7 @@ import tech.greenfield.vertx.irked.status.OK;
 public class TestAsyncSending extends TestBase {
 
 	@Rule
-	public Timeout timeout = Timeout.seconds(2);
+	public Timeout timeout = new Timeout(2000);
 	
 	public final static byte[] data = new byte[]{ 0x01, 0x02, 0x03, 0x04, 0x00, 0x00, 0x10, 0x20, 0x30, 0x40 };
 	
@@ -96,6 +96,7 @@ public class TestAsyncSending extends TestBase {
 		deployController(new TestController(), context.asyncAssertSuccess());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testTextSending(TestContext context) {
 		Async async = context.async();
@@ -113,6 +114,7 @@ public class TestAsyncSending extends TestBase {
 		}).end();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testBinarySending(TestContext context) {
 		Async async = context.async();
@@ -130,6 +132,7 @@ public class TestAsyncSending extends TestBase {
 		}).end();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testJsonObjectSending(TestContext context) {
 		Async async = context.async();
@@ -148,6 +151,7 @@ public class TestAsyncSending extends TestBase {
 		}).end();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testJsonArraySending(TestContext context) {
 		Async async = context.async();
@@ -167,6 +171,7 @@ public class TestAsyncSending extends TestBase {
 		}).end();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testMappedObjectSending(TestContext context) {
 		Async async = context.async();
@@ -186,6 +191,7 @@ public class TestAsyncSending extends TestBase {
 		}).end();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testStatusSending(TestContext context) {
 		Async async = context.async();
@@ -202,6 +208,7 @@ public class TestAsyncSending extends TestBase {
 		}).end();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testCustomStatusSending(TestContext context) {
 		Async async = context.async();

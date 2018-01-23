@@ -13,7 +13,7 @@ import tech.greenfield.vertx.irked.status.OK;
 public class TestRepeatables extends TestBase {
 
 	@Rule
-	public Timeout timeout = Timeout.seconds(2);
+	public Timeout timeout = new Timeout(2000);
 	
 	public class TestRepeatableField extends Controller {
 		@Post("/red")
@@ -28,6 +28,7 @@ public class TestRepeatables extends TestBase {
 		deployController(new TestRepeatableField(), context.asyncAssertSuccess(s -> executeTest(context)));
 	}
 
+	@SuppressWarnings("deprecation")
 	private void executeTest(TestContext context) {
 		Async asyncRed = context.async();
 		Async asyncBlue = context.async();

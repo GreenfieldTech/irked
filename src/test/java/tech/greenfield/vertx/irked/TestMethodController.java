@@ -19,7 +19,7 @@ import tech.greenfield.vertx.irked.status.NoContent;
 public class TestMethodController extends TestBase {
 
 	@Rule
-	public Timeout timeout = Timeout.seconds(5);
+	public Timeout timeout = new Timeout(5000);
 
 	public class TestController extends Controller {
 		@Get("/get")
@@ -48,6 +48,7 @@ public class TestMethodController extends TestBase {
 		deployController(new TestController(), context.asyncAssertSuccess());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testGet(TestContext context) {
 		Async async = context.async();
@@ -65,6 +66,7 @@ public class TestMethodController extends TestBase {
 		}).end();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testPost(TestContext context) {
 		Async async = context.async();
@@ -82,6 +84,7 @@ public class TestMethodController extends TestBase {
 		}).end("{}");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testPut(TestContext context) {
 		Async async = context.async();
@@ -94,6 +97,7 @@ public class TestMethodController extends TestBase {
 		}).end("{}");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testDelete(TestContext context) {
 		Async async = context.async();
