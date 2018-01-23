@@ -1,11 +1,11 @@
 package tech.greenfield.vertx.irked;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.stomp.utils.Headers;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.status.OK;
@@ -98,21 +98,10 @@ public class Request extends RoutingContextDecorator {
 	 * Helper method to terminate request processing with a custom response 
 	 * containing a JSON body and the specified status line.
 	 * @param json {@link JsonObject} containing the output to encode
-	 * @param status HTTP status to send
+	 * @param status An HttpError object representing the HTTP status to be sent
 	 */
 	public void sendJSON(JsonObject json, HttpError status) {
 		sendContent(json.encode(), status, "application/json");
-	}
-	
-	/**
-	 * Helper method to terminate request processing with a custom response 
-	 * containing a JSON body and the specified status line.
-	 * @param json {@link JsonObject} containing the output to encode
-	 * @param status HTTP status to send
-	 * @param headers
-	 */
-	public void sendJSON(JsonObject json, HttpError status, Headers headers) {
-		sendContent(json.encode(), status, "application/json", headers);
 	}
 	
 	/**
@@ -126,52 +115,24 @@ public class Request extends RoutingContextDecorator {
 	}
 	
 	/**
-	 * Helper method to terminate request processing with a custom response 
-	 * containing a JSON body and the specified status line.
-	 * @param json {@link JsonArray} containing the output to encode
-	 * @param status HTTP status to send
-	 * @param headers
-	 */
-	public void sendJSON(JsonArray json, HttpError status, Headers headers) {
-		sendContent(json.encode(), status, "application/json", headers);
-	}
-	/**
 	 * Helper method to terminate request processing with a custom response
-	 * containing some text and the specifeid status line.
-	 * @param content
-	 * @param status
-	 * @param contentType
-	 * @param headers
-	 */
-	public void sendContent(String content, HttpError status, String contentType, Headers headers) {
-		HttpServerResponse response = response(status)
-		.putHeader("Content-Type", contentType)
-		.putHeader("Content-Length", String.valueOf(content.length()));
-		for(Map.Entry<String, String> header : headers.entrySet()) {
-			response.putHeader(header.getKey(), header.getValue());
-		}
-		response.end(content);
-	}
-	
-	/**
-	 * Helper method to terminate request processing with a custom response
-	 * containing some text and the specifeid status line.
-	 * @param content
-	 * @param status
-	 * @param contentType
+	 * containing some text and the specified status line.
+	 * @param content Text content to send in the response
+	 * @param status An HttpError object representing the HTTP status to be sent
+	 * @param contentType The MIME Content-Type to be set for the response
 	 */
 	public void sendContent(String content, HttpError status, String contentType) {
 		response(status)
-		.putHeader("Content-Type", contentType)
-		.putHeader("Content-Length", String.valueOf(content.length()))
-		.end(content);
+				.putHeader("Content-Type", contentType)
+				.putHeader("Content-Length", String.valueOf(content.length()))
+				.end(content);
 	}
 	
 	/**
 	 * Helper method to terminate request processing with a custom response
 	 * containing some text and the specifeid status line.
-	 * @param content
-	 * @param contentType
+	 * @param content Text content to send in the response
+	 * @param contentType The MIME Content-Type to be set for the response
 	 */
 	public void sendContent(String content, String contentType) {
 		response(new OK())
@@ -183,8 +144,8 @@ public class Request extends RoutingContextDecorator {
 	/**
 	 * Helper method to terminate request processing with a custom response
 	 * containing some text and the specifeid status line.
-	 * @param content
-	 * @param status
+	 * @param content Text content to send in the response
+	 * @param status An HttpError object representing the HTTP status to be sent
 	 */
 	public void sendContent(String content, HttpError status) {
 		response(status)
@@ -196,7 +157,7 @@ public class Request extends RoutingContextDecorator {
 	/**
 	 * Helper method to terminate request processing with a custom response
 	 * containing some text and the specifeid status line.
-	 * @param content
+	 * @param content Text content to send in the response
 	 */
 	public void sendContent(String content) {
 		response(new OK())
@@ -210,13 +171,10 @@ public class Request extends RoutingContextDecorator {
 	 * The resulting HTTP response will have the correct status line and an application/json content
 	 * with a JSON encoded object containing the fields "status" set to "false" and "message" set
 	 * to the {@link HttpError}'s message.
-	 * @param err
+	 * @param status An HttpError object representing the HTTP status to be sent
 	 */
-	public void sendError(HttpError err) {
-		if(Objects.nonNull(err.getHeaders())) 
-			sendJSON(new JsonObject().put("status", false).put("message", err.getMessage()), err, err.getHeaders());
-		else
-			sendJSON(new JsonObject().put("status", false).put("message", err.getMessage()), err);
+	public void sendError(HttpError status) {
+		sendJSON(new JsonObject().put("status", false).put("message", status.getMessage()), status);
 	}
 
 	/**
@@ -225,7 +183,10 @@ public class Request extends RoutingContextDecorator {
 	 * @return HTTP response created using {@link RoutingContext#response()}
 	 */
 	public HttpServerResponse response(HttpError status) {
-		return response().setStatusCode(status.getStatusCode()).setStatusMessage(status.getStatusText());
+		HttpServerResponse res = response();
+		for (Entry<String, String> h : status.getHeaders())
+			res.putHeader(h.getKey(), h.getValue());
+		return res.setStatusCode(status.getStatusCode()).setStatusMessage(status.getStatusText());
 	}
 
 }
