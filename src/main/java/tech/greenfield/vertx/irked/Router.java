@@ -34,8 +34,13 @@ public class Router implements io.vertx.ext.web.Router{
 		router.accept(request);
 	}
 
-	public void configure(Controller api) throws InvalidRouteConfiguration {
-		configure(api, "", new RequestWrapper(api, Request::new));
+	public Router configure(Controller api) throws InvalidRouteConfiguration {
+		return configure(api, "/");
+	}
+
+	public Router configure(Controller api, String path) throws InvalidRouteConfiguration {
+		configure(api, path, new RequestWrapper(api, Request::new));
+		return this;
 	}
 
 	private void configure(Controller api, String prefix, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
