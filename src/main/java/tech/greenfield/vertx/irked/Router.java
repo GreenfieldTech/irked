@@ -2,8 +2,7 @@ package tech.greenfield.vertx.irked;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.vertx.core.Handler;
@@ -25,6 +24,8 @@ public class Router implements io.vertx.ext.web.Router{
 	private Vertx vertx;
 	private io.vertx.ext.web.Router router;
 
+	private Set<String> routePaths = new HashSet<>();
+
 	public Router(Vertx vertx) {
 		this.vertx = vertx;
 		this.router = io.vertx.ext.web.Router.router(this.vertx);
@@ -40,6 +41,11 @@ public class Router implements io.vertx.ext.web.Router{
 	
 	public Router with(Controller api, String path) throws InvalidRouteConfiguration {
 		configure(api, path);
+		return this;
+	}
+	
+	public Router configReport() {
+		routePaths.stream().sorted().forEach(p -> System.out.println(p));
 		return this;
 	}
 
@@ -77,7 +83,7 @@ public class Router implements io.vertx.ext.web.Router{
 			return;
 		}
 		
-		conf.buildRoutesFor(prefix, anot, method, requestWrapper);
+		conf.buildRoutesFor(prefix, anot, method, requestWrapper).forEach(routePaths::add);
 	}
 	
 	/**

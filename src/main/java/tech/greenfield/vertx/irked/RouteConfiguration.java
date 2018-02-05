@@ -3,8 +3,7 @@ package tech.greenfield.vertx.irked;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
@@ -106,15 +105,18 @@ public abstract class RouteConfiguration {
 		;
 	}
 
-	public <T extends Annotation> void buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method, RequestWrapper requestWrapper) throws IllegalArgumentException, InvalidRouteConfiguration {
+	public <T extends Annotation> List<String> buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method, RequestWrapper requestWrapper) throws IllegalArgumentException, InvalidRouteConfiguration {
+		List<String> out = new LinkedList<>();
 		for (Route r : pathsForAnnotation(prefix, anot)
 				.flatMap(s -> getRoutes(method, s))
-				.collect(Collectors.toList()))
+				.collect(Collectors.toList())) {
 			if (isFailHandler())
 				r.failureHandler(getHandler(requestWrapper));
 			else
 				r.handler(getHandler(requestWrapper));
-
+			out.add(r.getPath());
+		}
+		return out;
 	}
 
 	private Stream<Route> getRoutes(RoutingMethod method, String s) {
