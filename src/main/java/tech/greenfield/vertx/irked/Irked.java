@@ -3,6 +3,7 @@ package tech.greenfield.vertx.irked;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
+import tech.greenfield.vertx.irked.Router;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
 public class Irked {
@@ -20,4 +21,7 @@ public class Irked {
 		return router::accept;
 	}
 	
+	public static Router router(Vertx vertx) {
+		return new Router(vertx);
+	}
 }
