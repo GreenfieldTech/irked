@@ -12,10 +12,20 @@ import tech.greenfield.vertx.irked.status.InternalServerError;
 public class RouteConfigurationMethod extends RouteConfiguration {
 
 	private Method method;
+	private Class<?>[] params;
 
-	public RouteConfigurationMethod(Controller impl, Method m) {
+	public RouteConfigurationMethod(Controller impl, Method m) throws InvalidRouteConfiguration {
 		super(impl, m.getAnnotations());
 		method = m;
+		if (!isValid())
+			return; // don't sanity check methods that aren't routing methods
+		//if ((m.getModifiers() & Modifier.PUBLIC) == 0)
+		//	throw new InvalidRouteConfiguration("Method " + m.getName() + " is not public");
+		params = m.getParameterTypes();
+		if (params.length < 1 || !RoutingContext.class.isAssignableFrom(params[0]))
+			throw new InvalidRouteConfiguration("Method " + m.getName() + " doesn't take a Vert.x RoutingContext as first parameter");
+		if (m.getParameterCount() > 1)
+			throw new InvalidRouteConfiguration("Method " + m.getName() + " requires more than one parameter which I don't know how to provide yet");
 	}
 
 	@Override
@@ -41,22 +51,25 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	@Override
 	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
 		method.setAccessible(true);
-		Class<?>[] params = method.getParameterTypes();
-		if (params.length == 1 || params[0].isAssignableFrom(Request.class) || 
-				// we should support working with methods that take specializations for Request, we'll rely on the specific implementation's
-				// getRequest() to provide the correct type
-				Request.class.isAssignableFrom(params[0])) 
-			return r -> {
-				try {
-					method.invoke(impl, r);
-				} catch (InvocationTargetException e) {
-					r.fail(e.getCause());
-				} catch (IllegalAccessException | IllegalArgumentException e) {
-					// shouldn't happen
-					throw new InternalServerError("Invalid request handler " + this + ": " + e, e).uncheckedWrap();
-				}
-			};
-		throw new InvalidRouteConfiguration("Invalid arguments list for " + this);
+		return r -> {
+			// run time check for correct type
+			// we support working with methods that take specializations for Request, we'll rely on the specific implementation's
+			// getRequest() to provide the correct type
+			if (!params[0].isAssignableFrom(r.getClass())) {
+				r.fail(new InternalServerError("Invalid request handler " + this + " - can't handle request of type " + r.getClass()));
+				return;
+			}
+			
+			try {
+				method.invoke(impl, r);
+			} catch (InvocationTargetException e) { // user exception
+				r.fail(e.getCause()); // propagate exceptions thrown by the method to the Vert.x fail handler
+			} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
+				r.fail(new InternalServerError("Invalid request handler " + this + ": " + e, e));
+			} catch (IllegalArgumentException e) { // shouldn't happen because we checked the type before calling
+				r.fail(new InternalServerError("Mistyped request handler " + this + ": " + e, e));
+			}
+		};
 	}
 
 }

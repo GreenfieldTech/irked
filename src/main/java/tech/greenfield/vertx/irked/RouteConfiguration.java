@@ -35,7 +35,7 @@ public abstract class RouteConfiguration {
 		return new RouteConfigurationField(impl, f);
 	}
 	
-	static RouteConfiguration wrap(Controller impl, Method m) {
+	static RouteConfiguration wrap(Controller impl, Method m) throws InvalidRouteConfiguration {
 		return new RouteConfigurationMethod(impl, m);
 	}
 	
