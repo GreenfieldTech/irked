@@ -82,7 +82,7 @@ public class Request extends RoutingContextDecorator {
 	 * Helper to easily configure standard failure handlers
 	 * @return a WebHandler that sends Irked status exceptions as HTTP responses
 	 */
-	public WebHandler failureHandler() {
+	public static WebHandler failureHandler() {
 		return r -> {
 			r.sendError(HttpError.toHttpError(r));
 		};
