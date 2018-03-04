@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
+import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.status.OK;
 
 /**
@@ -75,6 +76,16 @@ public class Request extends RoutingContextDecorator {
 		if (Objects.nonNull(throwable))
 			fail(HttpError.unwrap(throwable));
 		return successValue;
+	}
+	
+	/**
+	 * Helper to easily configure standard failure handlers
+	 * @return a WebHandler that sends Irked status exceptions as HTTP responses
+	 */
+	public WebHandler failureHandler() {
+		return r -> {
+			r.sendError(HttpError.toHttpError(r));
+		};
 	}
 	
 	/**
