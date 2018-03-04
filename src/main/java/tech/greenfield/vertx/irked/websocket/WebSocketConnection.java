@@ -27,7 +27,7 @@ public class WebSocketConnection implements ServerWebSocket {
 		return request;
 	}
 	
-	public WebSocketConnection messageHandler(Handler<WebSocketMessage> handler) {
+	public WebSocketConnection messageHandler(Handler<? super WebSocketMessage> handler) {
 		socket.binaryMessageHandler(buffer -> handler.handle(new WebSocketMessage(request, socket, buffer)));
 		// The text message handler is more expensive because it effectively causes UTF-8 decoding + encoding + (probably) final decoding
 		// we should implement a custom frame aggregator that allows us to delay decoding text until the user actually wants to.  

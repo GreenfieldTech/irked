@@ -13,11 +13,10 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.BlockingHandlerDecorator;
 import tech.greenfield.vertx.irked.Router.RoutingMethod;
-import tech.greenfield.vertx.irked.annotations.Blocking;
-import tech.greenfield.vertx.irked.annotations.Consumes;
-import tech.greenfield.vertx.irked.annotations.Endpoint;
-import tech.greenfield.vertx.irked.annotations.OnFail;
+import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
+import tech.greenfield.vertx.irked.websocket.WebSocketConnection;
+import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
 public abstract class RouteConfiguration {
 	static Package annotationPackage = Endpoint.class.getPackage();
@@ -79,6 +78,7 @@ public abstract class RouteConfiguration {
 	abstract protected String getName();
 
 	abstract Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
+	abstract Handler<? super WebSocketMessage> getMessageHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
 
 	boolean isBlocking() {
 		return getAnnotation(Blocking.class).length > 0;
@@ -110,7 +110,9 @@ public abstract class RouteConfiguration {
 		for (Route r : pathsForAnnotation(prefix, anot)
 				.flatMap(s -> getRoutes(method, s))
 				.collect(Collectors.toList())) {
-			if (isFailHandler())
+			if (anot.equals(WebSocket.class))
+				r.handler(getWebSocketHandler(requestWrapper));
+			else if (isFailHandler())
 				r.failureHandler(getHandler(requestWrapper));
 			else
 				r.handler(getHandler(requestWrapper));
@@ -137,4 +139,18 @@ public abstract class RouteConfiguration {
 		return handler;
 	}
 
+	private Handler<RoutingContext> getWebSocketHandler(RequestWrapper parent) throws IllegalArgumentException, InvalidRouteConfiguration {
+		try {
+			Handler<? super WebSocketMessage> handler = getMessageHandler();
+			return new RequestWrapper(r -> {
+				Request req = (r instanceof Request) ? (Request) r : new Request(r);
+				if (req.needUpgrade("websocket"))
+					new WebSocketConnection(req).messageHandler(handler);
+				else
+					req.next();
+			}, parent);
+		} catch (IllegalAccessException e) {
+			throw new InvalidRouteConfiguration("Illegal access error while trying to configure " + this);
+		}
+	}
 }
