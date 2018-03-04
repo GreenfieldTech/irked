@@ -446,6 +446,14 @@ automatically. If the underlying cause is an `HttpError`, it will deliver it to 
 `Request.sendError()`, otherwise it will create an `InternalServerError` exception (HTTP status 500)
 that contains the unexpected exception, which will also be reported using `Request.sendError()`.
 
+Because this use case is so useful, there's even a shorted short-hand for this:
+
+```
+@OnFail
+@Endpoint("/*")
+WebHandler failureHandler = Request.failureHandler();
+```
+
 ##### "OK" Exceptions
 
 By the way, it is possible to use the throwable `HttpError` types to `throw` any kind of HTTP status,
