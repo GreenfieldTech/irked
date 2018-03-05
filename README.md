@@ -343,6 +343,15 @@ MessageHandler handler = m -> {
 }; 
 ```
 
+When using the method handlers, you can also ask for a specific `Request` implementation, to take advantage of typed request contexts:
+
+```
+@WebSocket("/websocket")
+void messageHandler(UserContextRequest req, WebSocketMessage msg) {
+  msg.reply(req.handleMessage(msg));
+}
+```
+
 #### SockJS service
 
 If you are interested in a [Sock.JS](http://sockjs.org) server implementation, Vert.x Web offers `SockJSHandler` that 
