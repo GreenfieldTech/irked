@@ -15,13 +15,12 @@ import io.vertx.ext.web.impl.BlockingHandlerDecorator;
 import tech.greenfield.vertx.irked.Router.RoutingMethod;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
-import tech.greenfield.vertx.irked.websocket.WebSocketConnection;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
 public abstract class RouteConfiguration {
 	static Package annotationPackage = Endpoint.class.getPackage();
 
-	private Annotation[] annotations;
+	protected Annotation[] annotations;
 
 	protected Controller impl;
 
@@ -141,14 +140,7 @@ public abstract class RouteConfiguration {
 
 	private Handler<RoutingContext> getWebSocketHandler(RequestWrapper parent) throws IllegalArgumentException, InvalidRouteConfiguration {
 		try {
-			Handler<? super WebSocketMessage> handler = getMessageHandler();
-			return new RequestWrapper(r -> {
-				Request req = (r instanceof Request) ? (Request) r : new Request(r);
-				if (req.needUpgrade("websocket"))
-					new WebSocketConnection(req).messageHandler(handler);
-				else
-					req.next();
-			}, parent);
+			return new WebSocketUpgradeRequestWrapper(Objects.requireNonNull(getMessageHandler()), parent);
 		} catch (IllegalAccessException e) {
 			throw new InvalidRouteConfiguration("Illegal access error while trying to configure " + this);
 		}
