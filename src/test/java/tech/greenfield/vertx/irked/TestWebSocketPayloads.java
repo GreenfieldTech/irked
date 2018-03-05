@@ -79,7 +79,7 @@ public class TestWebSocketPayloads extends TestBase {
 	@Test
 	public void testLargestPayload(TestContext context) {
 		Future<TestControllerForLargePayloads> f1 = Future.future();
-		rule.vertx().executeBlocking(makeController(100000), f1.completer());
+		rule.vertx().executeBlocking(makeController(50000), f1.completer());
 		f1.setHandler(payloadTester(context));
 	}
 
