@@ -3,11 +3,13 @@ package tech.greenfield.vertx.irked;
 import java.util.*;
 import java.util.Map.Entry;
 
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
+import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.status.OK;
 
 /**
@@ -74,6 +76,16 @@ public class Request extends RoutingContextDecorator {
 		if (Objects.nonNull(throwable))
 			fail(HttpError.unwrap(throwable));
 		return successValue;
+	}
+	
+	/**
+	 * Helper to easily configure standard failure handlers
+	 * @return a WebHandler that sends Irked status exceptions as HTTP responses
+	 */
+	public static WebHandler failureHandler() {
+		return r -> {
+			r.sendError(HttpError.toHttpError(r));
+		};
 	}
 	
 	/**
@@ -187,6 +199,25 @@ public class Request extends RoutingContextDecorator {
 		for (Entry<String, String> h : status.getHeaders())
 			res.putHeader(h.getKey(), h.getValue());
 		return res.setStatusCode(status.getStatusCode()).setStatusMessage(status.getStatusText());
+	}
+	
+	/**
+	 * Check if the client requested a connection upgrade, regardless which type
+	 * of upgrade is required.
+	 * @return {@literal true} if the request includes a 'Connection: upgrade' header.
+	 */
+	public boolean needUpgrade() {
+		return needUpgrade(null);
+	}
+	
+	/**
+	 * check if the client requested a specific connection upgrade.
+	 * @param type What upgrade type to test against, case insensitive
+	 * @return {@literal true} if the request includes a 'Connection: upgrade' header and an 'Upgrade' header with the specified type.
+	 */
+	public boolean needUpgrade(String type) {
+		HttpServerRequest req = request();
+		return req.getHeader("Connection").equalsIgnoreCase("upgrade") && (Objects.isNull(type) || req.getHeader("Upgrade").equalsIgnoreCase(type));
 	}
 
 }

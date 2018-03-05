@@ -9,11 +9,13 @@ import java.util.stream.Collectors;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
+import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
 public class Controller {
 
 	protected interface RawVertxHandler extends Handler<RoutingContext> {}
 	protected interface WebHandler extends Handler<Request> {}
+	protected interface MessageHandler extends Handler<WebSocketMessage> {}
 	
 	/**
 	 * Controller implementations should override this to generate local

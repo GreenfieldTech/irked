@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
+import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
 public class RouteConfigurationField extends RouteConfiguration {
 
@@ -43,6 +44,15 @@ public class RouteConfigurationField extends RouteConfiguration {
 			throw new InvalidRouteConfiguration(this + " is not a valid handler or controller");
 		field.setAccessible(true);
 		return (Handler<RoutingContext>)field.get(impl);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	Handler<? super WebSocketMessage> getMessageHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
+		if (!Handler.class.isAssignableFrom(field.getType()))
+			throw new InvalidRouteConfiguration(this + " is not a valid handler");
+		field.setAccessible(true);
+		return (Handler<WebSocketMessage>)field.get(impl);
 	}
 
 }
