@@ -1,18 +1,21 @@
 package tech.greenfield.vertx.irked;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
+import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
 public class Controller {
 
 	protected interface RawVertxHandler extends Handler<RoutingContext> {}
 	protected interface WebHandler extends Handler<Request> {}
+	protected interface MessageHandler extends Handler<WebSocketMessage> {}
 	
 	/**
 	 * Controller implementations should override this to generate local
@@ -29,13 +32,15 @@ public class Controller {
 	/**
 	 * Helper method for {@link Router} to discover routing endpoints
 	 * @return list of fields that are routing endpoints
+	 * @throws InvalidRouteConfiguration If one of the declared and annotated routes is invalid
 	 */
-	List<RouteConfiguration> getRoutes() {
-		return Stream.concat(
-				Arrays.stream(getClass().getDeclaredFields()).map(f -> RouteConfiguration.wrap(this, f)),
-				Arrays.stream(getClass().getDeclaredMethods()).map(f -> RouteConfiguration.wrap(this, f)))
-				.filter(RouteConfiguration::isValid)
-				.collect(Collectors.toList());
+	List<RouteConfiguration> getRoutes() throws InvalidRouteConfiguration {
+		ArrayList<RouteConfiguration> out = new ArrayList<>();
+		for (Field f : getClass().getDeclaredFields())
+			out.add(RouteConfiguration.wrap(this, f));
+		for (Method m : getClass().getDeclaredMethods())
+			out.add(RouteConfiguration.wrap(this, m));
+		return out.stream().filter(RouteConfiguration::isValid).collect(Collectors.toList());
 	}
 
 	/**

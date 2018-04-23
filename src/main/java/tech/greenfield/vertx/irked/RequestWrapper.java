@@ -9,7 +9,7 @@ import io.vertx.ext.web.RoutingContext;
 public class RequestWrapper implements Function<RoutingContext, Request>, Handler<RoutingContext> {
 
 	private Controller ctr;
-	private Function<RoutingContext, Request> wrapper;
+	protected Function<RoutingContext, Request> wrapper;
 	private Handler<? super RoutingContext> handler;
 
 	public RequestWrapper(Controller ctr, Function<RoutingContext, Request> requestWrapper) {
@@ -20,6 +20,14 @@ public class RequestWrapper implements Function<RoutingContext, Request>, Handle
 	public RequestWrapper(Handler<? super RoutingContext> handler, Function<RoutingContext, Request> requestWrapper) {
 		this.handler = Objects.requireNonNull(handler, "Handler instance is not set!");
 		this.wrapper = requestWrapper;
+	}
+	
+	/**
+	 * Helper c'tor for extensions that want to provide their own handling
+	 * @param parent Wrapping wrapper
+	 */
+	protected RequestWrapper(Function<RoutingContext, Request> parent) {
+		wrapper = parent;
 	}
 
 	@Override
