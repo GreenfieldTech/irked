@@ -3,6 +3,7 @@ package tech.greenfield.vertx.irked;
 import java.util.*;
 import java.util.Map.Entry;
 
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
@@ -134,10 +135,11 @@ public class Request extends RoutingContextDecorator {
 	 * @param contentType The MIME Content-Type to be set for the response
 	 */
 	public void sendContent(String content, HttpError status, String contentType) {
+		Buffer buffer = Buffer.factory.buffer(content);
 		response(status)
 				.putHeader("Content-Type", contentType)
-				.putHeader("Content-Length", String.valueOf(content.length()))
-				.end(content);
+				.putHeader("Content-Length", String.valueOf(buffer.length()))
+				.end(buffer);
 	}
 	
 	/**
@@ -147,10 +149,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param contentType The MIME Content-Type to be set for the response
 	 */
 	public void sendContent(String content, String contentType) {
-		response(new OK())
-		.putHeader("Content-Type", contentType)
-		.putHeader("Content-Length", String.valueOf(content.length()))
-		.end(content);
+		sendContent(content, new OK(), contentType);
 	}
 	
 	/**
@@ -160,10 +159,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param status An HttpError object representing the HTTP status to be sent
 	 */
 	public void sendContent(String content, HttpError status) {
-		response(status)
-		.putHeader("Content-Type", "text/plain")
-		.putHeader("Content-Length", String.valueOf(content.length()))
-		.end(content);
+		sendContent(content, status, "text/plain");
 	}
 	
 	/**
@@ -172,10 +168,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param content Text content to send in the response
 	 */
 	public void sendContent(String content) {
-		response(new OK())
-		.putHeader("Content-Type", "text/plain")
-		.putHeader("Content-Length", String.valueOf(content.length()))
-		.end(content);
+		sendContent(content, new OK(), "text/plain");
 	}
 	
 	/**
