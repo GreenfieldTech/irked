@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.TimeoutHandler;
 import io.vertx.ext.web.impl.BlockingHandlerDecorator;
 import tech.greenfield.vertx.irked.Router.RoutingMethod;
 import tech.greenfield.vertx.irked.annotations.*;
@@ -90,7 +91,12 @@ public abstract class RouteConfiguration {
 	boolean hasConsumes() {
 		return getAnnotation(Consumes.class).length > 0;
 	}
-
+	
+	Timeout trygetTimeout() {
+		Timeout[] ts = getAnnotation(Timeout.class);
+		return ts.length > 0 ? ts[0] : null;
+	}
+	
 	Stream<String> consumes() {
 		return Arrays.stream(getAnnotation(Consumes.class)).map(a -> a.value());
 	}
@@ -121,6 +127,15 @@ public abstract class RouteConfiguration {
 	}
 
 	private Stream<Route> getRoutes(RoutingMethod method, String s) {
+		return getRoutes(method, s, true);
+	}
+	
+	private Stream<Route> getRoutes(RoutingMethod method, String s, boolean withTimeout) {
+		if (withTimeout) {
+			Timeout t = trygetTimeout();
+			if (Objects.nonNull(t))
+				getRoutes(method, s, false).forEach(r -> r.handler(TimeoutHandler.create(t.value())));
+		}
 		if (!hasConsumes())
 			return Stream.of(method.setRoute(s));
 		return consumes().map(c -> method.setRoute(s).consumes(c));
