@@ -121,7 +121,7 @@ public abstract class RouteConfiguration {
 				r.failureHandler(getHandler(requestWrapper));
 			else
 				r.handler(getHandler(requestWrapper));
-			out.add(r.getPath());
+			out.add(r.toString());
 		}
 		return out;
 	}
