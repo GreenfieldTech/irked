@@ -134,7 +134,7 @@ public abstract class RouteConfiguration {
 		if (withTimeout) {
 			Timeout t = trygetTimeout();
 			if (Objects.nonNull(t))
-				getRoutes(method, s, false).forEach(r -> r.handler(TimeoutHandler.create(t.value())));
+				return getRoutes(method, s, false).map(r -> r.handler(TimeoutHandler.create(t.value())));
 		}
 		if (!hasConsumes())
 			return Stream.of(method.setRoute(s));
