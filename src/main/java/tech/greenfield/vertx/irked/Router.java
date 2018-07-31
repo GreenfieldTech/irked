@@ -44,6 +44,11 @@ public class Router implements io.vertx.ext.web.Router{
 		return this;
 	}
 	
+	public Router remove(Controller api) {
+		api.remove();
+		return this;
+	}
+	
 	public Router configReport() {
 		routePaths.stream().sorted().forEach(p -> System.out.println(p));
 		return this;

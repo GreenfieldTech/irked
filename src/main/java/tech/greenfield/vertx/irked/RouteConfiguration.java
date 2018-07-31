@@ -102,6 +102,9 @@ public abstract class RouteConfiguration {
 	}
 	
 	Pattern trailingSlashRemover = Pattern.compile("./$");
+
+	private List<Route> routes = new ArrayList<>();
+	
 	public <T extends Annotation> Stream<String> pathsForAnnotation(String prefix, Class<T> anot) {
 		return Arrays.stream(uriForAnnotation(anot))
 				.filter(s -> Objects.nonNull(s))
@@ -121,6 +124,7 @@ public abstract class RouteConfiguration {
 				r.failureHandler(getHandler(requestWrapper));
 			else
 				r.handler(getHandler(requestWrapper));
+			routes.add(r);
 			out.add(r.toString());
 		}
 		return out;
@@ -159,5 +163,9 @@ public abstract class RouteConfiguration {
 		} catch (IllegalAccessException e) {
 			throw new InvalidRouteConfiguration("Illegal access error while trying to configure " + this);
 		}
+	}
+	
+	void remove() {
+		routes.forEach(Route::remove);
 	}
 }
