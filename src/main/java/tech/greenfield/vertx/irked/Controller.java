@@ -16,6 +16,8 @@ public class Controller {
 	protected interface RawVertxHandler extends Handler<RoutingContext> {}
 	protected interface WebHandler extends Handler<Request> {}
 	protected interface MessageHandler extends Handler<WebSocketMessage> {}
+
+	private List<RouteConfiguration> routes;
 	
 	/**
 	 * Controller implementations should override this to generate local
@@ -40,7 +42,7 @@ public class Controller {
 			out.add(RouteConfiguration.wrap(this, f));
 		for (Method m : getClass().getDeclaredMethods())
 			out.add(RouteConfiguration.wrap(this, m));
-		return out.stream().filter(RouteConfiguration::isValid).collect(Collectors.toList());
+		return routes = out.stream().filter(RouteConfiguration::isValid).collect(Collectors.toList());
 	}
 
 	/**
@@ -80,5 +82,9 @@ public class Controller {
 			throw new RuntimeException("Error accessing field " + field + ": " + e, e);
 		}
 	}
-
+	
+	public void remove() {
+		routes.forEach(RouteConfiguration::remove);
+	}
+	
 }
