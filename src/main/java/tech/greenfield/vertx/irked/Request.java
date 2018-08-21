@@ -99,6 +99,15 @@ public class Request extends RoutingContextDecorator {
 	}
 	
 	/**
+	 * Helper method to terminate a request processing with a success (200 OK) response
+	 * containing a JSON object mapped from the specified POJO
+	 * @param data POJO containing the data to map to a JSON encoded object
+	 */
+	public void sendObject(Object data) {
+		sendJSON(JsonObject.mapFrom(data));
+	}
+	
+	/**
 	 * Helper method to terminate request processing with a success (200 OK) response 
 	 * containing a JSON body.
 	 * @param json {@link JsonArray} containing the output to encode
@@ -115,6 +124,16 @@ public class Request extends RoutingContextDecorator {
 	 */
 	public void sendJSON(JsonObject json, HttpError status) {
 		sendContent(json.encode(), status, "application/json");
+	}
+	
+	/**
+	 * Helper method to terminate a request processing with a custom response
+	 * containing a JSON object mapped from the specified POJO and the specified status line.
+	 * @param data POJO containing the data to map to a JSON encoded object
+	 * @param status An HttpError object representing the HTTP status to be sent
+	 */
+	public void sendObject(Object data, HttpError status) {
+		sendJSON(JsonObject.mapFrom(data), status);
 	}
 	
 	/**
