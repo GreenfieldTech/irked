@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
+import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.OK;
 
 /**
@@ -87,6 +88,17 @@ public class Request extends RoutingContextDecorator {
 		return r -> {
 			r.sendError(HttpError.toHttpError(r));
 		};
+	}
+	
+	public <T> T getBodyAs(Class<T> type) {
+		String contentType = this.request().getHeader("Content-Type");
+		if (Objects.isNull(contentType)) contentType = "application/json"; // we love JSON
+		switch (contentType) {
+			case "application/json":
+				return getBodyAsJson().mapTo(type);
+			default:
+				throw new BadRequest("Request body must be of type " + type.getSimpleName()).uncheckedWrap();
+		}
 	}
 	
 	/**
