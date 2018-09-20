@@ -166,11 +166,21 @@ public class Request extends RoutingContextDecorator {
 	 * @param contentType The MIME Content-Type to be set for the response
 	 */
 	public void sendContent(String content, HttpError status, String contentType) {
-		Buffer buffer = Buffer.factory.buffer(content);
+		sendContent(Buffer.factory.buffer(content), status, contentType);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a custom response
+	 * containing some data and the specified status line.
+	 * @param content Binary content to send in the response
+	 * @param status An HttpError object representing the HTTP status to be sent
+	 * @param contentType The MIME Content-Type to be set for the response
+	 */
+	public void sendContent(Buffer content, HttpError status, String contentType) {
 		response(status)
 				.putHeader("Content-Type", contentType)
-				.putHeader("Content-Length", String.valueOf(buffer.length()))
-				.end(buffer);
+				.putHeader("Content-Length", String.valueOf(content.length()))
+				.end(content);
 	}
 	
 	/**
