@@ -11,6 +11,13 @@ import tech.greenfield.vertx.irked.status.OK;
 
 public class HttpError extends Exception {
 
+	public class UncheckedHttpError extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		private UncheckedHttpError() {
+			super(HttpError.this);
+		}
+	}
+
 	private static final long serialVersionUID = -7084405660609573926L;
 	
 	private int statusCode;
@@ -65,7 +72,7 @@ public class HttpError extends Exception {
 	 * @return {@link RuntimeException} wrapping this status instance
 	 */
 	public RuntimeException uncheckedWrap() {
-		return new RuntimeException(this);
+		return new UncheckedHttpError();
 	}
 	
 	/**
