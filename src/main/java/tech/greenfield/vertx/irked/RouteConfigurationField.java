@@ -49,6 +49,10 @@ public class RouteConfigurationField extends RouteConfiguration {
 			try {
 				handler.handle(r);
 			} catch (Throwable cause) {
+				if (r.failed()) {
+					log.warn("Exception occured on a fail route, ignoring",cause);
+					return;
+				}
 				if (cause instanceof UncheckedHttpError)
 					r.fail(HttpError.toHttpError(cause));
 				else

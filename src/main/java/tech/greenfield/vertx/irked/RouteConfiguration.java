@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
 import io.vertx.core.Handler;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.TimeoutHandler;
@@ -24,6 +26,8 @@ public abstract class RouteConfiguration {
 	protected Annotation[] annotations;
 
 	protected Controller impl;
+	
+	protected Logger log = LoggerFactory.getLogger(getClass());
 
 	protected RouteConfiguration(Controller impl, Annotation[] annotations) {
 		this.annotations = annotations;

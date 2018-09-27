@@ -84,6 +84,10 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			try {
 				method.invoke(impl, r);
 			} catch (InvocationTargetException e) { // user exception
+				if (r.failed()) {
+					log.warn("Exception occured on a fail route, ignoring",e);
+					return;
+				}
 				Throwable cause = e.getCause();
 				if (cause instanceof UncheckedHttpError)
 					r.fail(HttpError.toHttpError(cause));
