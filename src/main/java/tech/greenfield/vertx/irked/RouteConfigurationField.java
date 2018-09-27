@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import tech.greenfield.vertx.irked.HttpError.UncheckedHttpError;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
@@ -43,7 +44,17 @@ public class RouteConfigurationField extends RouteConfiguration {
 		if (!Handler.class.isAssignableFrom(field.getType()))
 			throw new InvalidRouteConfiguration(this + " is not a valid handler or controller");
 		field.setAccessible(true);
-		return (Handler<RoutingContext>)field.get(impl);
+		final Handler<RoutingContext> handler = (Handler<RoutingContext>)field.get(impl);
+		return r -> {
+			try {
+				handler.handle(r);
+			} catch (Throwable cause) {
+				if (cause instanceof UncheckedHttpError)
+					r.fail(HttpError.toHttpError(cause));
+				else
+					r.fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")

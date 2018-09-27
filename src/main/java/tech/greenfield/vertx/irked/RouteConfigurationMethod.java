@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import tech.greenfield.vertx.irked.HttpError.UncheckedHttpError;
 import tech.greenfield.vertx.irked.annotations.WebSocket;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.status.InternalServerError;
@@ -83,7 +84,11 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			try {
 				method.invoke(impl, r);
 			} catch (InvocationTargetException e) { // user exception
-				r.fail(e.getCause()); // propagate exceptions thrown by the method to the Vert.x fail handler
+				Throwable cause = e.getCause();
+				if (cause instanceof UncheckedHttpError)
+					r.fail(HttpError.toHttpError(cause));
+				else
+					r.fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
 			} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
 				r.fail(new InternalServerError("Invalid request handler " + this + ": " + e, e));
 			} catch (IllegalArgumentException e) { // shouldn't happen because we checked the type before calling
