@@ -18,8 +18,8 @@ public class DigestAuthenticate extends Unauthorized {
 	
 	static {
 		try {
-			rand = SecureRandom.getInstanceStrong();
-		} catch (NoSuchAlgorithmException e) { // shouldn't happen - every JVM must have at least one strong implementation
+			rand = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) { // shouldn't happen - every JVM must have this implementation
 			rand = null;
 		}
 	}
