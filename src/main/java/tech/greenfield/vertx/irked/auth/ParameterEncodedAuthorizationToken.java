@@ -20,7 +20,7 @@ public class ParameterEncodedAuthorizationToken extends AuthorizationToken {
 	}
 	
 	public static Iterable<Map.Entry<String,String>> parseParameters(String text) {
-		StringTokenizer t = new StringTokenizer(text);
+		StringTokenizer t = new StringTokenizer(text, " \t\r\n,");
 		return new Iterable<Map.Entry<String,String>>() {
 			@Override
 			public Iterator<Entry<String, String>> iterator() {
