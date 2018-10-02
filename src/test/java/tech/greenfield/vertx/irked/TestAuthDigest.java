@@ -79,7 +79,7 @@ public class TestAuthDigest extends TestBase {
 		ctx.assertEquals(Unauthorized.code, res.statusCode());
 		try {
 			Map<String, String> auth = parseAuthHeader(res.getHeader("WWW-Authenticate"));
-			DigestAuthorizationToken tok = new DigestAuthorizationToken(auth.get("realm"), "GET", "/auth", null, userName, userPass, auth.get("nonce"), DigestAuthenticate.generateNonce("", 300), "MD5");
+			DigestAuthorizationToken tok = new DigestAuthorizationToken(auth.get("realm"), "GET", "/auth", userName, userPass, auth.get("nonce"));
 			getClient().get(port, "localhost", "/auth").exceptionHandler(ctx::fail)
 			.handler(res2 -> testGetAuthedCheckResponse(ctx, res2, finish))
 			.putHeader("Authorization", tok.generateAuthrizationHeader())
@@ -111,7 +111,7 @@ public class TestAuthDigest extends TestBase {
 		ctx.assertEquals(Unauthorized.code, res.statusCode());
 		try {
 			Map<String, String> auth = parseAuthHeader(res.getHeader("WWW-Authenticate"));
-			DigestAuthorizationToken tok = new DigestAuthorizationToken(auth.get("realm"), "POST", "/auth-int", postdata, userName, userPass, auth.get("nonce"), DigestAuthenticate.generateNonce("", 300), "MD5");
+			DigestAuthorizationToken tok = new DigestAuthorizationToken(auth.get("realm"), "POST", "/auth-int", postdata, userName, userPass, auth.get("nonce"), DigestAuthenticate.generateNonce("", 300));
 			getClient().post(port, "localhost", "/auth-int").exceptionHandler(ctx::fail)
 			.handler(res2 -> testGetAuthedCheckResponse(ctx, res2, finish))
 			.putHeader("Authorization", tok.generateAuthrizationHeader())
