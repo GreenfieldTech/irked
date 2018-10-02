@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
+import tech.greenfield.vertx.irked.auth.AuthorizationToken;
 import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.OK;
 
@@ -252,6 +253,14 @@ public class Request extends RoutingContextDecorator {
 	public boolean needUpgrade(String type) {
 		HttpServerRequest req = request();
 		return req.getHeader("Connection").equalsIgnoreCase("upgrade") && (Objects.isNull(type) || req.getHeader("Upgrade").equalsIgnoreCase(type));
+	}
+	
+	/**
+	 * Helper for authorization header parsing
+	 * @return A parsed {@link AuthorizationToken}
+	 */
+	public AuthorizationToken getAuthorization() {
+		return AuthorizationToken.parse(request().getHeader("Authorization"));
 	}
 
 }
