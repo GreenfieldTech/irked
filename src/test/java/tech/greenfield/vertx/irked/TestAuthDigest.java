@@ -126,6 +126,7 @@ public class TestAuthDigest extends TestBase {
 		String[] authparts = authHeader.split(" ",2);
 		if (!"Digest".equals(authparts[0]) || authparts.length != 2)
 			throw new Exception("Unexpected auth type: " + authparts[0]);
+		System.err.println("Authorization header: " + authHeader);
 		return Arrays.asList(authparts[1].split(",\\s+")).stream()
 				.map(s -> s.split("=",2))
 				.map(ss -> {
