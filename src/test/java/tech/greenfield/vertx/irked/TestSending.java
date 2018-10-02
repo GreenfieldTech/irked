@@ -1,18 +1,16 @@
 package tech.greenfield.vertx.irked;
 
-import java.util.Objects;
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
-import tech.greenfield.vertx.irked.status.*;
 import tech.greenfield.vertx.irked.base.TestBase;
+import tech.greenfield.vertx.irked.status.OK;
 
 public class TestSending extends TestBase {
 
@@ -60,7 +58,7 @@ public class TestSending extends TestBase {
 			context.assertEquals(200, res.statusCode(), "Request failed");
 			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				try {
-					context.assertEquals(data, body.getBytes());
+					context.assertTrue(Arrays.equals(data, body.getBytes()));
 				} catch (Exception e) {
 					context.fail(e);
 				}
