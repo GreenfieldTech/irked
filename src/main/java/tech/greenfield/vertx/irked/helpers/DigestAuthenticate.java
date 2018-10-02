@@ -1,6 +1,5 @@
 package tech.greenfield.vertx.irked.helpers;
 
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -8,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.vertx.core.buffer.Buffer;
+import tech.greenfield.vertx.irked.auth.ParameterEncodedAuthorizationToken;
 import tech.greenfield.vertx.irked.status.Unauthorized;
 
 public class DigestAuthenticate extends Unauthorized {
@@ -17,8 +18,8 @@ public class DigestAuthenticate extends Unauthorized {
 	
 	static {
 		try {
-			rand = SecureRandom.getInstanceStrong();
-		} catch (NoSuchAlgorithmException e) { // shouldn't happen - every JVM must have at least one strong implementation
+			rand = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) { // shouldn't happen - every JVM must have this implementation
 			rand = null;
 		}
 	}
@@ -56,12 +57,8 @@ public class DigestAuthenticate extends Unauthorized {
 	public static String generateNonce(String tag, long expiry) {
 		byte[] randdata = new byte[8];
 		rand.nextBytes(randdata);
-		String nonce = String.valueOf(System.currentTimeMillis() / 1000 + expiry) + ":" + tag + ":" + javax.xml.bind.DatatypeConverter.printHexBinary(randdata);
-		try {
-			return Base64.getEncoder().encodeToString(nonce.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) { // shouldn't happen as "UTF-8" is builtin
-			return null;
-		}
+		String nonce = String.valueOf(System.currentTimeMillis() / 1000 + expiry) + ":" + tag + ":" + ParameterEncodedAuthorizationToken.toHex(randdata);
+		return Base64.getEncoder().encodeToString(Buffer.buffer(nonce).getBytes());
 	}
 
 }

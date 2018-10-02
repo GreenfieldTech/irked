@@ -1,8 +1,8 @@
 package tech.greenfield.vertx.irked;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +14,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.auth.DigestAuthorizationToken;
+import tech.greenfield.vertx.irked.auth.ParameterEncodedAuthorizationToken;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.helpers.DigestAuthenticate;
 import tech.greenfield.vertx.irked.status.OK;
@@ -126,13 +127,8 @@ public class TestAuthDigest extends TestBase {
 		String[] authparts = authHeader.split(" ",2);
 		if (!"Digest".equals(authparts[0]) || authparts.length != 2)
 			throw new Exception("Unexpected auth type: " + authparts[0]);
-		return Arrays.asList(authparts[1].split(",\\s+")).stream()
-				.map(s -> s.split("=",2))
-				.map(ss -> {
-					if (ss[1].charAt(0) == '"')
-						ss[1] = ss[1].substring(1, ss[1].length()-1);
-					return ss;
-				})
-				.collect(Collectors.toMap(ss -> ss[0], ss -> ss[1]));
+		System.err.println("Authorization header: " + authHeader);
+		return StreamSupport.stream(ParameterEncodedAuthorizationToken.parseParameters(authparts[1]).spliterator(), false)
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 }

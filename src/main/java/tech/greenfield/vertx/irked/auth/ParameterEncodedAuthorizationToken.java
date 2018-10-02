@@ -1,7 +1,7 @@
 package tech.greenfield.vertx.irked.auth;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ParameterEncodedAuthorizationToken extends AuthorizationToken {
 
@@ -13,19 +13,50 @@ public class ParameterEncodedAuthorizationToken extends AuthorizationToken {
 	@Override
 	protected AuthorizationToken update(String type, String token) {
 		super.update(type, token);
-		for (String part : token.split(",\\s+")) {
-			String[] parts = part.split("=",2);
-			if (parts.length != 2)
-				continue;
-			if (parts[1].charAt(0) == '"')
-				parts[1] = parts[1].substring(1, parts[1].length()-1);
-			parameters.put(parts[0], parts[1]);
+		for (Map.Entry<String,String> e : parseParameters(token)) {
+			parameters.put(e.getKey(), e.getValue());
 		}
 		return this;
 	}
 	
+	public static Iterable<Map.Entry<String,String>> parseParameters(String text) {
+		StringTokenizer t = new StringTokenizer(text, " \t\r\n,");
+		return new Iterable<Map.Entry<String,String>>() {
+			@Override
+			public Iterator<Entry<String, String>> iterator() {
+				return new Iterator<Map.Entry<String,String>>() {
+					
+					@Override
+					public Entry<String, String> next() {
+						String next = t.nextToken();
+						String[] parts = next.split("=",2);
+						if (parts.length != 2)
+							return new AbstractMap.SimpleImmutableEntry<String,String>(parts[0], null);
+						while (parts[1].startsWith("\"") && !parts[1].endsWith("\"") && t.hasMoreTokens())
+							parts[1] += " " + t.nextToken();
+						if (parts[1].startsWith("\""))
+							parts[1] = parts[1].substring(1, parts[1].length()-1);
+						return new AbstractMap.SimpleImmutableEntry<String,String>(parts[0], parts[1]);
+					}
+					
+					@Override
+					public boolean hasNext() {
+						return t.hasMoreTokens();
+					}
+				};
+			}
+		};
+	}
+
 	public String getParameter(String param) {
 		return parameters.get(param);
+	}
+	
+	public static String toHex(byte[] data) {
+		StringBuilder sb = new StringBuilder(data.length * 2);
+		for(byte b: data)
+			sb.append(String.format("%02x", b));
+		return sb.toString();
 	}
 	
 }

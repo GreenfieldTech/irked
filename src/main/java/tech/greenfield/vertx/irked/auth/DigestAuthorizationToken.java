@@ -151,7 +151,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	public String hash(Buffer buffer) {
 		if (!isValid())
 			return "";
-		return javax.xml.bind.DatatypeConverter.printHexBinary(digestAlgorithm.digest(buffer.getBytes())).toLowerCase();
+		return toHex(digestAlgorithm.digest(buffer.getBytes())).toLowerCase();
 	}
 	
 	/**
