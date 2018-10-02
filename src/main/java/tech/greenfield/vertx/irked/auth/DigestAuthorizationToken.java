@@ -24,7 +24,27 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	public DigestAuthorizationToken(String token) {
 		update("Digest", token);
 	}
+	
+	public DigestAuthorizationToken(String realm, String method, String uri, String username, String password, 
+			String nonce) {
+		this(realm, method, uri, null, username, password, nonce, null, null, "MD5");
+	}
 
+	public DigestAuthorizationToken(String realm, String method, String uri, String username, String password, 
+			String nonce, String algorithm) {
+		this(realm, method, uri, null, username, password, nonce, null, null, algorithm);
+	}
+
+	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password, 
+			String nonce, String cnonce) {
+		this(realm, method, uri, entityBody, username, password, nonce, cnonce, null, "MD5");
+	}
+	
+	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password, 
+			String nonce, String cnonce, String algorithm) {
+		this(realm, method, uri, entityBody, username, password, nonce, cnonce, null, algorithm);
+	}
+	
 	/**
 	 * Helper constructor to compute a new Digest authorization header
 	 * @param realm Realm received in the Unauthorized response
@@ -35,11 +55,13 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	 * @param algorithm Algorithm to use
 	 */
 	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password, 
-			String nonce, String cnonce, String algorithm) {
+			String nonce, String cnonce, String opaque, String algorithm) {
 		parameters.put("username", username);
 		parameters.put("realm", realm);
 		parameters.put("nonce", nonce);
 		parameters.put("uri", uri);
+		if (Objects.nonNull(opaque))
+			parameters.put("opaque", opaque);
 		if (Objects.nonNull("cnonce")) {
 			parameters.put("qop", Objects.isNull(entityBody) ? "auth" : "auth-int");
 			parameters.put("nc", "00000001");
@@ -102,6 +124,14 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	 */
 	public String getAlgorithm() {
 		return Objects.nonNull(getParameter("algorithm")) ? getParameter("algorithm") : "MD5";
+	}
+	
+	/**
+	 * Retrieve the opaque value entrusted to the client in the challenge
+	 * @return Opaque value if reported by the client, null otherwise
+	 */
+	public String getOpaque() {
+		return getParameter("opaque");
 	}
 	
 	/**

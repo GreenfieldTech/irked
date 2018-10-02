@@ -22,15 +22,27 @@ public class DigestAuthenticate extends Unauthorized {
 			rand = null;
 		}
 	}
+	
+	public DigestAuthenticate(String realm) {
+		this(realm, "");
+	}
 
 	public DigestAuthenticate(String realm, String opaque) {
-		this(realm, generateNonce("", TimeUnit.MINUTES.toMillis(5)), opaque, "MD5", false);
+		this(realm, generateNonce("", TimeUnit.MINUTES.toMillis(5)), opaque, "MD5", true);
+	}
+
+	public DigestAuthenticate(String realm, boolean allowQopIntegrity) {
+		this(realm, generateNonce("", TimeUnit.MINUTES.toSeconds(5)), "", "MD5", allowQopIntegrity);
 	}
 
 	public DigestAuthenticate(String realm, String opaque, boolean allowQopIntegrity) {
 		this(realm, generateNonce("", TimeUnit.MINUTES.toSeconds(5)), opaque, "MD5", allowQopIntegrity);
 	}
 
+	public DigestAuthenticate(String realm, String nonce, String opaque, String algorithm) {
+		this(realm, nonce, opaque, algorithm, true);
+	}
+	
 	public DigestAuthenticate(String realm, String nonce, String opaque, String algorithm, boolean allowQopIntegrity) {
 		addHeader("WWW-Authenticate", "Digest " + Stream.of(
 				"realm=\"" + realm + "\"",
