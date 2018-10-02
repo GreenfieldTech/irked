@@ -28,4 +28,11 @@ public class ParameterEncodedAuthorizationToken extends AuthorizationToken {
 		return parameters.get(param);
 	}
 	
+	public static String toHex(byte[] data) {
+		StringBuilder sb = new StringBuilder(data.length * 2);
+		for(byte b: data)
+			sb.append(String.format("%02x", b));
+		return sb.toString();
+	}
+	
 }

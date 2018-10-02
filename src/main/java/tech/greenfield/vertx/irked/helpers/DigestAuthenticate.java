@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import tech.greenfield.vertx.irked.auth.ParameterEncodedAuthorizationToken;
 import tech.greenfield.vertx.irked.status.Unauthorized;
 
 public class DigestAuthenticate extends Unauthorized {
@@ -56,7 +57,7 @@ public class DigestAuthenticate extends Unauthorized {
 	public static String generateNonce(String tag, long expiry) {
 		byte[] randdata = new byte[8];
 		rand.nextBytes(randdata);
-		String nonce = String.valueOf(System.currentTimeMillis() / 1000 + expiry) + ":" + tag + ":" + javax.xml.bind.DatatypeConverter.printHexBinary(randdata);
+		String nonce = String.valueOf(System.currentTimeMillis() / 1000 + expiry) + ":" + tag + ":" + ParameterEncodedAuthorizationToken.toHex(randdata);
 		try {
 			return Base64.getEncoder().encodeToString(nonce.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) { // shouldn't happen as "UTF-8" is builtin
