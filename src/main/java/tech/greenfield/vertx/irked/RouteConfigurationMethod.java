@@ -91,8 +91,10 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 				Throwable cause = e.getCause();
 				if (cause instanceof UncheckedHttpError)
 					r.fail(HttpError.toHttpError(cause));
-				else
+				else {
+					log.error("Handler method " + method + " threw an unexpected exception",cause);
 					r.fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
+				}
 			} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
 				r.fail(new InternalServerError("Invalid request handler " + this + ": " + e, e));
 			} catch (IllegalArgumentException e) { // shouldn't happen because we checked the type before calling

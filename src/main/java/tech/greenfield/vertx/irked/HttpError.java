@@ -66,12 +66,20 @@ public class HttpError extends Exception {
 	}
 	
 	/**
+	 * Alias to {@link #unchecked()}
+	 * @return unchecked {@link RuntimeException} wrapping this status instance
+	 */
+	public RuntimeException uncheckedWrap() {
+		return new UncheckedHttpError();
+	}
+	
+	/**
 	 * Helper method to make it easier to throw HTTP statuses out of lambdas.
 	 * Outside the lambda you should catch a {@link RuntimeException} and use
 	 * {@link HttpError#unwrap(Throwable))} to get the original exception
-	 * @return {@link RuntimeException} wrapping this status instance
+	 * @return unchecked {@link RuntimeException} wrapping this status instance
 	 */
-	public RuntimeException uncheckedWrap() {
+	public RuntimeException unchecked() {
 		return new UncheckedHttpError();
 	}
 	
