@@ -94,7 +94,8 @@ public class Request extends RoutingContextDecorator {
 	public <T> T getBodyAs(Class<T> type) {
 		String contentType = this.request().getHeader("Content-Type");
 		if (Objects.isNull(contentType)) contentType = "application/json"; // we love JSON
-		switch (contentType) {
+		String[] ctParts = contentType.split(";\\s*");
+		switch (ctParts[0]) {
 			case "application/json":
 				return getBodyAsJson().mapTo(type);
 			default:
