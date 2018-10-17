@@ -3,6 +3,8 @@ package tech.greenfield.vertx.irked;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -223,6 +225,54 @@ public class Request extends RoutingContextDecorator {
 	 */
 	public void sendError(HttpError status) {
 		sendJSON(new JsonObject().put("status", false).put("message", status.getMessage()), status);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with an HTTP OK and a JSON response
+	 * @param object {@link JsonObject} of data to send
+	 */
+	public void send(JsonObject object) {
+		sendJSON(object);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with an HTTP OK and a JSON response
+	 * @param list {@link JsonArray} of a list of data to send
+	 */
+	public void send(JsonArray list) {
+		sendJSON(list);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with an HTTP OK and a text/plain response
+	 * @param content text to send
+	 */
+	public void send(String content) {
+		sendContent(content);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with an HTTP OK and a application/octet-stream response
+	 * @param buffer binary data to send
+	 */
+	public void send(Buffer buffer) {
+		sendContent(buffer, new OK(), "application/octet-stream");
+	}
+	
+	/**
+	 * Helper method to terminate request processing with a non-OK HTTP response with default text
+	 * @param status {@link HttpError} to send
+	 */
+	public void send(HttpError status) {
+		sendError(status);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with an HTTP OK and a JSON response
+	 * @param object custom object to process through Jackson's {@link ObjectMapper} to generate JSON content
+	 */
+	public void send(Object object) {
+		sendObject(object);
 	}
 
 	/**
