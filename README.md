@@ -57,6 +57,7 @@ class Root extends Controller {
 
 	@Get("/")
 	Handler<RoutingContext> index = r -> {
+		// classic Vert.x RoutingContext usage
 		r.response().setStatusCode(200).end("Hello World!");
 	};
 	
@@ -64,7 +65,7 @@ class Root extends Controller {
 	void create(Request r) {
 		// the irked Request object offers some useful helper methods over the
 		// standard Vert.x RoutingContext
-		r.sendError(new BadRequest("Creating resources is not yet implemented"));
+		r.send(new BadRequest("Creating resources is not yet implemented"));
 	}
 }
 ```
@@ -103,7 +104,7 @@ class BlockApi extends Controller {
 	@Get("/:id")
 	Handler<Request> retrieve = r -> {
 		// irked supports vertx-web path parameters 
-		r.sendJSON(loadBlock(r.pathParam("id")));
+		r.send(loadBlock(r.pathParam("id")));
 	};
 }
 ```
@@ -182,7 +183,7 @@ class BlockApi extends Controller {
 
 	@Get("/")
 	Handler<MyRequest> retrieve = r -> {
-		r.sendJSON(getAllBlocksFor(r.getId()));
+		r.send(getAllBlocksFor(r.getId()));
 	};
 }
 ```
@@ -220,7 +221,7 @@ class Root extends Controller {
 		store(r.pathParam("id"), r.getBodyAsJson(), f.completer());
 		f.setHandler(res -> { // once the operation completes
 			if (res.failed()) // if it failed
-				r.sendError(new InternalServerError(res.cause())); // send an 500 error
+				r.send(new InternalServerError(res.cause())); // send an 500 error
 			else // but if it succeeds
 				r.next(); // we don't send a response - we stop handling the request and let
 				// the next handler send the response
@@ -230,7 +231,7 @@ class Root extends Controller {
 	@Put("/")
 	@Get("/")
 	WebHandler retrieve = r -> {
-		r.sendJSON(data);
+		r.send(data);
 	};
 
 }
@@ -290,9 +291,34 @@ annotation. Specify it like URI annotations with the expected request content ty
 @Consumes("multipart/form-data")
 WebHandler fileUpload = r -> {
 	for (FileUpload f : r.fileUploads()) saveFile(f);
-	r.sendContent("Uploaded!");
+	r.send("Uploaded!");
 };
 ```
+
+### Async Processing
+
+Irked contains a few helpers for using Java 8's Promise API (`CompletableFuture`) to asynchronously process
+requests, most notable `Request.send()` to send responses and `Request.handleFailure` to forward
+"exceptional completion" Exceptions to the failure handlers.
+
+#### An Async Processing Sample
+
+```
+CompletableFuture<List<PojoType>> loadSomeRecords() {
+	// ... access a database asynchronously to load some POJOs
+}
+
+@Get("/")
+WebHandler catalog = r -> // we don't even need curly braces
+	loadSomeRecords() // fetch records
+	.thenApply(l -> l.stream() // stream proces loaded records
+			.map(JsonObject::mapFrom) // bean map each record to a JSON object
+			.collect(JsonArray::new, JsonArray::add, JsonArray::addAll)) // collect everything to a JSON array
+	.thenAccept(r::send) // send the list to the client
+	.exceptionally(r::handleFailure); // capture any exceptions and forward to the failure handler
+```
+
+You can review the Irked unit test `TestAsyncSending.java` for more examples.
 
 ### Initializing
 
@@ -437,14 +463,14 @@ a 404 Not Found error:
 @Get("/:id")
 Handler<Request> retrieve = r -> {
 	if (!existsItem(r.pathParam("id")))
-		throw new NotFound("No such item!").uncheckedWrap();
-	r.sendJSON(load(r.pathParam("id")));
+		throw new NotFound("No such item!").unchecked();
+	r.send(load(r.pathParam("id")));
 }
 ```
 
-The `HttpError.uncheckedWrap()` method wraps the business logic's HTTP status exception with a
+The `HttpError.unchecked()` method wraps the business logic's HTTP status exception with a
 `RuntimeException` so it can jump out of lambdas and other non-declaring code easily without
-boiler-plate exception handling. The Vert.X web request handling glue will pick up the exception and 
+boiler-plate exception handling. The Irked request handling glue will pick up the exception and 
 deliver it to an appropriate `@OnFail` handler.
 
 Then the `@OnFail` handler can be configured to automatically forward this status to the client:
@@ -473,7 +499,7 @@ WebHandler failureHandler = Request.failureHandler();
 ##### "OK" Exceptions
 
 By the way, it is possible to use the throwable `HttpError` types to `throw` any kind of HTTP status,
-including a "200 OK", like this: `throw new OK().uncheckedWrap()`.  
+including a "200 OK", like this: `throw new OK().unchecked()`.  
 
 #### Specify Custom Headers
 

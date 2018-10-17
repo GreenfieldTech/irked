@@ -53,7 +53,7 @@ public class RouteConfigurationField extends RouteConfiguration {
 					log.warn("Exception occured on a fail route, ignoring",cause);
 					return;
 				}
-				if (cause instanceof UncheckedHttpError)
+				if (cause instanceof UncheckedHttpError || cause instanceof HttpError)
 					r.fail(HttpError.toHttpError(cause));
 				else
 					r.fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
