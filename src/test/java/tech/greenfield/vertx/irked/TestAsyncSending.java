@@ -1,5 +1,6 @@
 package tech.greenfield.vertx.irked;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
@@ -53,9 +54,11 @@ public class TestAsyncSending extends TestBase {
 			.exceptionally(r::handleFailure);
 		};
 		
+		@SuppressWarnings("serial")
 		@Get("/sendjsonl")
 		public void jsonl(Request r) {
-			CompletableFuture.completedFuture(new JsonArray().add(1).add(2))
+			CompletableFuture.completedFuture(new ArrayList<Integer>() {{ add(1); add(2); }})
+			.thenApply(l -> l.stream().collect(JsonArray::new, JsonArray::add, JsonArray::addAll))
 			.thenAccept(r::send)
 			.exceptionally(r::handleFailure);
 		};
