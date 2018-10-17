@@ -100,8 +100,8 @@ public class TestAsyncSending extends TestBase {
 				} catch (Exception e) {
 					context.fail(e);
 				}
+				async.complete();
 			});
-			async.complete();
 		}).end();
 	}
 
@@ -117,8 +117,8 @@ public class TestAsyncSending extends TestBase {
 				} catch (Exception e) {
 					context.fail(e);
 				}
+				async.complete();
 			});
-			async.complete();
 		}).end();
 	}
 
@@ -135,8 +135,8 @@ public class TestAsyncSending extends TestBase {
 				} catch (Exception e) {
 					context.fail(e);
 				}
+				async.complete();
 			});
-			async.complete();
 		}).end();
 	}
 
@@ -154,8 +154,8 @@ public class TestAsyncSending extends TestBase {
 				} catch (Exception e) {
 					context.fail(e);
 				}
+				async.complete();
 			});
-			async.complete();
 		}).end();
 	}
 
@@ -173,8 +173,8 @@ public class TestAsyncSending extends TestBase {
 				} catch (Exception e) {
 					context.fail(e);
 				}
+				async.complete();
 			});
-			async.complete();
 		}).end();
 	}
 
@@ -189,8 +189,8 @@ public class TestAsyncSending extends TestBase {
 				} catch (Exception e) {
 					context.fail(e);
 				}
+				async.complete();
 			});
-			async.complete();
 		}).end();
 	}
 
@@ -202,12 +202,14 @@ public class TestAsyncSending extends TestBase {
 			context.assertEquals("custom", res.getHeader("X-Custom"), "Request failed");
 			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				try {
-					context.assertEquals(0, body.length());
+					context.assertNotNull(body.toJsonObject());
+					context.assertEquals(true, body.toJsonObject().getBoolean("status"));
+					context.assertEquals("Still OK", body.toJsonObject().getString("message"));
 				} catch (Exception e) {
 					context.fail(e);
 				}
+				async.complete();
 			});
-			async.complete();
 		}).end();
 	}
 
