@@ -89,7 +89,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 					return;
 				}
 				Throwable cause = e.getCause();
-				if (cause instanceof UncheckedHttpError)
+				if (cause instanceof UncheckedHttpError || cause instanceof HttpError)
 					r.fail(HttpError.toHttpError(cause));
 				else {
 					log.error("Handler method " + method + " threw an unexpected exception",cause);
