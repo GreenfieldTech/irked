@@ -45,20 +45,20 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-web</artifactId>
-			<version>[3,3.5.999)</version>
+			<version>[3.5,3.5.999)</version>
 		</dependency>
 
 		<!--Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>[4,)</version>
+			<version>[4.9,)</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-unit</artifactId>
-			<version>[3,)</version>
+			<version>[3.5,)</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -68,7 +68,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.6.1</version>
+				<version>3.8.0</version>
 				<executions>
 					<execution>
 						<id>generators</id>
