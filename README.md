@@ -57,6 +57,7 @@ class Root extends Controller {
 
 	@Get("/")
 	Handler<RoutingContext> index = r -> {
+		// classic Vert.x RoutingContext usage
 		r.response().setStatusCode(200).end("Hello World!");
 	};
 	
@@ -293,6 +294,31 @@ WebHandler fileUpload = r -> {
 	r.send("Uploaded!");
 };
 ```
+
+### Async Processing
+
+Irked contains a few helpers for using Java 8's Promise API (`CompletableFuture`) to asynchronously process
+requests, most notable `Request.send()` to send responses and `Request.handleFailure` to forward
+"exceptional completion" Exceptions to the failure handlers.
+
+#### An Async Processing Sample
+
+```
+CompletableFuture<List<PojoType>> loadSomeRecords() {
+	// ... access a database asynchronously to load some POJOs
+}
+
+@Get("/")
+WebHandler catalog = r -> // we don't even need curly braces
+	loadSomeRecords() // fetch records
+	.thenApply(l -> l.stream() // stream proces loaded records
+			.map(JsonObject::mapFrom) // bean map each record to a JSON object
+			.collect(JsonArray::new, JsonArray::add, JsonArray::addAll)) // collect everything to a JSON array
+	.thenAccept(r::send) // send the list to the client
+	.exceptionally(r::handleFailure); // capture any exceptions and forward to the failure handler
+```
+
+You can review the Irked unit test `TestAsyncSending.java` for more examples.
 
 ### Initializing
 
