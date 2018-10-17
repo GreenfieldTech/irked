@@ -224,7 +224,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param status An HttpError object representing the HTTP status to be sent
 	 */
 	public void sendError(HttpError status) {
-		sendJSON(new JsonObject().put("status", false).put("message", status.getMessage()), status);
+		sendJSON(new JsonObject().put("status", status.getStatusCode() / 100 == 2).put("message", status.getMessage()), status);
 	}
 	
 	/**
