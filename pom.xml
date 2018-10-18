@@ -6,7 +6,7 @@
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
 
-	<version>1.14.0</version>
+	<version>1.14.1<version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-web</artifactId>
-			<version>[3.5,3.5.999)</version>
+			<version>[3,3.5.999)</version>
 		</dependency>
 
 		<!--Test dependencies -->
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-unit</artifactId>
-			<version>[3.5,)</version>
+			<version>[3,)</version>
 			<scope>test</scope>
 		</dependency>
 
