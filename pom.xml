@@ -45,7 +45,9 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-web</artifactId>
-			<version>[3.6,)</version>
+==== BASE ====
+			<version>[3.5,3.5.999)</version>
+==== BASE ====
 		</dependency>
 
 		<!--Test dependencies -->
@@ -58,7 +60,9 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-unit</artifactId>
-			<version>[3.6,)</version>
+==== BASE ====
+			<version>[3.5,)</version>
+==== BASE ====
 			<scope>test</scope>
 		</dependency>
 
