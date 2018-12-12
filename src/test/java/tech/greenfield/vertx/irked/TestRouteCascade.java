@@ -40,6 +40,17 @@ public class TestRouteCascade extends TestBase {
 		WebHandler retrieve = r -> {
 			r.sendJSON(data);
 		};
+		
+		@Get("/foo")
+		WebHandler foo1 = r -> {
+			r.send("ok");
+		};
+
+		@Get("/foo")
+		WebHandler foo2 = r -> {
+			r.send("shouldn't happen");
+		};
+
 	}
 
 	@Test
@@ -59,4 +70,21 @@ public class TestRouteCascade extends TestBase {
 		}).end(new JsonObject().put(fieldName, newVal).encode());
 	}
 
+	@Test
+	public void testNotCascadingFieldHandlers(TestContext context) {
+		deployController(new TestControllerCascadeField(), context.asyncAssertSuccess(s -> executeTestNoCascade(context)));
+	}
+
+	private void executeTestNoCascade(TestContext context) {
+		Async async = context.async();
+		getClient().get(port, "localhost", "/foo").exceptionHandler(t -> context.fail(t)).handler(r -> {
+			context.assertEquals(200, r.statusCode(), "Failed to call GET /foo");
+			r.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
+				context.assertEquals("ok", body.toString());
+				async.complete();
+			});
+		}).end();
+	}
+
+	
 }

@@ -31,10 +31,6 @@ public class Router implements io.vertx.ext.web.Router{
 		this.router = io.vertx.ext.web.Router.router(this.vertx);
 	}
 	
-	public void accept(HttpServerRequest request) {
-		router.accept(request);
-	}
-	
 	public Router with(Controller api) throws InvalidRouteConfiguration {
 		return with(api, "/");
 	}
@@ -251,6 +247,10 @@ public class Router implements io.vertx.ext.web.Router{
 
 	public void handleFailure(RoutingContext context) {
 		router.handleFailure(context);
+	}
+
+	public void handle(HttpServerRequest event) {
+		router.handle(event);
 	}
 
 }

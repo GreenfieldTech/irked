@@ -194,4 +194,8 @@ public class WebSocketConnection implements ServerWebSocket {
 	public boolean isSsl() {
 		return socket.isSsl();
 	}
+
+	public ServerWebSocket fetch(long amount) {
+		return socket.fetch(amount);
+	}
 }
