@@ -1,5 +1,7 @@
 package tech.greenfield.vertx.irked;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Test;
 
 import io.vertx.core.json.JsonObject;
@@ -13,6 +15,8 @@ import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 
 public class TestRouteCascade extends TestBase {
+	
+	AtomicInteger failedTests = new AtomicInteger(0);
 
 	String fieldName = "value";
 
@@ -49,6 +53,7 @@ public class TestRouteCascade extends TestBase {
 		@Get("/foo")
 		WebHandler foo2 = r -> {
 			r.send("shouldn't happen");
+			failedTests.incrementAndGet();
 		};
 
 	}
@@ -81,6 +86,7 @@ public class TestRouteCascade extends TestBase {
 			context.assertEquals(200, r.statusCode(), "Failed to call GET /foo");
 			r.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
 				context.assertEquals("ok", body.toString());
+				context.assertEquals(0, failedTests.get());
 				async.complete();
 			});
 		}).end();
