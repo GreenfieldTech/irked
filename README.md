@@ -331,7 +331,7 @@ asking Irked to set up the request handler.
 ```
 Future<HttpServer> async = Future.future();
 vertx.createHttpServer()
-		.requestHandler(Irked.router(getVertx()).with(new com.example.api.Root())::accept)
+		.requestHandler(Irked.router(getVertx()).with(new com.example.api.Root()))
 		.listen(port, async);
 ```
 
