@@ -6,7 +6,7 @@
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
 
-	<version>1.15.1</version>
+	<version>1.15.2</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -153,6 +153,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
