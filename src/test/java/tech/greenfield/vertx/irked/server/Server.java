@@ -21,7 +21,7 @@ public class Server extends AbstractVerticle {
 	public void start(Future<Void> startFuture) throws Exception {
 		Future<HttpServer> async = Future.future();
 		(server = vertx.createHttpServer(getHttpServerOptions())).requestHandler(
-				Irked.router(vertx).configure(test).configReport()::accept)
+				Irked.router(vertx).configure(test).configReport())
 				.listen(config().getInteger("port"), async);
 		async.map((Void) null).setHandler(startFuture);
 	}

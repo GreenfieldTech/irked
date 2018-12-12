@@ -18,7 +18,7 @@ public class Irked {
 		Router router = new Router(vertx);
 		for (Controller api : apis)
 			router.configure(api);
-		return router::accept;
+		return router;
 	}
 	
 	public static Router router(Vertx vertx) {

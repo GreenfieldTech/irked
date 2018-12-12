@@ -21,7 +21,7 @@ public class App extends AbstractVerticle {
 						throw new Redirect("/2" + r.request().uri()).uncheckedWrap(); 
 					};
 				});
-		vertx.createHttpServer(new HttpServerOptions()).requestHandler(router::accept)
+		vertx.createHttpServer(new HttpServerOptions()).requestHandler(router)
 				.listen(config().getInteger("port", 8080));
 	}
 
