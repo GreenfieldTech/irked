@@ -76,7 +76,7 @@ public class HttpError extends Exception {
 	/**
 	 * Helper method to make it easier to throw HTTP statuses out of lambdas.
 	 * Outside the lambda you should catch a {@link RuntimeException} and use
-	 * {@link HttpError#unwrap(Throwable))} to get the original exception
+	 * {@link HttpError#unwrap(Throwable)} to get the original exception
 	 * @return unchecked {@link RuntimeException} wrapping this status instance
 	 */
 	public RuntimeException unchecked() {
@@ -90,9 +90,13 @@ public class HttpError extends Exception {
 	 * @return the first non RuntimeException found
 	 */
 	public static Throwable unwrap(Throwable t) {
-		while (t instanceof RuntimeException && Objects.nonNull(t.getCause()))
+		Throwable orig = t;
+		while (!(t instanceof HttpError)) {
+			if (Objects.isNull(t.getCause()))
+				return orig; // can't find HTTP Error
 			t = t.getCause();
-		return t;
+		}
+		return t; // must be an HTTP Error
 	}
 	
 	/**

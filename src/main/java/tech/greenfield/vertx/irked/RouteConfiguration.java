@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
 import java.util.stream.Collectors;
 
 import io.vertx.core.Handler;
@@ -15,6 +16,7 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.TimeoutHandler;
 import io.vertx.ext.web.impl.BlockingHandlerDecorator;
+import tech.greenfield.vertx.irked.HttpError.UncheckedHttpError;
 import tech.greenfield.vertx.irked.Router.RoutingMethod;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
@@ -172,4 +174,31 @@ public abstract class RouteConfiguration {
 	void remove() {
 		routes.forEach(Route::remove);
 	}
+	
+	/**
+	 * Handling logic for user exceptions thrown from a handler invocation.
+	 * Handler developers can throw an Irked {@link HttpError} exception to propagate an HTTP response
+	 * to the failure handler, or an unexpected exception can be thrown which would mean a server error.
+	 * Because {@link HttpError}s may be wrapped by all kinds of wrappers, from Irked {@link UncheckedHttpError} to
+	 * Jackson's JsonMappingException, we try hard to extract {@link HttpError}s wherever we find them - to make
+	 * the fail handler's developer's life easier.
+	 * 
+	 * @param r routing context on which this handler was called
+	 * @param cause User exception thrown from the handler
+	 * @param invocationDescription Description of the invocation endpoint for logging
+	 */
+	protected void handleUserException(RoutingContext r, Throwable cause, String invocationDescription) {
+		if (r.failed()) {
+			log.warn("Exception occured on a fail route, ignoring",cause);
+			return;
+		}
+		if (cause instanceof UncheckedHttpError || cause instanceof HttpError || HttpError.unwrap(cause) instanceof HttpError)
+			r.fail(HttpError.toHttpError(cause));
+		else {
+			log.error("Handler " + invocationDescription + " threw an unexpected exception",cause);
+			r.fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
+		}
+	}
+
+
 }

@@ -16,11 +16,10 @@ import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
+public class Router implements io.vertx.ext.web.Router {
 
-public class Router implements io.vertx.ext.web.Router{
-	
 	static Logger log = LoggerFactory.getLogger(Router.class);
-	
+
 	private Vertx vertx;
 	private io.vertx.ext.web.Router router;
 
@@ -30,21 +29,21 @@ public class Router implements io.vertx.ext.web.Router{
 		this.vertx = vertx;
 		this.router = io.vertx.ext.web.Router.router(this.vertx);
 	}
-	
+
 	public Router with(Controller api) throws InvalidRouteConfiguration {
 		return with(api, "/");
 	}
-	
+
 	public Router with(Controller api, String path) throws InvalidRouteConfiguration {
 		configure(api, path);
 		return this;
 	}
-	
+
 	public Router remove(Controller api) {
 		api.remove();
 		return this;
 	}
-	
+
 	public Router configReport() {
 		routePaths.stream().sorted().forEach(p -> System.out.println(p));
 		return this;
@@ -59,11 +58,12 @@ public class Router implements io.vertx.ext.web.Router{
 		return this;
 	}
 
-	private void configure(Controller api, String prefix, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
+	private void configure(Controller api, String prefix, RequestWrapper requestWrapper)
+			throws InvalidRouteConfiguration {
 		// clean up mount path
 		if (prefix.endsWith("/"))
 			prefix = prefix.substring(0, prefix.length() - 1);
-		
+
 		for (RouteConfiguration f : api.getRoutes()) {
 			tryConfigureRoute(router::route, prefix, f, Endpoint.class, requestWrapper);
 			tryConfigureRoute(router::post, prefix, f, Post.class, requestWrapper);
@@ -76,20 +76,23 @@ public class Router implements io.vertx.ext.web.Router{
 		}
 	}
 
-	private <T extends Annotation> void tryConfigureRoute(RoutingMethod method, 
-			String prefix, RouteConfiguration conf, Class<T> anot, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
+	private <T extends Annotation> void tryConfigureRoute(RoutingMethod method, String prefix, RouteConfiguration conf,
+			Class<T> anot, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
 		if (conf.isController()) {
-			Controller ctr = Objects.requireNonNull(conf.getController(), "Sub-Controller for " + conf + " is not set!");
+			Controller ctr = Objects.requireNonNull(conf.getController(),
+					"Sub-Controller for " + conf + " is not set!");
 			for (String path : conf.pathsForAnnotation(prefix, anot).collect(Collectors.toList()))
 				configure(ctr, path, new RequestWrapper(ctr, requestWrapper));
 			return;
 		}
-		
+
 		conf.buildRoutesFor(prefix, anot, method, requestWrapper).forEach(routePaths::add);
 	}
-	
+
 	/**
-	 * Helper interface for {@link Router#tryConfigureRoute(RoutingMethod, Field, Class)}
+	 * Helper interface for
+	 * {@link Router#tryConfigureRoute(RoutingMethod, Field, Class)}
+	 * 
 	 * @author odeda
 	 */
 	@FunctionalInterface
@@ -237,6 +240,7 @@ public class Router implements io.vertx.ext.web.Router{
 		return router.mountSubRouter(mountPoint, subRouter);
 	}
 
+	@Deprecated
 	public io.vertx.ext.web.Router exceptionHandler(Handler<Throwable> exceptionHandler) {
 		return router.exceptionHandler(exceptionHandler);
 	}
@@ -251,6 +255,12 @@ public class Router implements io.vertx.ext.web.Router{
 
 	public void handle(HttpServerRequest event) {
 		router.handle(event);
+	}
+
+	@Override
+	public io.vertx.ext.web.Router errorHandler(int statusCode, Handler<RoutingContext> errorHandler) {
+		router.errorHandler(statusCode, errorHandler);
+		return this;
 	}
 
 }

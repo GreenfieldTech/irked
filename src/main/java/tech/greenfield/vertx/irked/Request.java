@@ -34,6 +34,11 @@ public class Request extends RoutingContextDecorator {
 		super(outerContext.currentRoute(), outerContext);
 		this.outerContext = outerContext;
 	}
+	
+	@Override
+	public void next() {
+		this.outerContext.next();
+	}
 
 	@Override
 	public void fail(int statusCode) { 
