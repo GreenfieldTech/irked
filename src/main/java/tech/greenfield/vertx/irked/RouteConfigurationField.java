@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import tech.greenfield.vertx.irked.HttpError.UncheckedHttpError;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
@@ -49,14 +48,7 @@ public class RouteConfigurationField extends RouteConfiguration {
 			try {
 				handler.handle(r);
 			} catch (Throwable cause) {
-				if (r.failed()) {
-					log.warn("Exception occured on a fail route, ignoring",cause);
-					return;
-				}
-				if (cause instanceof UncheckedHttpError || cause instanceof HttpError)
-					r.fail(HttpError.toHttpError(cause));
-				else
-					r.fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
+				handleUserException(r, cause, "field " + field);
 			}
 		};
 	}
