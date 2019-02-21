@@ -90,9 +90,13 @@ public class HttpError extends Exception {
 	 * @return the first non RuntimeException found
 	 */
 	public static Throwable unwrap(Throwable t) {
-		while (t instanceof RuntimeException && Objects.nonNull(t.getCause()))
+		Throwable orig = t;
+		while (!(t instanceof HttpError)) {
+			if (Objects.isNull(t.getCause()))
+				return orig; // can't find HTTP Error
 			t = t.getCause();
-		return t;
+		}
+		return t; // must be an HTTP Error
 	}
 	
 	/**
