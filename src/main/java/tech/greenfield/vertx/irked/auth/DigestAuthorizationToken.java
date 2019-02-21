@@ -175,9 +175,8 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	 * and optional body.
 	 * 
 	 * @param password Password to check against the digest response
-	 * @param method HTTP method used in the request
-	 * @param entityBody Optional entity body to verify integrity with. If the token has set "qop" to "auth-int"
-	 * (as can be verified by {@link #qopIntegrityRequested()}, and an entity body was not provided, this method
+	 * @param req HTTP request to verify integrity with. If the token has set "qop" to "auth-int"
+	 * (as can be verified by {@link #qopIntegrityRequested()}, and a body is not provided in the request, this method
 	 * will return false. 
 	 * @return Whether the response value specified in the token is correct according to RFC7616 
 	 */
