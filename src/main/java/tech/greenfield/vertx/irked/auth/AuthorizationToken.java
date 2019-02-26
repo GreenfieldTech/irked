@@ -45,4 +45,8 @@ public class AuthorizationToken {
 	public String getType() {
 		return type;
 	}
+	
+	public String toString() {
+		return type + " " + token;
+	}
 }
