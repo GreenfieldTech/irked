@@ -4,6 +4,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.security.cert.X509Certificate;
 
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
@@ -197,5 +198,10 @@ public class WebSocketConnection implements ServerWebSocket {
 
 	public ServerWebSocket fetch(long amount) {
 		return socket.fetch(amount);
+	}
+
+	@Override
+	public void setHandshake(Future<Integer> future) {
+		socket.setHandshake(future);
 	}
 }
