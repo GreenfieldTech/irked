@@ -76,11 +76,12 @@ public class Request extends RoutingContextDecorator {
 	 * Helper failure handler for CompletableFuture users.
 	 * Use in the middle an async chain to succinctly propagate exceptions, or
 	 * success values as thus: <code>.whenComplete(req::handlePossibleFailure)</code>.
-	 * This method will call {@link Request#fail(Throwable)} if a failure occured,
+	 * This method will call {@link Request#fail(Throwable)} if a failure occurred,
 	 * after unwrapping {@link RuntimeException}s as needed. It will also pass on
 	 * the success value (or null if there was a failure) for the next async
 	 * element. Subsequent code can check whether a failure was propagated
 	 * by calling {@link #failed()}
+	 * @param successValue successful completion value to return in case no failure occurred
 	 * @param throwable A {@link Throwable} error to fail on
 	 * @return null
 	 */
