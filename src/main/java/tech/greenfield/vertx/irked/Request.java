@@ -76,11 +76,12 @@ public class Request extends RoutingContextDecorator {
 	 * Helper failure handler for CompletableFuture users.
 	 * Use in the middle an async chain to succinctly propagate exceptions, or
 	 * success values as thus: <code>.whenComplete(req::handlePossibleFailure)</code>.
-	 * This method will call {@link Request#fail(Throwable)} if a failure occured,
+	 * This method will call {@link Request#fail(Throwable)} if a failure occurred,
 	 * after unwrapping {@link RuntimeException}s as needed. It will also pass on
 	 * the success value (or null if there was a failure) for the next async
 	 * element. Subsequent code can check whether a failure was propagated
 	 * by calling {@link #failed()}
+	 * @param successValue successful completion value to return in case no failure occurred
 	 * @param throwable A {@link Throwable} error to fail on
 	 * @return null
 	 */
@@ -287,7 +288,7 @@ public class Request extends RoutingContextDecorator {
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and an application/json
 	 * response containing a stream of {@link io.vertx.core.json.Json}-encoded objects.
-	 * Please note that the response will be buffered in memory using a {@link io.vertx.core.JsonArray}
+	 * Please note that the response will be buffered in memory using a {@link io.vertx.core.json.JsonArray}
 	 * based collector.
 	 * @param <G> type of objects in the stream
 	 * @param stream Stream to convert to a JSON array for sending
