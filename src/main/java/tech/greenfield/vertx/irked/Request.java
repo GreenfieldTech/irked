@@ -273,10 +273,24 @@ public class Request extends RoutingContextDecorator {
 		sendError(status);
 	}
 	
+	/**
+	 * Helper method to terminate request processing with an HTTP OK and an application/json
+	 * response containing a list of Jackson-mappable objects
+	 * @param <G> type of objects in the list
+	 * @param list List to convert to a JSON array for sending
+	 */
 	public <G> void sendList(List<G> list) {
 		sendStream(list.stream());
 	}
 	
+	/**
+	 * Helper method to terminate request processing with an HTTP OK and an application/json
+	 * response containing a stream of Jackson-mappable objects.
+	 * Please note that the response will be buffered in memory using a {@link io.vertx.core.JsonArray}
+	 * based collector.
+	 * @param <G> type of objects in the stream
+	 * @param stream Stream to convert to a JSON array for sending
+	 */
 	public <G> void sendStream(Stream<G> stream) {
 		sendJSON(stream.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 	}
