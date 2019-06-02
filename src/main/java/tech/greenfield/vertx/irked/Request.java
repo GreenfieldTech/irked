@@ -2,6 +2,7 @@ package tech.greenfield.vertx.irked;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -272,12 +273,24 @@ public class Request extends RoutingContextDecorator {
 		sendError(status);
 	}
 	
+	public <G> void sendList(List<G> list) {
+		sendStream(list.stream());
+	}
+	
+	public <G> void sendStream(Stream<G> stream) {
+		sendJSON(stream.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+	}
+	
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and a JSON response
 	 * @param object custom object to process through Jackson's {@link ObjectMapper} to generate JSON content
 	 */
+	@SuppressWarnings("unchecked")
 	public void send(Object object) {
-		sendObject(object);
+		if (object instanceof List)
+			sendList((List<Object>)object);
+		else
+			sendObject(object);
 	}
 
 	/**
