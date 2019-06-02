@@ -122,7 +122,7 @@ public class WebSocketMessage implements Buffer {
 
 	/**
 	 * @param enc String encoding to use
-	 * @return
+	 * @return a {@code String} representation of the Buffer with the encoding specified by {@code enc}
 	 * @see io.vertx.core.buffer.Buffer#toString(java.nio.charset.Charset)
 	 */
 	public String toString(Charset enc) {

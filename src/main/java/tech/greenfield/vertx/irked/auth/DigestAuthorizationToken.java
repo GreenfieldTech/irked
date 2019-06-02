@@ -48,10 +48,14 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	/**
 	 * Helper constructor to compute a new Digest authorization header
 	 * @param realm Realm received in the Unauthorized response
+	 * @param method HTTP method to authorize
 	 * @param uri URI of the request
+	 * @param entityBody HTTP body content to authorize
 	 * @param username Username to authenticate with
 	 * @param password password to authentication with
 	 * @param nonce Nonce received in the Unauthorized response
+	 * @param cnonce cnonce received in the unauthorized response
+	 * @param opaque whether the authorized content is opaque (as per the RFC)
 	 * @param algorithm Algorithm to use
 	 */
 	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password, 
@@ -112,7 +116,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	 * 
 	 * This method currently only checks that the specified digest algorithm is supported by the JVM.
 	 * If you want to restrict the algorithm to only specific ones, use {@link #getAlgorithm()} to check.
-	 * @return
+	 * @return Whether the token is valid
 	 */
 	public boolean isValid() {
 		return Objects.nonNull(digestAlgorithm);

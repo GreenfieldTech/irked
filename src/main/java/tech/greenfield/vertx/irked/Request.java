@@ -287,7 +287,7 @@ public class Request extends RoutingContextDecorator {
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and an application/json
 	 * response containing a stream of {@link io.vertx.core.json.Json}-encoded objects.
-	 * Please note that the response will be buffered in memory using a {@link io.vertx.core.JsonArray}
+	 * Please note that the response will be buffered in memory using a {@link io.vertx.core.json.JsonArray}
 	 * based collector.
 	 * @param <G> type of objects in the stream
 	 * @param stream Stream to convert to a JSON array for sending
