@@ -2,12 +2,14 @@ package tech.greenfield.vertx.irked;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -273,11 +275,39 @@ public class Request extends RoutingContextDecorator {
 	}
 	
 	/**
+	 * Helper method to terminate request processing with an HTTP OK and an application/json
+	 * response containing a list of {@link io.vertx.core.json.Json}-encoded objects
+	 * @param <G> type of objects in the list
+	 * @param list List to convert to a JSON array for sending
+	 */
+	public <G> void sendList(List<G> list) {
+		sendStream(list.stream());
+	}
+	
+	/**
+	 * Helper method to terminate request processing with an HTTP OK and an application/json
+	 * response containing a stream of {@link io.vertx.core.json.Json}-encoded objects.
+	 * Please note that the response will be buffered in memory using a {@link io.vertx.core.JsonArray}
+	 * based collector.
+	 * @param <G> type of objects in the stream
+	 * @param stream Stream to convert to a JSON array for sending
+	 */
+	public <G> void sendStream(Stream<G> stream) {
+		sendJSON(stream.map(Json::encode).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+	}
+	
+	/**
 	 * Helper method to terminate request processing with an HTTP OK and a JSON response
 	 * @param object custom object to process through Jackson's {@link ObjectMapper} to generate JSON content
 	 */
+	@SuppressWarnings("unchecked")
 	public void send(Object object) {
-		sendObject(object);
+		if (object instanceof List)
+			sendList((List<Object>)object);
+		else if (object instanceof Stream)
+			sendStream((Stream<Object>)object);
+		else
+			sendObject(object);
 	}
 
 	/**

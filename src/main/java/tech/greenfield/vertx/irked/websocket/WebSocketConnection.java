@@ -4,6 +4,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.security.cert.X509Certificate;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -144,10 +145,6 @@ public class WebSocketConnection implements ServerWebSocket {
 		return socket.peerCertificateChain();
 	}
 
-	public WebSocketBase writeTextMessage(String text) {
-		return socket.writeTextMessage(text);
-	}
-
 	public WebSocketBase writePing(Buffer data) {
 		return socket.writePing(data);
 	}
@@ -203,5 +200,60 @@ public class WebSocketConnection implements ServerWebSocket {
 	@Override
 	public void setHandshake(Future<Integer> future) {
 		socket.setHandshake(future);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public void end(Handler<AsyncResult<Void>> handler) {
+		socket.end(handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public void close(Handler<AsyncResult<Void>> handler) {
+		socket.close(handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public void close(short statusCode, Handler<AsyncResult<Void>> handler) {
+		socket.close(statusCode, handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public void close(short statusCode, String reason, Handler<AsyncResult<Void>> handler) {
+		socket.close(statusCode, reason, handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public ServerWebSocket write(Buffer data, Handler<AsyncResult<Void>> handler) {
+		return socket.write(data, handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public ServerWebSocket writeFrame(WebSocketFrame frame, Handler<AsyncResult<Void>> handler) {
+		return socket.writeFrame(frame, handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public ServerWebSocket writeFinalTextFrame(String text, Handler<AsyncResult<Void>> handler) {
+		return socket.writeFinalTextFrame(text, handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public ServerWebSocket writeFinalBinaryFrame(Buffer data, Handler<AsyncResult<Void>> handler) {
+		return socket.writeFinalBinaryFrame(data, handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public ServerWebSocket writeBinaryMessage(Buffer data, Handler<AsyncResult<Void>> handler) {
+		return socket.writeBinaryMessage(data, handler);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public ServerWebSocket writeTextMessage(String text) {
+		return socket.writeTextMessage(text);
+	}
+
+	// for support 3.6, this is disabled @Override
+	public ServerWebSocket writeTextMessage(String text, Handler<AsyncResult<Void>> handler) {
+		return socket.writeTextMessage(text, handler);
 	}
 }
