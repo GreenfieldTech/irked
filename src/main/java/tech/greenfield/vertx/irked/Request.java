@@ -9,9 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.*;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
@@ -294,7 +292,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param stream Stream to convert to a JSON array for sending
 	 */
 	public <G> void sendStream(Stream<G> stream) {
-		sendJSON(stream.map(Json::encode).map(Json::decodeValue).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+		sendJSON(stream.map(this::encodeToJsonType).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 	}
 	
 	/**
@@ -348,6 +346,35 @@ public class Request extends RoutingContextDecorator {
 	 */
 	public AuthorizationToken getAuthorization() {
 		return AuthorizationToken.parse(request().getHeader("Authorization"));
+	}
+
+	/**
+	 * Helper method to encode arbitrary types to a type that Vert.x 
+	 * @{link io.vertx.json.JsonObject} and @{link io.vertx.json.JsonArray}
+	 * will accept.
+	 * 
+	 * This implementation is based on encoding to a string and then reparsing
+	 * using a copy of Vert.x 3.7 <code>Json.decodeValue()</code> implementation.
+	 * We are using a copy because Irked supports Vert.x versions older than 3.7
+	 * @param value object to recode to a valid JSON type
+	 * @return a type that will be accepted by JsonArray.add();
+	 */
+	private Object encodeToJsonType(Object value) {
+		try {
+			value = Json.mapper.readValue(Json.encode(value), Object.class);
+			if (value instanceof List) {
+				@SuppressWarnings("rawtypes")
+				List list = (List) value;
+				return new JsonArray(list);
+			} else if (value instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> map = (Map<String, Object>) value;
+				return new JsonObject(map);
+			}
+			return value;
+		} catch (Exception e) {
+			throw new DecodeException("Failed to decode: " + e.getMessage());
+		}
 	}
 
 }
