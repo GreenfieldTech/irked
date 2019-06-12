@@ -294,7 +294,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param stream Stream to convert to a JSON array for sending
 	 */
 	public <G> void sendStream(Stream<G> stream) {
-		sendJSON(stream.map(Json::encode).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+		sendJSON(stream.map(Json::encode).map(Json::decodeValue).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 	}
 	
 	/**
