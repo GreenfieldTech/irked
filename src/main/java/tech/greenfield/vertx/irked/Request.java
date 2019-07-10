@@ -353,28 +353,22 @@ public class Request extends RoutingContextDecorator {
 	 * @{link io.vertx.json.JsonObject} and @{link io.vertx.json.JsonArray}
 	 * will accept.
 	 * 
-	 * This implementation is based on encoding to a string and then reparsing
-	 * using a copy of Vert.x 3.7 <code>Json.decodeValue()</code> implementation.
-	 * We are using a copy because Irked supports Vert.x versions older than 3.7
+	 * This implementation recognizes some types as Vert.x JSON "safe" (i.e. can
+	 * be used with <code>JsonArray::add</code> but not all the types that would be
+	 * accepted. Ideally we would use Json.checkAndCopy() but it is not visible.
 	 * @param value object to recode to a valid JSON type
 	 * @return a type that will be accepted by JsonArray.add();
 	 */
 	private Object encodeToJsonType(Object value) {
-		try {
-			value = Json.mapper.readValue(Json.encode(value), Object.class);
-			if (value instanceof List) {
-				@SuppressWarnings("rawtypes")
-				List list = (List) value;
-				return new JsonArray(list);
-			} else if (value instanceof Map) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> map = (Map<String, Object>) value;
-				return new JsonObject(map);
-			}
+		if (value instanceof Boolean ||
+				value instanceof Number ||
+				value instanceof String ||
+				value instanceof JsonArray ||
+				value instanceof List ||
+				value instanceof JsonObject ||
+				value instanceof Map)
 			return value;
-		} catch (Exception e) {
-			throw new DecodeException("Failed to decode: " + e.getMessage());
-		}
+		return JsonObject.mapFrom(value);
 	}
 
 }
