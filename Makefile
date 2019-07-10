@@ -34,6 +34,7 @@ release:
 	git flow release start "$(VERSION)"
 	perl -pi -e 's,<version>$(CURRENT_VERSION)</version>,<version>'"$(VERSION)"'</version>,' pom.xml
 	git commit pom.xml -m "bump release to $(VERSION)"
+	$(MVNCMD) package
 	git flow release finish -m "release $(VERSION)" </dev/null
 	perl -pi -e 'BEGIN{sub bump{@v=split(/\./,$$_[0]);join(".",@v[0..1]).".".($$v[-1]+1);}}s,<version>($(VERSION))</version>,"<version>".(bump($$1))."-SNAPSHOT</version>",e' pom.xml
 	git commit pom.xml -m "develop back to snapshot mode"
