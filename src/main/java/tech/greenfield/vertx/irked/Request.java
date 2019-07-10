@@ -104,10 +104,30 @@ public class Request extends RoutingContextDecorator {
 		if (Objects.isNull(contentType)) contentType = "application/json"; // we love JSON
 		String[] ctParts = contentType.split(";\\s*");
 		switch (ctParts[0]) {
-			case "application/json":
+		case "application/x-www-form-urlencoded":
+			JsonObject out = new JsonObject();
+			request().formAttributes().forEach(e -> {
+				Object old = out.getValue(e.getKey());
+				if (Objects.isNull(old)) {
+					out.put(e.getKey(), e.getValue());
+					return;
+				}
+				if (old instanceof JsonArray) {
+					((JsonArray)old).add(e.getValue());
+					return;
+				}
+				out.put(e.getKey(), new JsonArray().add(old).add(e.getValue()));
+			});
+			return out.mapTo(type);
+		case "application/json":
+			return getBodyAsJson().mapTo(type);
+		default:
+			try {
 				return getBodyAsJson().mapTo(type);
-			default:
-				throw new BadRequest("Request body must be of type " + type.getSimpleName()).uncheckedWrap();
+			} catch (DecodeException e) {
+				throw new BadRequest("Unrecognized content-type " + ctParts[0] + 
+						" and content does not decode as JSON: " + e.getMessage()).unchecked();
+			}
 		}
 	}
 	
