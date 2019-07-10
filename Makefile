@@ -19,10 +19,13 @@ compile: $(wildcard src/main/java/**/*.java)
 test: $(wildcard src/test/java/**/*.java)
 	$(MVNCMD) test
 
-.PHONY: release
+.PHONY: release push
 
 clean:
 	$(MVNCMD) clean
+
+push:
+	git push --all && git push --tags
 
 release:
 	$(eval SHELL := /bin/bash)
