@@ -197,7 +197,7 @@ public class WebSocketConnection implements ServerWebSocket {
 		return socket.fetch(amount);
 	}
 
-	@Override
+	// for support 3.6, this is disabled @Override
 	public void setHandshake(Future<Integer> future) {
 		socket.setHandshake(future);
 	}
