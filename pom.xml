@@ -29,17 +29,6 @@
 		<url>https://github.com/GreenfieldTech/irked</url>
 	</scm>
 
-	<distributionManagement>
-		<repository>
-			<id>packagecloud-GreenfieldTech</id>
-			<url>packagecloud+https://packagecloud.io/GreenfieldTech/oss</url>
-		</repository>
-		<snapshotRepository>
-			<id>packagecloud-GreenfieldTech</id>
-			<url>packagecloud+https://packagecloud.io/GreenfieldTech/oss</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 	<dependencies>
 		<!-- upstream stacks -->
 		<dependency>
@@ -244,13 +233,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<extensions>
-			<extension>
-				<groupId>io.packagecloud.maven.wagon</groupId>
-				<artifactId>maven-packagecloud-wagon</artifactId>
-				<version>[0,)</version>
-			</extension>
-		</extensions>
 	</build>
 
 	<profiles>
