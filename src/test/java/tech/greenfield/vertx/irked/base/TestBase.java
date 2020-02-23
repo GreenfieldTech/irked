@@ -1,42 +1,45 @@
 package tech.greenfield.vertx.irked.base;
 
 import java.util.Random;
+import java.util.function.Function;
 
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
-import io.vertx.core.http.HttpClient;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.junit.RunTestOnContext;
-import io.vertx.ext.unit.junit.Timeout;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.Controller;
 import tech.greenfield.vertx.irked.server.Server;
 
-@RunWith(VertxUnitRunner.class)
-@Ignore public class TestBase {
+public class TestBase {
 
-	@ClassRule
-	public static RunTestOnContext rule = new RunTestOnContext();
-	@Rule
-	public Timeout timeoutRule = Timeout.seconds(3600);
+	private static final int MAX_WEBSOCKET_MESSAGE_SIZE = 1024 * 1024 * 1024;
+
+	@RegisterExtension
+	static VertxExtension vertxExtension = new VertxExtension();
 	protected final Integer port = new Random().nextInt(30000)+10000;
 
-	protected HttpClient getClient() {
-		return rule.vertx().createHttpClient(new HttpClientOptions().setIdleTimeout(0));
+	protected WebClientExt getClient(Vertx vertx) {
+		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions()
+				.setIdleTimeout(0)
+				.setMaxWebsocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
 	}
 
-	protected void deployController(Controller controller, Handler<AsyncResult<String>> handler) {
+	protected void deployController(Controller controller, Vertx vertx, Handler<AsyncResult<String>> handler) {
 		Server server = new Server(controller);
-	
+
 		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("port", port));
-		rule.vertx().deployVerticle(server, options, handler);
+		vertx.deployVerticle(server, options, handler);
+	}
+
+	protected Function<Throwable, Void> failureHandler(VertxTestContext context) {
+		return  t -> {
+			context.failNow(t);
+			return null;
+		};
 	}
 
 }

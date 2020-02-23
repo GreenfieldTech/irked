@@ -1,7 +1,7 @@
 package tech.greenfield.vertx.irked.server;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import tech.greenfield.vertx.irked.Controller;
@@ -18,12 +18,12 @@ public class Server extends AbstractVerticle {
 	}
 
 	@Override
-	public void start(Future<Void> startFuture) throws Exception {
-		Future<HttpServer> async = Future.future();
+	public void start(Promise<Void> startFuture) throws Exception {
+		Promise<HttpServer> async = Promise.promise();
 		(server = vertx.createHttpServer(getHttpServerOptions())).requestHandler(
 				Irked.router(vertx).configure(test).configReport())
 				.listen(config().getInteger("port"), async);
-		async.map((Void) null).setHandler(startFuture);
+		async.future().map((Void) null).setHandler(startFuture);
 	}
 
 	public static HttpServerOptions getHttpServerOptions() {
@@ -31,7 +31,7 @@ public class Server extends AbstractVerticle {
 	}
 
 	@Override
-	public void stop(Future<Void> stopFuture) throws Exception {
+	public void stop(Promise<Void> stopFuture) throws Exception {
 		server.close(stopFuture);
 	}
 	
