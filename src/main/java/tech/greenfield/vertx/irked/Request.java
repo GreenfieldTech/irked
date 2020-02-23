@@ -196,7 +196,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param contentType The MIME Content-Type to be set for the response
 	 */
 	public void sendContent(String content, HttpError status, String contentType) {
-		sendContent(Buffer.factory.buffer(content), status, contentType);
+		sendContent(Buffer.buffer(content), status, contentType);
 	}
 	
 	/**

@@ -7,44 +7,45 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import tech.greenfield.vertx.irked.Request;
 import tech.greenfield.vertx.irked.helpers.DigestAuthenticate;
 
 public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken {
 
 	private static Logger logger = LoggerFactory.getLogger(DigestAuthorizationToken.class);
-	
+
 	private MessageDigest digestAlgorithm;
 
 	public DigestAuthorizationToken() {}
-	
+
 	public DigestAuthorizationToken(String token) {
 		update("Digest", token);
 	}
-	
-	public DigestAuthorizationToken(String realm, String method, String uri, String username, String password, 
+
+	public DigestAuthorizationToken(String realm, String method, String uri, String username, String password,
 			String nonce) {
 		this(realm, method, uri, null, username, password, nonce, null, null, "MD5");
 	}
 
-	public DigestAuthorizationToken(String realm, String method, String uri, String username, String password, 
+	public DigestAuthorizationToken(String realm, String method, String uri, String username, String password,
 			String nonce, String algorithm) {
 		this(realm, method, uri, null, username, password, nonce, null, null, algorithm);
 	}
 
-	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password, 
+	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password,
 			String nonce, String cnonce) {
 		this(realm, method, uri, entityBody, username, password, nonce, cnonce, null, "MD5");
 	}
-	
-	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password, 
+
+	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password,
 			String nonce, String cnonce, String algorithm) {
 		this(realm, method, uri, entityBody, username, password, nonce, cnonce, null, algorithm);
 	}
-	
+
 	/**
 	 * Helper constructor to compute a new Digest authorization header
 	 * @param realm Realm received in the Unauthorized response
@@ -58,7 +59,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	 * @param opaque whether the authorized content is opaque (as per the RFC)
 	 * @param algorithm Algorithm to use
 	 */
-	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password, 
+	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password,
 			String nonce, String cnonce, String opaque, String algorithm) {
 		parameters.put("username", username);
 		parameters.put("realm", realm);
@@ -83,7 +84,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 		}
 		parameters.put("response", computeResponse(password, method, entityBody));
 	}
-	
+
 	public String generateAuthrizationHeader() {
 		return "Digest " + parameters.entrySet().stream()
 				.map(e -> e.getKey() + "=\"" + e.getValue() + "\"")
@@ -97,7 +98,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	protected boolean supports(String type) {
 		return "Digest".equalsIgnoreCase(type);
 	}
-	
+
 	@Override
 	protected AuthorizationToken update(String type, String token) {
 		super.update(type, token);
@@ -109,11 +110,11 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Check if the digest token is valid and additional test operations can work on it.
 	 * If this method returns false, other validation methods are likely to fail.
-	 * 
+	 *
 	 * This method currently only checks that the specified digest algorithm is supported by the JVM.
 	 * If you want to restrict the algorithm to only specific ones, use {@link #getAlgorithm()} to check.
 	 * @return Whether the token is valid
@@ -121,7 +122,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	public boolean isValid() {
 		return Objects.nonNull(digestAlgorithm);
 	}
-	
+
 	/**
 	 * Returns the digest algorithm claimed in the authorization token.
 	 * @return Name of the digest algorithm
@@ -129,7 +130,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	public String getAlgorithm() {
 		return Objects.nonNull(getParameter("algorithm")) ? getParameter("algorithm") : "MD5";
 	}
-	
+
 	/**
 	 * Retrieve the opaque value entrusted to the client in the challenge
 	 * @return Opaque value if reported by the client, null otherwise
@@ -137,7 +138,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	public String getOpaque() {
 		return getParameter("opaque");
 	}
-	
+
 	/**
 	 * Use the digest algorithm specified in the token to hash text according to RFC 7616
 	 * @param text Text to hash
@@ -146,7 +147,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	public String hash(String text) {
 		return hash(Buffer.buffer(text));
 	}
-	
+
 	/**
 	 * Use the digest algorithm specified in the token to hash text according to RFC 7616
 	 * @param buffer data to hash
@@ -157,7 +158,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 			return "";
 		return toHex(digestAlgorithm.digest(buffer.getBytes())).toLowerCase();
 	}
-	
+
 	/**
 	 * Retrieve the username claimed in the token
 	 * @return username value of the token
@@ -165,7 +166,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	public String getUsername() {
 		return getParameter("username");
 	}
-	
+
 	/**
 	 * Check if the sender requested a body integrity check
 	 * @return whether the "qop" value of the digest specified "auth-int"
@@ -173,22 +174,22 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	public boolean qopIntegrityRequested() {
 		return "auth-int".equals(getParameter("qop"));
 	}
-	
+
 	/**
 	 * Check if the response value provided in the token is valid considering the provided password, method
 	 * and optional body.
-	 * 
+	 *
 	 * @param password Password to check against the digest response
 	 * @param req HTTP request to verify integrity with. If the token has set "qop" to "auth-int"
 	 * (as can be verified by {@link #qopIntegrityRequested()}, and a body is not provided in the request, this method
-	 * will return false. 
-	 * @return Whether the response value specified in the token is correct according to RFC7616 
+	 * will return false.
+	 * @return Whether the response value specified in the token is correct according to RFC7616
 	 */
 	public boolean validateResponse(String password, Request req) {
 		return getParameter("uri").equals(req.request().uri()) &&
 				computeResponse(password, req.request().rawMethod(), req.getBody()).equals(getParameter("response"));
 	}
-	
+
 	private String computeResponse(String password, String method, Buffer entityBody) {
 		String A1 = hash(getParameter("username") + ":" + getParameter("realm") + ":" + password);
 		String A2 = null;
@@ -200,17 +201,17 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 			logger.warn("Invalid digest format: " + getParameter("qop"));
 			return "";
 		}
-		return parameters.containsKey("qop") ? 
-			hash(A1 + ":" + getParameter("nonce") + ":" + getParameter("nc") + ":" + getParameter("cnonce") + ":" + 
+		return parameters.containsKey("qop") ?
+			hash(A1 + ":" + getParameter("nonce") + ":" + getParameter("nc") + ":" + getParameter("cnonce") + ":" +
 					getParameter("qop") + ":" + A2)
 			:
 			hash(A1 + ":" + getParameter("nonce") + ":" + A2);
 	}
 
 	/**
-	 * Check if the nonce is stale according to the nonce format suggested in RFC7616. 
+	 * Check if the nonce is stale according to the nonce format suggested in RFC7616.
 	 * @param duration seconds to allow for after the value specified in the nonce. IF the nonce was generated
-	 * by {@link DigestAuthenticate}, set this value to 0, as the nonce generated by that helper class already 
+	 * by {@link DigestAuthenticate}, set this value to 0, as the nonce generated by that helper class already
 	 * specifies the maximum life of the nonce
 	 * @return whether the nonce is stale
 	 */

@@ -5,12 +5,13 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.annotations.*;
@@ -92,7 +93,7 @@ public class Router implements io.vertx.ext.web.Router {
 	/**
 	 * Helper interface for
 	 * {@link Router#tryConfigureRoute(RoutingMethod, Field, Class)}
-	 * 
+	 *
 	 * @author odeda
 	 */
 	@FunctionalInterface
@@ -263,10 +264,16 @@ public class Router implements io.vertx.ext.web.Router {
 		return this;
 	}
 
-	// for support <=3.7, this is disabled @Override
+	@Override
 	public io.vertx.ext.web.Router modifiedHandler(Handler<io.vertx.ext.web.Router> handler) {
 		router.modifiedHandler(handler);
 		return this;
 	}
-	
+
+	@Override
+	public io.vertx.ext.web.Router allowForward(boolean allow) {
+		router.allowForward(allow);
+		return this;
+	}
+
 }
