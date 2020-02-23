@@ -1,8 +1,10 @@
 package tech.greenfield.vertx.irked.status;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import tech.greenfield.vertx.irked.HttpError;
 
@@ -10,13 +12,13 @@ public class StatusTest {
 
 	@Test
 	public void testNotFound() {
-		assertTrue(HttpError.class.isInstance(new NotFound()));
-		assertTrue(new NotFound() instanceof HttpError);
+		assertThat(new NotFound(), instanceOf(HttpError.class));
+		assertThat(HttpError.class.isInstance(new NotFound()), equalTo(true));
 	}
-	
+
 	@Test
 	public void testLookup() throws Exception {
-		assertEquals(404, tech.greenfield.vertx.irked.status.HttpStatuses.create(404).getStatusCode());
+		assertThat(tech.greenfield.vertx.irked.status.HttpStatuses.create(404).getStatusCode(), equalTo(404));
 	}
 
 }
