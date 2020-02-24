@@ -214,7 +214,7 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<source>8</source>
+							<source>11</source>
 						</configuration>
 					</execution>
 				</executions>

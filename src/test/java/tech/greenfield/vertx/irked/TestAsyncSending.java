@@ -1,17 +1,22 @@
 package tech.greenfield.vertx.irked;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.NoContent;
@@ -20,7 +25,7 @@ import tech.greenfield.vertx.irked.status.OK;
 public class TestAsyncSending extends TestBase {
 
 	public final static byte[] data = new byte[]{ 0x01, 0x02, 0x03, 0x04, 0x00, 0x00, 0x10, 0x20, 0x30, 0x40 };
-	
+
 	public static class TestValue {
 		private String value = "OK";
 		public void setValue(String value) {
@@ -32,7 +37,7 @@ public class TestAsyncSending extends TestBase {
 	}
 
 	public class TestController extends Controller {
-		
+
 		@Get("/sendtext")
 		public void text(Request r) {
 			CompletableFuture.completedFuture("hello world")
@@ -53,7 +58,7 @@ public class TestAsyncSending extends TestBase {
 			.thenAccept(r::send)
 			.exceptionally(r::handleFailure);
 		};
-		
+
 		@SuppressWarnings("serial")
 		@Get("/sendjsonl")
 		public void jsonl(Request r) {
@@ -62,158 +67,137 @@ public class TestAsyncSending extends TestBase {
 			.thenAccept(r::send)
 			.exceptionally(r::handleFailure);
 		};
-		
+
 		@Get("/sendmapped")
 		public void mapped(Request r) {
 			CompletableFuture.completedFuture(new TestValue())
 			.thenAccept(r::send)
 			.exceptionally(r::handleFailure);
 		};
-		
+
 		@Get("/sendempty")
 		public void empty(Request r) {
 			CompletableFuture.completedFuture(new NoContent())
 			.thenAccept(r::send)
 			.exceptionally(r::handleFailure);
 		};
-		
+
 		@Get("/sendcustomok")
 		public void customOK(Request r) {
 			CompletableFuture.completedFuture(new OK("Still OK").addHeader("X-Custom", "custom"))
 			.thenAccept(r::send)
 			.exceptionally(r::handleFailure);
 		};
-		
+
 	}
 
-	@Before
-	public void deployServer(TestContext context) {
-		deployController(new TestController(), context.asyncAssertSuccess());
-	}
-
-	@Test
-	public void testTextSending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendtext").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(OK.code, res.statusCode(), "Request failed");
-			context.assertEquals("text/plain", res.getHeader("Content-Type"));
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertEquals("hello world", body.toString());
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end();
+	@BeforeEach
+	public void deployServer(VertxTestContext context, Vertx vertx) {
+		deployController(new TestController(), vertx, context.succeeding());
 	}
 
 	@Test
-	public void testBinarySending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendbinary").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(OK.code, res.statusCode(), "Request failed");
-			context.assertEquals("application/octet-stream", res.getHeader("Content-Type"));
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertTrue(Arrays.equals(data, body.getBytes()));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end();
+	public void testTextSending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendtext")
+		.sendP()
+		.thenAccept(res -> {
+			assertThat(res.statusCode(), equalTo(OK.code));
+			assertThat(res.getHeader("Content-Type"), equalTo("text/plain"));
+			assertThat(res, hasBody("hello world"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testJsonObjectSending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendjsono").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(OK.code, res.statusCode(), "Request failed");
-			context.assertEquals("application/json", res.getHeader("Content-Type"));
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertNotNull(body.toJsonObject());
-					context.assertEquals("bar",body.toJsonObject().getString("foo"));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end();
+	public void testBinarySending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendbinary")
+		.sendP()
+		.thenAccept(res -> {
+			assertThat(res.statusCode(), equalTo(OK.code));
+			assertThat(res.getHeader("Content-Type"), equalTo("application/octet-stream"));
+			assertThat(res, hasBody(data));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testJsonArraySending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendjsonl").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(OK.code, res.statusCode(), "Request failed");
-			context.assertEquals("application/json", res.getHeader("Content-Type"));
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertNotNull(body.toJsonArray());
-					context.assertEquals(2,body.toJsonArray().size());
-					context.assertEquals(2,body.toJsonArray().getInteger(1));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end();
+	public void testJsonObjectSending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendjsono")
+		.sendP()
+		.thenAccept(res -> {
+			assertThat(res.statusCode(), equalTo(OK.code));
+			assertThat(res.getHeader("Content-Type"), equalTo("application/json"));
+			assertThat(res.bodyAsJsonObject(), notNullValue());
+			assertThat(res.bodyAsJsonObject().getString("foo"), equalTo("bar"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testMappedObjectSending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendmapped").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(OK.code, res.statusCode(), "Request failed");
-			context.assertEquals("application/json", res.getHeader("Content-Type"));
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertNotNull(body.toJsonObject());
-					context.assertNotNull(body.toJsonObject().mapTo(TestValue.class));
-					context.assertEquals("OK", body.toJsonObject().mapTo(TestValue.class).value);
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end();
+	public void testJsonArraySending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendjsonl")
+		.sendP()
+		.thenAccept(res -> {
+			assertThat(res.statusCode(), equalTo(OK.code));
+			assertThat(res.getHeader("Content-Type"), equalTo("application/json"));
+			assertThat(res.bodyAsJsonArray(), notNullValue());
+			assertThat(res.bodyAsJsonArray().size(), equalTo(2));
+			assertThat(res.bodyAsJsonArray().getInteger(1), equalTo(2));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testStatusSending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendempty").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(NoContent.code, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertEquals(0, body.length());
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end();
+	public void testMappedObjectSending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendmapped")
+		.sendP()
+		.thenAccept(res -> {
+			assertThat(res.statusCode(), equalTo(OK.code));
+			assertThat(res.getHeader("Content-Type"), equalTo("application/json"));
+			assertThat(res.bodyAsJsonObject(), notNullValue());
+			assertThat(res.bodyAsJsonObject().mapTo(TestValue.class), notNullValue());
+			assertThat(res.bodyAsJsonObject().mapTo(TestValue.class).value, equalTo("OK"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testCustomStatusSending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendcustomok").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(OK.code, res.statusCode(), "Request failed");
-			context.assertEquals("custom", res.getHeader("X-Custom"), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertNotNull(body.toJsonObject());
-					context.assertEquals(true, body.toJsonObject().getBoolean("status"));
-					context.assertEquals("Still OK", body.toJsonObject().getString("message"));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end();
+	public void testStatusSending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendempty")
+		.sendP()
+		.thenAccept(res -> {
+			assertThat(res.statusCode(), equalTo(NoContent.code));
+			assertThat(res, is(bodyEmpty()));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
+	}
+
+	@Test
+	public void testCustomStatusSending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendcustomok")
+		.sendP()
+		.thenAccept(res -> {
+			assertThat(res.statusCode(), equalTo(OK.code));
+			assertThat(res.getHeader("X-Custom"), equalTo("custom"));
+			assertThat(res.bodyAsJsonObject(), notNullValue());
+			assertThat(res.bodyAsJsonObject().getBoolean("status"), equalTo(true));
+			assertThat(res.bodyAsJsonObject().getString("message"), equalTo("Still OK"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 }

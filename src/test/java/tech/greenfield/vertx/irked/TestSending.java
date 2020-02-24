@@ -1,16 +1,19 @@
 package tech.greenfield.vertx.irked;
 
-import java.util.Arrays;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.OK;
@@ -46,74 +49,54 @@ public class TestSending extends TestBase {
 		
 	}
 
-	@Before
-	public void deployServer(TestContext context) {
-		deployController(new TestController(), context.asyncAssertSuccess());
+	@BeforeEach
+	public void deployServer(VertxTestContext context, Vertx vertx) {
+		deployController(new TestController(), vertx, context.succeeding());
 	}
 
 	@Test
-	public void testTextSending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendtext").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertEquals("hello world", body.toString());
-				} catch (Exception e) {
-					context.fail(e);
-				}
-			});
-			async.complete();
-		}).end();
+	public void testTextSending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendtext").sendP().thenAccept(res -> {
+			assertThat(res, isOK());
+			assertThat(res.bodyAsString(), equalTo("hello world"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testBinarySending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendbinary").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertTrue(Arrays.equals(data, body.getBytes()));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-			});
-			async.complete();
-		}).end("{}");
+	public void testBinarySending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendbinary").sendP("{}").thenAccept(res -> {
+			assertThat(res, isOK());
+			assertThat(res.body().getBytes(), equalTo(data));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testListSending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendlist").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertTrue(Arrays.equals(data, body.getBytes()));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-			});
-			async.complete();
-		}).end("{}");
+	public void testListSending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendlist").sendP("{}").thenAccept(res -> {
+			assertThat(res, isOK());
+			assertThat(res.body().getBytes(), equalTo(data));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 
 	@Test
-	public void testStreamSending(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/sendstream").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					context.assertTrue(Arrays.equals(data, body.getBytes()));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-			});
-			async.complete();
-		}).end("{}");
+	public void testStreamSending(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/sendstream").sendP("{}").thenAccept(res -> {
+			assertThat(res, isOK());
+			assertThat(res.body().getBytes(), equalTo(data));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 }
