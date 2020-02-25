@@ -8,67 +8,15 @@ package:
  image: maven:3-jdk-11
  script:
   - mvn -B package
-  - mvn -DaltDeploymentRepository=repo::default::file:./maven-repo/releases deploy
+  - mvn -DaltDeploymentRepository=repo::default::file:./maven-repo/$(grep -q SNAPSHOT pom.xml && echo snapshots || echo releases) deploy
  artifacts:
   paths:
    - maven-repo/*
    - target/*
 
-packagecloud-snapshot:
- stage: deploy
- image: maven:3-jdk-11
- except:
-  - master
- script:
-  - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
-  - mkdir -p $HOME/.m2
-  - echo "<settings><servers><server><id>packagecloud-GreenfieldTech</id><password>$PC_TOKEN</password></server></servers></settings>" > $HOME/.m2/settings.xml
-  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
-  - xmlstarlet ed -P -L -O -N p=http://maven.apache.org/POM/4.0.0 -u '/p:project/p:version' -v $VERSION-SNAPSHOT pom.xml
-  - mvn deploy
-
-packagecloud:
- stage: deploy
- image: maven:3-jdk-11
- only:
-  - master
- script:
-  - mkdir -p $HOME/.m2
-  - echo "<settings><servers><server><id>packagecloud-GreenfieldTech</id><password>$PC_TOKEN</password></server></servers></settings>" > $HOME/.m2/settings.xml
-  - mvn deploy
-
-ossrh-staging:
- stage: deploy
- image: maven:3-jdk-11
- variables:
-  REPO_URL: https://oss.sonatype.org/content/repositories/snapshots
- except:
-  - features/ossrh
- script:
-  - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
-  - echo "$GPG_PRIVATE_KEY" | gpg --batch --import --passphrase "$GPG_PASSPHRASE" -
-  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
-  - xmlstarlet ed -P -L -O -N p=http://maven.apache.org/POM/4.0.0 -u '/p:project/p:version' -v $VERSION-SNAPSHOT pom.xml
-  - mvn gpg:sign-and-deploy-file -Dfile=target/irked-vertx-${VERSION}.jar -Durl=$REPO_URL -DrepositoryId=sonatype_oss
-
-ossrh-release:
- stage: deploy
- image: maven:3-jdk-11
- variables:
-  REPO_URL: http://oss.sonatype.org/service/local/staging/deploy/maven2/
- only:
-  - features/ossrh
- script:
-  - apt-get update && apt-get install -qy xmlstarlet libxml2-utils
-  - echo "$GPG_PRIVATE_KEY" | gpg --batch --import --passphrase "$GPG_PASSPHRASE" -
-  - export VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
-  - mvn gpg:sign-and-deploy-file -Dfile=target/irked-vertx-${VERSION}.jar -Durl=$REPO_URL -DrepositoryId=sonatype_oss
-
 s3:
  stage: deploy
  image: python
- only:
-  - master
  script:
   - pip install awscli
   - aws s3 sync --storage-class REDUCED_REDUNDANCY --acl public-read maven-repo/ s3://cloudonix-dist/maven2/
