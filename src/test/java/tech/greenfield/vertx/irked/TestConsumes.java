@@ -204,7 +204,7 @@ public class TestConsumes extends TestBase {
 	
 	private Handler<HttpClientResponse> verifyMissHandler(TestContext context, Async f) {
 		return r -> {
-			context.assertEquals(404,  r.statusCode(), "Should have received an error for incorrect type");
+			context.assertTrue(r.statusCode() == 404 || r.statusCode() == 415, "Should have received an error for incorrect type");
 			f.complete();
 		};
 	}
