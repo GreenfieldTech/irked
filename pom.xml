@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-web</artifactId>
-			<version>[3.6,)</version>
+			<version>[3.6,3.8.999]</version>
 		</dependency>
 
 		<!--Test dependencies -->

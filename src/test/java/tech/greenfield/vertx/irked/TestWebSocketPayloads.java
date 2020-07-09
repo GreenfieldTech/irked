@@ -65,21 +65,21 @@ public class TestWebSocketPayloads extends TestBase {
 	@Test
 	public void testLargePayload(TestContext context) {
 		Future<TestControllerForLargePayloads> f1 = Future.future();
-		rule.vertx().executeBlocking(makeController(1000), f1.completer());
+		rule.vertx().executeBlocking(h -> { h.complete(makeController(1000)); }, f1.completer());
 		f1.setHandler(payloadTester(context));
 	}
 
 	@Test
 	public void testLargerPayload(TestContext context) {
 		Future<TestControllerForLargePayloads> f1 = Future.future();
-		rule.vertx().executeBlocking(makeController(10000), f1.completer());
+		rule.vertx().executeBlocking(h -> { h.complete(makeController(10000)); }, f1.completer());
 		f1.setHandler(payloadTester(context));
 	}
 
 	@Test
 	public void testLargestPayload(TestContext context) {
 		Future<TestControllerForLargePayloads> f1 = Future.future();
-		rule.vertx().executeBlocking(makeController(50000), f1.completer());
+		rule.vertx().executeBlocking(h -> { h.complete(makeController(50000)); }, f1.completer());
 		f1.setHandler(payloadTester(context));
 	}
 
@@ -117,17 +117,15 @@ public class TestWebSocketPayloads extends TestBase {
 		};
 	}
 
-	private Handler<Future<TestControllerForLargePayloads>> makeController(int scale) {
-		return f -> {
-			log.info("Started generating payloads");
-			TestControllerForLargePayloads ctr = new TestControllerForLargePayloads();
-			ctr.request = generatePayload(scale);
-			ctr.response = generatePayload(scale);
-			ctr.checksumIn = checksumPayload(ctr.request);
-			ctr.checksumOut = checksumPayload(ctr.response);
-			log.info("done generating payloads");
-			f.complete(ctr);
-		};
+	private TestControllerForLargePayloads makeController(int scale) {
+		log.info("Started generating payloads");
+		TestControllerForLargePayloads ctr = new TestControllerForLargePayloads();
+		ctr.request = generatePayload(scale);
+		ctr.response = generatePayload(scale);
+		ctr.checksumIn = checksumPayload(ctr.request);
+		ctr.checksumOut = checksumPayload(ctr.response);
+		log.info("done generating payloads");
+		return ctr;
 	}
 
 }

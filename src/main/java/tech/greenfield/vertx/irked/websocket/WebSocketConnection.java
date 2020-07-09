@@ -256,4 +256,24 @@ public class WebSocketConnection implements ServerWebSocket {
 	public ServerWebSocket writeTextMessage(String text, Handler<AsyncResult<Void>> handler) {
 		return socket.writeTextMessage(text, handler);
 	}
+
+	// for support 3.6, this is disabled @Override
+	public Short closeStatusCode() {
+		return socket.closeStatusCode();
+	}
+
+	// for support 3.6, this is disabled @Override
+	public String closeReason() {
+		return socket.closeReason();
+	}
+
+	// for support 3.6, this is disabled @Override
+	public boolean isClosed() {
+		return socket.isClosed();
+	}
+
+	// for support 3.6, this is disabled @Override
+	public void setHandshake(Future<Integer> future, Handler<AsyncResult<Integer>> handler) {
+		socket.setHandshake(future, handler);
+	}
 }

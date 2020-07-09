@@ -263,4 +263,9 @@ public class Router implements io.vertx.ext.web.Router {
 		return this;
 	}
 
+	// for support 3.6, this is disabled @Override
+	public io.vertx.ext.web.Router modifiedHandler(Handler<io.vertx.ext.web.Router> handler) {
+		return router.modifiedHandler(handler);
+	}
+
 }
