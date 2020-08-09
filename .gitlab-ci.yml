@@ -73,7 +73,7 @@ s3:
   - master
  script:
   - apk update && apk add perl
-  - aws s3 ls s3://cloudonix-dist/maven2/releases/tech/greenfield/irked-vertx/ perl -ne  'chomp; s/.*\s+//; m/maven-|SNAPSHOT/ and next; s,(.*)/,<version>$1</version>,; push @versions,$_; END { $versions = join("\n", @versions); our @ARGV = ("maven-repo/releases/tech/greenfield/irked-vertx/maven-metadata.xml"); while(<ARGV>) { s/<version>.*/$versions/; print;} }' > maven-metadata.xml
+  - aws s3 ls s3://cloudonix-dist/maven2/releases/tech/greenfield/irked-vertx/ | perl -ne  'chomp; s/.*\s+//; m/maven-|SNAPSHOT/ and next; s,(.*)/,<version>$1</version>,; push @versions,$_; END { $versions = join("\n", @versions); our @ARGV = ("maven-repo/releases/tech/greenfield/irked-vertx/maven-metadata.xml"); while(<ARGV>) { s/<version>.*/$versions/; print;} }' > maven-metadata.xml
   - mv maven-metadata.xml maven-repo/releases/tech/greenfield/irked-vertx/maven-metadata.xml
   - md5sum maven-repo/releases/tech/greenfield/irked-vertx/maven-metadata.xml > maven-repo/releases/tech/greenfield/irked-vertx/maven-metadata.xml.md5
   - sha1sum maven-repo/releases/tech/greenfield/irked-vertx/maven-metadata.xml > maven-repo/releases/tech/greenfield/irked-vertx/maven-metadata.xml.sha1
