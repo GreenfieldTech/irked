@@ -31,6 +31,8 @@ public class BasicAuthorizationToken extends AuthorizationToken {
 			if (parts.length == 2)
 				password = parts[1];
 		} catch (UnsupportedEncodingException e) { // shouldn't happen, UTF-8 is builtin
+		} catch (IllegalArgumentException e) { // invalid Base64 text - possibly some kind of abuse
+			username = password = ""; // ignore the token and assume empty fields
 		}
 		return this;
 	}
