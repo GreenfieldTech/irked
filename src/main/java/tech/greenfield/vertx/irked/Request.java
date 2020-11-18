@@ -14,6 +14,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.auth.AuthorizationToken;
+import tech.greenfield.vertx.irked.exceptions.MissingBodyException;
 import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.OK;
 
@@ -123,7 +124,9 @@ public class Request extends RoutingContextDecorator {
 		default:
 			try {
 				JsonObject body = getBodyAsJson();
-				return body == null ? null : body.mapTo(type);
+				if (body == null)
+					throw new MissingBodyException().unchecked();
+				return body.mapTo(type);
 			} catch (DecodeException e) {
 				throw new BadRequest("Unrecognized content-type " + ctParts[0] + 
 						" and content does not decode as JSON: " + e.getMessage()).unchecked();
