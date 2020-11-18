@@ -120,10 +120,10 @@ public class Request extends RoutingContextDecorator {
 			});
 			return out.mapTo(type);
 		case "application/json":
-			return getBodyAsJson().mapTo(type);
 		default:
 			try {
-				return getBodyAsJson().mapTo(type);
+				JsonObject body = getBodyAsJson();
+				return body == null ? null : body.mapTo(type);
 			} catch (DecodeException e) {
 				throw new BadRequest("Unrecognized content-type " + ctParts[0] + 
 						" and content does not decode as JSON: " + e.getMessage()).unchecked();
