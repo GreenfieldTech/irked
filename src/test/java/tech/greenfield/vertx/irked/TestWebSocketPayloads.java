@@ -26,6 +26,15 @@ public class TestWebSocketPayloads extends TestBase {
 	private static Logger log = LoggerFactory.getLogger(TestWebSocketPayloads.class);
 
 	public class TestControllerForLargePayloads extends Controller {
+		public TestControllerForLargePayloads(int scale) {
+			log.info("Started generating payloads");
+			request = generatePayload(scale);
+			response = generatePayload(scale);
+			checksumIn = checksumPayload(request);
+			checksumOut = checksumPayload(response);
+			log.info("done generating payloads");
+		}
+		
 		Buffer checksumIn, checksumOut, request, response;
 		@WebSocket("/payload")
 		MessageHandler handler = m -> {
@@ -59,37 +68,30 @@ public class TestWebSocketPayloads extends TestBase {
 
 	@Test
 	public void testLargePayload(VertxTestContext context, Vertx vertx) {
-		Promise<TestControllerForLargePayloads> f1 = Promise.promise();
-		vertx.executeBlocking(makeController(1000), f1);
-		f1.future().onComplete(payloadTester(context, vertx));
+		vertx.<TestControllerForLargePayloads>executeBlocking(p -> p.complete(new TestControllerForLargePayloads(1000)))
+		.onSuccess(payloadTester(context, vertx))
+		.onFailure(context::failNow);
 	}
 
 	@Test
 	public void testLargerPayload(VertxTestContext context, Vertx vertx) {
-		Promise<TestControllerForLargePayloads> f1 = Promise.promise();
-		vertx.executeBlocking(makeController(10000), f1);
-		f1.future().onComplete(payloadTester(context, vertx));
+		vertx.<TestControllerForLargePayloads>executeBlocking(p -> p.complete(new TestControllerForLargePayloads(10000)))
+		.onSuccess(payloadTester(context, vertx))
+		.onFailure(context::failNow);
 	}
 
 	@Test
 	public void testLargestPayload(VertxTestContext context, Vertx vertx) {
-		Promise<TestControllerForLargePayloads> f1 = Promise.promise();
-		vertx.executeBlocking(makeController(50000), f1);
-		f1.future().onComplete(payloadTester(context, vertx));
+		vertx.<TestControllerForLargePayloads>executeBlocking(p -> p.complete(new TestControllerForLargePayloads(50000)))
+		.onSuccess(payloadTester(context, vertx))
+		.onFailure(context::failNow);
 	}
 
-	private Handler<AsyncResult<TestControllerForLargePayloads>> payloadTester(VertxTestContext context, Vertx vertx) {
+	private Handler<TestControllerForLargePayloads> payloadTester(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		return res -> {
-			if (res.failed()) {
-				log.info("Failde to init");
-				context.failNow(res.cause());
-				return;
-			}
-
+		return ctr -> {
 			log.info("deploying verticle");
 			Server.getHttpServerOptions().setMaxWebSocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE);
-			TestControllerForLargePayloads ctr = res.result();
 			deployController(ctr, vertx, context.succeeding(s -> {
 				log.info("Starting websocket");
 				getClient(vertx).websocket(port, "localhost", "/payload")
@@ -107,19 +109,6 @@ public class TestWebSocketPayloads extends TestBase {
 							log.info("Waiting for reply");
 						}).exceptionally(failureHandler(context));
 			}));
-		};
-	}
-
-	private Handler<Promise<TestControllerForLargePayloads>> makeController(int scale) {
-		return f -> {
-			log.info("Started generating payloads");
-			TestControllerForLargePayloads ctr = new TestControllerForLargePayloads();
-			ctr.request = generatePayload(scale);
-			ctr.response = generatePayload(scale);
-			ctr.checksumIn = checksumPayload(ctr.request);
-			ctr.checksumOut = checksumPayload(ctr.response);
-			log.info("done generating payloads");
-			f.complete(ctr);
 		};
 	}
 
