@@ -2,6 +2,7 @@ package tech.greenfield.vertx.irked;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static tech.greenfield.vertx.irked.Matchers.*;
@@ -93,16 +94,18 @@ public class TestInvalidMethod extends TestBase {
 	
 	@Test
 	public void noArgs(VertxTestContext context, Vertx vertx) {
-		deployController(new NoArgController(), vertx, context.succeeding(t -> 
-			assertThat(t.getClass(), equalTo(InvalidRouteConfiguration.class))
-		));
+		deployController(new NoArgController(), vertx, context.failing(t -> {
+			assertThat(t, is(instanceOf(InvalidRouteConfiguration.class)));
+			context.completeNow();
+		}));
 	}
 
 	@Test
 	public void tooManyArgs(VertxTestContext context, Vertx vertx) {
-		deployController(new ManyArgsController(), vertx, context.succeeding(t -> 
-			assertThat(t.getClass(), equalTo(InvalidRouteConfiguration.class))
-		));
+		deployController(new ManyArgsController(), vertx, context.failing(t -> {
+			assertThat(t, is(instanceOf(InvalidRouteConfiguration.class)));
+			context.completeNow();
+		}));
 	}
 	
 	@Test
