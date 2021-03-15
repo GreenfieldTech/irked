@@ -98,7 +98,7 @@ public class TestAuthDigest extends TestBase {
 
 	private void testGetAuthedCheckResponse(HttpResponse<Buffer> res) {
 		assertThat(res, isOK());
-		assertThat(res.toString(), equalTo("OK"));
+		assertThat(res.body().toString(), is(equalTo("OK")));
 	}
 
 	@Test
