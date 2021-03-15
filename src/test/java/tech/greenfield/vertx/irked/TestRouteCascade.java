@@ -134,7 +134,7 @@ public class TestRouteCascade extends TestBase {
 		return getClient(vertx).get(port, "localhost", "/foo").sendP().thenAccept(r -> {
 			assertThat(r, isOK());
 			assertThat(r.bodyAsString(), equalTo("ok"));
-			assertThat(failedTests.get(), equalTo("ok"));
+			assertThat(failedTests.get(), equalTo(0));
 		})
 		.exceptionally(failureHandler(context))
 		.thenRun(async::flag);
