@@ -1,7 +1,7 @@
 package tech.greenfield.vertx.irked;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-
+import static tech.greenfield.vertx.irked.Matchers.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

@@ -2,6 +2,7 @@ package tech.greenfield.vertx.irked;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static tech.greenfield.vertx.irked.Matchers.*;
 
 import java.util.concurrent.TimeUnit;
 
