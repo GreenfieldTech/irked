@@ -187,7 +187,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	 */
 	public boolean validateResponse(String password, Request req) {
 		return getParameter("uri").equals(req.request().uri()) &&
-				computeResponse(password, req.request().rawMethod(), req.getBody()).equals(getParameter("response"));
+				computeResponse(password, req.request().method().name(), req.getBody()).equals(getParameter("response"));
 	}
 
 	private String computeResponse(String password, String method, Buffer entityBody) {

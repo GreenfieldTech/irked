@@ -32,7 +32,7 @@ public class TestBase {
 	protected WebClientExt getClient(Vertx vertx) {
 		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions()
 				.setIdleTimeout(0)
-				.setMaxWebsocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
+				.setMaxWebSocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
 	}
 
 	protected void deployController(Controller controller, Vertx vertx, Handler<AsyncResult<String>> handler) {

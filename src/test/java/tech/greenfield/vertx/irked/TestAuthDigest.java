@@ -69,7 +69,7 @@ public class TestAuthDigest extends TestBase {
 
 	@BeforeEach
 	public void deployServer(VertxTestContext context, Vertx vertx) {
-		deployController(new TestController(), vertx, context.succeeding());
+		deployController(new TestController(), vertx, context.succeedingThenComplete());
 	}
 
 	@Test

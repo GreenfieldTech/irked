@@ -55,7 +55,7 @@ public class TestMountController extends TestBase {
 
 	@BeforeEach
 	public void deployServer(VertxTestContext context, Vertx vertx) {
-		deployController(new ParentController(), vertx, context.succeeding());
+		deployController(new ParentController(), vertx, context.succeedingThenComplete());
 	}
 
 	@Test

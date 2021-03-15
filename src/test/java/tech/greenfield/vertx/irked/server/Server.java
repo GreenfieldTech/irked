@@ -23,7 +23,7 @@ public class Server extends AbstractVerticle {
 		(server = vertx.createHttpServer(getHttpServerOptions())).requestHandler(
 				Irked.router(vertx).configure(test).configReport())
 				.listen(config().getInteger("port"), async);
-		async.future().map((Void) null).setHandler(startFuture);
+		async.future().map((Void) null).onComplete(startFuture);
 	}
 
 	public static HttpServerOptions getHttpServerOptions() {

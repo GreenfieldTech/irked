@@ -61,21 +61,21 @@ public class TestWebSocketPayloads extends TestBase {
 	public void testLargePayload(VertxTestContext context, Vertx vertx) {
 		Promise<TestControllerForLargePayloads> f1 = Promise.promise();
 		vertx.executeBlocking(makeController(1000), f1);
-		f1.future().setHandler(payloadTester(context, vertx));
+		f1.future().onComplete(payloadTester(context, vertx));
 	}
 
 	@Test
 	public void testLargerPayload(VertxTestContext context, Vertx vertx) {
 		Promise<TestControllerForLargePayloads> f1 = Promise.promise();
 		vertx.executeBlocking(makeController(10000), f1);
-		f1.future().setHandler(payloadTester(context, vertx));
+		f1.future().onComplete(payloadTester(context, vertx));
 	}
 
 	@Test
 	public void testLargestPayload(VertxTestContext context, Vertx vertx) {
 		Promise<TestControllerForLargePayloads> f1 = Promise.promise();
 		vertx.executeBlocking(makeController(50000), f1);
-		f1.future().setHandler(payloadTester(context, vertx));
+		f1.future().onComplete(payloadTester(context, vertx));
 	}
 
 	private Handler<AsyncResult<TestControllerForLargePayloads>> payloadTester(VertxTestContext context, Vertx vertx) {
@@ -88,7 +88,7 @@ public class TestWebSocketPayloads extends TestBase {
 			}
 
 			log.info("deploying verticle");
-			Server.getHttpServerOptions().setMaxWebsocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE);
+			Server.getHttpServerOptions().setMaxWebSocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE);
 			TestControllerForLargePayloads ctr = res.result();
 			deployController(ctr, vertx, context.succeeding(s -> {
 				log.info("Starting websocket");

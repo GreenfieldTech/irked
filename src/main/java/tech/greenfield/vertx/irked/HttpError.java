@@ -3,7 +3,7 @@ package tech.greenfield.vertx.irked;
 import java.util.*;
 
 import io.vertx.core.MultiMap;
-import io.vertx.core.http.impl.headers.VertxHttpHeaders;
+import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.InternalServerError;
@@ -22,7 +22,7 @@ public class HttpError extends Exception {
 	
 	private int statusCode;
 	private String statusText;
-	private MultiMap headers = new VertxHttpHeaders();
+	private HeadersMultiMap headers = HeadersMultiMap.httpHeaders();
 	
 	public HttpError(int statusCode, String statusText) {
 		super(statusText);

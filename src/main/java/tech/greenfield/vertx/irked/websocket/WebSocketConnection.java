@@ -4,6 +4,9 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.security.cert.X509Certificate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
@@ -19,10 +22,11 @@ public class WebSocketConnection implements ServerWebSocket {
 
 	private ServerWebSocket socket;
 	private Request request;
+	private static Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
 
 	public WebSocketConnection(Request request) {
 		this.request = request;
-		socket = request.request().upgrade();
+		request.request().toWebSocket().onSuccess(s -> socket = s).onFailure(t -> log.error("Failed to upgrade websocket",t));
 	}
 
 	public Request request() {
@@ -586,6 +590,16 @@ public class WebSocketConnection implements ServerWebSocket {
 	 */
 	public boolean isClosed() {
 		return socket.isClosed();
+	}
+
+	@Override
+	public String scheme() {
+		return socket.scheme();
+	}
+
+	@Override
+	public String host() {
+		return socket.host();
 	}
 
 }

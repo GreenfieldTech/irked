@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.WebsocketRejectedException;
-import io.vertx.core.http.impl.headers.VertxHttpHeaders;
+import io.vertx.core.http.UpgradeRejectedException;
+import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
@@ -82,7 +82,7 @@ public class TestWebSocket extends TestBase {
 	public void testMethodPinger(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerMethodPinger(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/ping-method", new VertxHttpHeaders().add("Authorization","ok"))
+			getClient(vertx).websocket(port, "localhost", "/ping-method", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
 			.thenAccept(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
@@ -120,7 +120,7 @@ public class TestWebSocket extends TestBase {
 	public void testAdvancedMethodPinger(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAdvancedMethodPinger(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/ping-adv-method", new VertxHttpHeaders().add("Authorization","ok"))
+			getClient(vertx).websocket(port, "localhost", "/ping-adv-method", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
 			.thenAccept(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
@@ -156,7 +156,7 @@ public class TestWebSocket extends TestBase {
 	public void testAuthorizedPing(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAuthorizePing(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/with-auth", new VertxHttpHeaders().add("Authorization","ok"))
+			getClient(vertx).websocket(port, "localhost", "/with-auth", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
 			.thenAccept(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
@@ -173,12 +173,12 @@ public class TestWebSocket extends TestBase {
 	public void testFailedToAuthorizedPing(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAuthorizePing(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/with-auth", new VertxHttpHeaders().add("Authorization","invalid"))
+			getClient(vertx).websocket(port, "localhost", "/with-auth", HeadersMultiMap.httpHeaders().add("Authorization","invalid"))
 			.thenAccept(ws -> {
 				context.failNow(new Exception("Invalid authorization should not succeed"));
 			}).exceptionally(t -> {
-				if (t instanceof WebsocketRejectedException) {
-					WebsocketRejectedException e = (WebsocketRejectedException)t;
+				if (t instanceof UpgradeRejectedException) {
+					var e = (UpgradeRejectedException)t;
 					assertThat(e.getStatus(), equalTo(401));
 					vertx.undeploy(s);
 					async.flag();

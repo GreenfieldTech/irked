@@ -23,12 +23,12 @@ public class TestBadController extends TestBase {
 	
 	@Test
 	public void testInvalidFieldHandlerError(VertxTestContext context, Vertx vertx) {
-		deployController(new TestControllerBadField(), vertx, context.succeeding());
+		deployController(new TestControllerBadField(), vertx, context.succeedingThenComplete());
 	}
 	
 	@Test
 	public void testInvalidMethodHandlerError(VertxTestContext context, Vertx vertx) {
-		deployController(new TestControllerBadMethod(), vertx, context.succeeding());
+		deployController(new TestControllerBadMethod(), vertx, context.succeedingThenComplete());
 	}
 
 }
