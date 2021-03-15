@@ -177,6 +177,7 @@ public class TestWebSocket extends TestBase {
 			.thenAccept(ws -> {
 				context.failNow(new Exception("Invalid authorization should not succeed"));
 			}).exceptionally(t -> {
+				while (t instanceof RuntimeException && t.getCause() != null) t = t.getCause();
 				if (t instanceof UpgradeRejectedException) {
 					var e = (UpgradeRejectedException)t;
 					assertThat(e.getStatus(), equalTo(401));
