@@ -24,21 +24,20 @@ public class WebSocketConnection implements ServerWebSocket {
 	private Request request;
 	private static Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
 
-	public WebSocketConnection(Request request) {
-		this.request = request;
-		request.request().toWebSocket().onSuccess(s -> socket = s).onFailure(t -> log.error("Failed to upgrade websocket",t));
+	public WebSocketConnection(Request request, Handler<? super WebSocketMessage> handler) {
+		(this.request = request).request().toWebSocket().onSuccess(s -> {
+			socket = s;
+			socket.binaryMessageHandler(buffer -> handler.handle(new WebSocketMessage(request, socket, buffer)));
+			// The text message handler is more expensive because it effectively causes UTF-8 decoding + encoding + (probably) final decoding
+			// we should implement a custom frame aggregator that allows us to delay decoding text until the user actually wants to.
+			socket.textMessageHandler(text -> handler.handle(new WebSocketMessage(request, socket, text)));
+		}).onFailure(t -> {
+			log.error("Failed to upgrade websocket",t);
+		});
 	}
 
 	public Request request() {
 		return request;
-	}
-
-	public WebSocketConnection messageHandler(Handler<? super WebSocketMessage> handler) {
-		socket.binaryMessageHandler(buffer -> handler.handle(new WebSocketMessage(request, socket, buffer)));
-		// The text message handler is more expensive because it effectively causes UTF-8 decoding + encoding + (probably) final decoding
-		// we should implement a custom frame aggregator that allows us to delay decoding text until the user actually wants to.
-		socket.textMessageHandler(text -> handler.handle(new WebSocketMessage(request, socket, text)));
-		return this;
 	}
 
 	/**

@@ -19,7 +19,7 @@ public class WebSocketUpgradeRequestWrapper extends RequestWrapper {
 	public void handle(RoutingContext r) {
 		Request req = wrapper.apply(r);
 		if (req.needUpgrade("websocket"))
-			new WebSocketConnection(req).messageHandler(msghandler);
+			new WebSocketConnection(req, msghandler);
 		else
 			req.next();
 	}
