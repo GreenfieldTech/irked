@@ -3,6 +3,7 @@ package tech.greenfield.vertx.irked;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static tech.greenfield.vertx.irked.Matchers.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -89,7 +90,7 @@ public class TestFieldController extends TestBase {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).delete(port, "localhost", "/delete").sendP("{}").thenAccept(res -> {
 			assertThat(res, is(status(new NoContent())));
-			assertThat(res.body().length(), equalTo(0));
+			assertThat(res.body(), is(nullValue()));
 		})
 		.exceptionally(failureHandler(context))
 		.thenRun(async::flag);
