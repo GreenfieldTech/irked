@@ -1,13 +1,19 @@
 package tech.greenfield.vertx.irked.base;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static tech.greenfield.vertx.irked.Matchers.notFound;
+
 import java.util.Random;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.vertx.core.*;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -40,6 +46,10 @@ public class TestBase {
 			context.failNow(t);
 			return null;
 		};
+	}
+	
+	protected void verifyNotFound(HttpResponse<Buffer> r) {
+		assertThat(r, is(notFound()));
 	}
 
 }
