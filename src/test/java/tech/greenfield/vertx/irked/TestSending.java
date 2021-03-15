@@ -2,6 +2,7 @@ package tech.greenfield.vertx.irked;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static tech.greenfield.vertx.irked.Matchers.*;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
@@ -82,7 +84,7 @@ public class TestSending extends TestBase {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendlist").sendP("{}").thenAccept(res -> {
 			assertThat(res, isOK());
-			assertThat(res.body().getBytes(), equalTo(data));
+			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
 		})
 		.exceptionally(failureHandler(context))
 		.thenRun(async::flag);
@@ -94,7 +96,7 @@ public class TestSending extends TestBase {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendstream").sendP("{}").thenAccept(res -> {
 			assertThat(res, isOK());
-			assertThat(res.body().getBytes(), equalTo(data));
+			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
 		})
 		.exceptionally(failureHandler(context))
 		.thenRun(async::flag);
