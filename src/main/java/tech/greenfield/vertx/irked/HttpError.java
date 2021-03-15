@@ -143,4 +143,9 @@ public class HttpError extends Exception {
 			return new InternalServerError("Failed to translate failed context to HTTP error");
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return "HTTP " + statusCode + " " + statusText;
+	}
 }
