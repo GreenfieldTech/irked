@@ -10,7 +10,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.client.HttpResponse;
 
 public class Matchers {
-	protected static Matcher<HttpResponse<?>> isOK() {
+	public static Matcher<HttpResponse<?>> isOK() {
 		return new BaseMatcher<HttpResponse<?>>() {
 			@Override
 			public boolean matches(Object actual) {
@@ -24,7 +24,7 @@ public class Matchers {
 			}};
 	}
 
-	protected static Matcher<HttpResponse<?>> status(HttpError status) {
+	public static Matcher<HttpResponse<?>> status(HttpError status) {
 		return new BaseMatcher<HttpResponse<?>>() {
 			@Override
 			public boolean matches(Object actual) {
@@ -51,7 +51,7 @@ public class Matchers {
 			}};
 	}
 	
-	protected static Matcher<HttpResponse<Buffer>> bodyEmpty() {
+	public static Matcher<HttpResponse<Buffer>> bodyEmpty() {
 		return new BaseMatcher<HttpResponse<Buffer>>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -69,7 +69,7 @@ public class Matchers {
 			}};
 	}
 	
-	protected static Matcher<HttpResponse<Buffer>> hasBody(String text) {
+	public static Matcher<HttpResponse<Buffer>> hasBody(String text) {
 		return new BaseMatcher<HttpResponse<Buffer>>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -84,7 +84,7 @@ public class Matchers {
 			}};
 	}
 	
-	protected static Matcher<HttpResponse<Buffer>> hasBody(byte[] data) {
+	public static Matcher<HttpResponse<Buffer>> hasBody(byte[] data) {
 		return new BaseMatcher<HttpResponse<Buffer>>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -99,7 +99,7 @@ public class Matchers {
 			}};
 	}
 	
-	protected static Matcher<HttpResponse<Buffer>> bodyContains(String text) {
+	public static Matcher<HttpResponse<Buffer>> bodyContains(String text) {
 		return new BaseMatcher<HttpResponse<Buffer>>() {
 			@SuppressWarnings("unchecked")
 			@Override
