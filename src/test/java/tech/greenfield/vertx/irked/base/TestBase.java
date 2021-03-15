@@ -29,7 +29,7 @@ public class TestBase {
 	static VertxExtension vertxExtension = new VertxExtension();
 	protected final Integer port = new Random().nextInt(30000)+10000;
 
-	protected WebClientExt getClient(Vertx vertx) {
+	protected static WebClientExt getClient(Vertx vertx) {
 		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions()
 				.setIdleTimeout(0)
 				.setMaxWebSocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
@@ -42,14 +42,14 @@ public class TestBase {
 		vertx.deployVerticle(server, options, handler);
 	}
 
-	protected Function<Throwable, Void> failureHandler(VertxTestContext context) {
+	protected static Function<Throwable, Void> failureHandler(VertxTestContext context) {
 		return  t -> {
 			context.failNow(t);
 			return null;
 		};
 	}
 
-	protected Matcher<HttpResponse<?>> isOK() {
+	protected static Matcher<HttpResponse<?>> isOK() {
 		return new BaseMatcher<HttpResponse<?>>() {
 			@Override
 			public boolean matches(Object actual) {
@@ -63,28 +63,43 @@ public class TestBase {
 			}};
 	}
 
-	protected Matcher<HttpResponse<?>> status(HttpError status) {
+	protected static Matcher<HttpResponse<?>> status(HttpError status) {
 		return new BaseMatcher<HttpResponse<?>>() {
 			@Override
 			public boolean matches(Object actual) {
 				return actual instanceof HttpResponse ?
 						(((HttpResponse<?>)actual).statusCode() == status.getStatusCode()) : false;
 			}
+			
+			@Override
+			public void describeMismatch(Object item, Description description) {
+				if (item instanceof HttpResponse) {
+					var resp = (HttpResponse<?>)item;
+					description.appendText("response has status HTTP ");
+					description.appendText("" + resp.statusCode());
+					description.appendText(" ");
+					description.appendText(resp.statusMessage());
+				} else
+					description.appendText("value is not an HTTP Response (" + item.getClass() + ")");
+			}
 
 			@Override
 			public void describeTo(Description description) {
-				description.appendText("is the response of status");
-				description.appendValue(status);
+				description.appendText("response has status ");
+				description.appendText(status.toString());
 			}};
 	}
 	
-	protected Matcher<HttpResponse<Buffer>> bodyEmpty() {
+	protected static Matcher<HttpResponse<Buffer>> bodyEmpty() {
 		return new BaseMatcher<HttpResponse<Buffer>>() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public boolean matches(Object actual) {
-				return actual instanceof HttpResponse ?
-						(((HttpResponse<Buffer>)actual).body().length() == 0) : false;
+				if (actual instanceof HttpResponse) {
+					var body = ((HttpResponse<Buffer>)actual).body();
+					return body == null || body.length() == 0; // Vert.x 4 BodyCodecImpl sends empty bodies as null
+				}
+				return false;
 			}
 	
 			@Override
@@ -93,7 +108,7 @@ public class TestBase {
 			}};
 	}
 	
-	protected Matcher<HttpResponse<Buffer>> hasBody(String text) {
+	protected static Matcher<HttpResponse<Buffer>> hasBody(String text) {
 		return new BaseMatcher<HttpResponse<Buffer>>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -108,7 +123,7 @@ public class TestBase {
 			}};
 	}
 	
-	protected Matcher<HttpResponse<Buffer>> hasBody(byte[] data) {
+	protected static Matcher<HttpResponse<Buffer>> hasBody(byte[] data) {
 		return new BaseMatcher<HttpResponse<Buffer>>() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -123,7 +138,7 @@ public class TestBase {
 			}};
 	}
 	
-	protected Matcher<HttpResponse<Buffer>> bodyContains(String text) {
+	protected static Matcher<HttpResponse<Buffer>> bodyContains(String text) {
 		return new BaseMatcher<HttpResponse<Buffer>>() {
 			@SuppressWarnings("unchecked")
 			@Override
