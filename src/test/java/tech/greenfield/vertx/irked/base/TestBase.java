@@ -22,7 +22,8 @@ import tech.greenfield.vertx.irked.server.Server;
 
 public class TestBase {
 
-	private static final int MAX_WEBSOCKET_MESSAGE_SIZE = 1024 * 1024 * 1024;
+	// client max message
+	private static final int MAX_WEBSOCKET_MESSAGE_SIZE = 1024 * 1024 * 1024; // 1G. Frame size is 64K
 
 	@RegisterExtension
 	static VertxExtension vertxExtension = new VertxExtension();
