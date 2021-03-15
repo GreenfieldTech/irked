@@ -16,7 +16,7 @@ import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Consumes;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.base.TestBase;
-import tech.greenfield.vertx.irked.status.NotFound;
+import tech.greenfield.vertx.irked.status.UnsupportedMediaType;
 
 public class TestConsumes extends TestBase {
 	
@@ -102,7 +102,7 @@ public class TestConsumes extends TestBase {
 			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/one")
 				.putHeader("Content-Type", "text/xml")
 				.sendP())
-			.thenAccept(verifyMissHandler(context))
+			.thenAccept(r -> assertThat(r, is(status(new UnsupportedMediaType()))))
 			.exceptionally(failureHandler(context))
 			.thenRun(f::flag);
 		}));
@@ -124,7 +124,7 @@ public class TestConsumes extends TestBase {
 			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/multiple")
 				.putHeader("Content-Type", "text/xml")
 				.sendP())
-			.thenAccept(verifyMissHandler(context))
+			.thenAccept(r -> assertThat(r, is(status(UnsupportedMediaType.class))))
 			.exceptionally(failureHandler(context))
 			.thenRun(f::flag);
 		}));
@@ -150,7 +150,7 @@ public class TestConsumes extends TestBase {
 			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/glob")
 				.putHeader("Content-Type", "text/xpm")
 				.sendP())
-			.thenAccept(verifyMissHandler(context))
+			.thenAccept(r -> assertThat(r, is(status(new UnsupportedMediaType()))))
 			.exceptionally(failureHandler(context))
 			.thenRun(f::flag);
 		}));
@@ -185,10 +185,4 @@ public class TestConsumes extends TestBase {
 		};
 	}
 	
-	private Consumer<HttpResponse<Buffer>> verifyMissHandler(VertxTestContext context) {
-		return r -> {
-			assertThat(r, is(status(new NotFound())));
-		};
-	}
-
 }
