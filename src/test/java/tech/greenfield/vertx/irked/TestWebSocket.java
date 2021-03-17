@@ -2,6 +2,7 @@ package tech.greenfield.vertx.irked;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
 
@@ -95,7 +96,6 @@ public class TestWebSocket extends TestBase {
 		}));
 	}
 	
-	
 	public class TestControllerAdvancedMethodPinger extends Controller {
 		private class AutoReply extends Request {
 			public AutoReply(RoutingContext outerContext) {
@@ -187,6 +187,30 @@ public class TestWebSocket extends TestBase {
 					context.failNow(t);
 				return null;
 			});
+		}));
+	}
+
+	public class TestMessageHandlingFailure extends Controller {
+		@WebSocket("/failures")
+		void pinger(WebSocketMessage m) {
+			throw new RuntimeException("Unexpected exception");
+		}
+	}
+	
+	@Test
+	public void testMessageHandlingFailure(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		vertx.exceptionHandler(context::failNow);
+		deployController(new TestMessageHandlingFailure(), vertx, context.succeeding(s -> {
+			getClient(vertx).websocket(port, "localhost", "/failures", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			.thenAccept(ws -> {
+				ws.closeHandler(v -> {
+					assertThat(ws.closeStatusCode(), is(equalTo((short)1011)));
+					assertThat(ws.closeReason(), is(equalTo("Unexpected exception")));
+					async.flag();
+				});
+				ws.writeTextMessage(PING);
+			}).exceptionally(failureHandler(context));
 		}));
 	}
 

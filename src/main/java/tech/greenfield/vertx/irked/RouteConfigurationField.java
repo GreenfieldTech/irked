@@ -73,7 +73,7 @@ public class RouteConfigurationField extends RouteConfiguration {
 				try {
 					handler.handle(m);
 				} catch (Throwable cause) {
-					m.request().fail(cause);
+					handleUserException(m, cause, "field " + field);
 				}
 			}
 			@Override

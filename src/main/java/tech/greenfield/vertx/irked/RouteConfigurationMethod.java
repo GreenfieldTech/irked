@@ -120,11 +120,10 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 					else
 						method.invoke(impl, req, m);
 				} catch (InvocationTargetException e) { // user exception
-					m.request().fail(e.getCause()); // propagate exceptions thrown by the method to the Vert.x fail handler
-				} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
-					m.request().fail(new InternalServerError("Invalid request handler " + this + ": " + e, e));
-				} catch (IllegalArgumentException e) { // shouldn't happen because we checked the type before calling
-					m.request().fail(new InternalServerError("Mistyped request handler " + this + ": " + e, e));
+					handleUserException(m, e.getCause(), "method " + method);
+				} catch (IllegalAccessException | IllegalArgumentException e) {
+					// shouldn't happen because we setAccessible above and we checked the type before calling
+					handleUserException(m, e, "method " + method);
 				}
 			}
 			@Override

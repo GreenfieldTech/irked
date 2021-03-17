@@ -201,4 +201,38 @@ public abstract class RouteConfiguration {
 		}
 	}
 
+	/**
+	 * Handling logic for user exceptions thrown from a message handler invocation.
+	 * Note that WebSocket does not provide robust error reporting mechanisms - unless the application handles
+	 * their own error detection and reporting using an application-level protocol, the only think we can do
+	 * is send a close frame with a status code
+	 * (<a href="https://www.iana.org/assignments/websocket/websocket.xml#close-code-number">specified by IANA</a>
+	 * but almost completely useless) and a text message.
+	 * 
+	 * As such we expect the application developer to implement their own application level error handling protocol
+	 * and here we implement a "last refuge" handler that closes the socket and attempts to provide useful information
+	 * while limiting internal implementation details leakage. We assume that this method will be called in two cases:
+	 * <ul>
+	 * <li>The developer threw an {@link HttpError} from a message handler - which they shouldn't do, but we can try
+	 * to give them a simple expected behavior by closing the socket with a 1002 ("Protocol Error") status and the
+	 * message from the exception (it could be the HTTP status message, or a custom message).</li>
+	 * <li>An unexpected exception was thrown from a message handler - that the developer should have caught but didn't.
+	 * In that case we will close the socket with a 1011 ("Internal Error") status and the exception message. We will also
+	 * dump the full exception stack to the error log.</li>
+	 * </ul>
+	 *
+	 * @param m message that caused the exception
+	 * @param cause User exception thrown from the handler
+	 * @param invocationDescription Description of the invocation endpoint for logging
+	 */
+	protected void handleUserException(WebSocketMessage m, Throwable cause, String invocationDescription) {
+		var err = HttpError.unwrap(cause);
+		if (err instanceof HttpError)
+			m.socket().close((short)1002, ((HttpError)err).getMessage());
+		else {
+			log.error("Handler " + invocationDescription + " threw an unexpected exception",cause);
+			m.socket().close((short)1011, cause.getMessage());
+		}
+	}
+
 }
