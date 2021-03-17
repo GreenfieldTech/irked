@@ -16,7 +16,7 @@ get-repo:
   - tags
  script:
   - pip install awscli
-  - aws s3 sync s3://cloudonix-dist/maven2/releases/tech/greenfield/irked-vertx/  maven-repo/releases/tech/greenfield/irked-vertx/
+  - aws s3 sync s3://cloudonix-dist/maven2/releases/tech/greenfield/irked-vertx/ maven-repo/releases/tech/greenfield/irked-vertx/
  artifacts:
   paths:
    - maven-repo/*
@@ -26,7 +26,7 @@ package:
  image: maven:3-jdk-11
  script:
   - mvn -B package
-  - mvn -DaltDeploymentRepository=repo::default::file:./maven-repo/$(grep -q SNAPSHOT pom.xml && echo snapshots || echo releases) deploy
+  - mvn -DskipTests -DaltDeploymentRepository=repo::default::file:./maven-repo/$(grep -q SNAPSHOT pom.xml && echo snapshots || echo releases) deploy
  artifacts:
   paths:
    - maven-repo/*
