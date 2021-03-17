@@ -30,6 +30,13 @@
 		<url>https://github.com/GreenfieldTech/irked</url>
 	</scm>
 
+	<distributionManagement>
+		<repository>
+			<id>default</id>
+			<url>file:./maven-repo/releases</url>
+		</repository>
+	</distributionManagement>
+
 	<dependencies>
 		<!-- upstream stacks -->
 		<dependency>
@@ -225,6 +232,10 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>3.0.0-M1</version>
 			</plugin>
 		</plugins>
 
