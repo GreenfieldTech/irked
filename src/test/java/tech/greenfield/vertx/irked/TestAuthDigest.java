@@ -3,7 +3,8 @@ package tech.greenfield.vertx.irked;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static tech.greenfield.vertx.irked.Matchers.*;
+import static tech.greenfield.vertx.irked.Matchers.isOK;
+import static tech.greenfield.vertx.irked.Matchers.status;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,7 +20,10 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
-import tech.greenfield.vertx.irked.annotations.*;
+import tech.greenfield.vertx.irked.annotations.Endpoint;
+import tech.greenfield.vertx.irked.annotations.Get;
+import tech.greenfield.vertx.irked.annotations.OnFail;
+import tech.greenfield.vertx.irked.annotations.Post;
 import tech.greenfield.vertx.irked.auth.DigestAuthorizationToken;
 import tech.greenfield.vertx.irked.auth.ParameterEncodedAuthorizationToken;
 import tech.greenfield.vertx.irked.base.TestBase;
@@ -89,7 +93,7 @@ public class TestAuthDigest extends TestBase {
 			assertThat(res, isOK());
 			assertThat(res.body().toString(), is(equalTo("OK")));
 		})
-		.exceptionally(failureHandler(context))
+		.exceptionally(t -> { context.failNow(t); return null; })
 		.thenRun(async::flag);
 	}
 
@@ -109,7 +113,7 @@ public class TestAuthDigest extends TestBase {
 			assertThat(res, isOK());
 			assertThat(res.body().toString(), is(equalTo("OK")));
 		})
-		.exceptionally(failureHandler(context))
+		.exceptionally(t -> { context.failNow(t); return null; })
 		.thenRun(async::flag);
 	}
 
