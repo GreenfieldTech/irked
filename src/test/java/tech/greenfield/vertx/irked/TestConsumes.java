@@ -1,14 +1,22 @@
 package tech.greenfield.vertx.irked;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static tech.greenfield.vertx.irked.Matchers.*;
 
-import io.vertx.core.Handler;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import java.util.function.Consumer;
+
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Consumes;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.base.TestBase;
+import tech.greenfield.vertx.irked.status.UnsupportedMediaType;
 
 public class TestConsumes extends TestBase {
 	
@@ -71,142 +79,110 @@ public class TestConsumes extends TestBase {
 	}
 
 	@Test
-	public void testNoConsumes(TestContext context) {
-		deployController(new TestNoConsumes(), context.asyncAssertSuccess(s -> {
-			Async f = context.async();
-			getClient().post(port, "localhost", "/none")
+	public void testNoConsumes(VertxTestContext context, Vertx vertx) {
+		deployController(new TestNoConsumes(), vertx, context.succeeding(s -> {
+			Checkpoint f = context.checkpoint();
+			getClient(vertx).post(port, "localhost", "/none")
 					.putHeader("Content-Type", "application/octet-stream")
-					.exceptionHandler(context::fail)
-					.handler(compareBodyHandler(TestNoConsumes.message, context, f)).end();
+					.sendP()
+					.thenAccept(compareBodyHandler(TestNoConsumes.message, context))
+					.exceptionally(failureHandler(context))
+					.thenRun(f::flag);
 		}));
 	}
 	
 	@Test
-	public void testConsumesOne(TestContext context) {
-		deployController(new TestConsumesOne(), context.asyncAssertSuccess(s -> {
-			Async f1 = context.async();
-			getClient().post(port, "localhost", "/one")
+	public void testConsumesOne(VertxTestContext context, Vertx vertx) {
+		deployController(new TestConsumesOne(), vertx, context.succeeding(s -> {
+			Checkpoint f = context.checkpoint();
+			getClient(vertx).post(port, "localhost", "/one")
 			.putHeader("Content-Type", "text/plain")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler(TestConsumesOne.message, context, f1)).end();
-			
-			Async f2 = context.async();
-			f1.handler(r -> {
-				getClient().post(port, "localhost", "/one")
+			.sendP()
+			.thenAccept(compareBodyHandler(TestConsumesOne.message, context))
+			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/one")
 				.putHeader("Content-Type", "text/xml")
-				.exceptionHandler(context::fail)
-				.handler(verifyMissHandler(context, f2)).end();
-			});
+				.sendP())
+			.thenAccept(r -> assertThat(r, is(status(new UnsupportedMediaType()))))
+			.exceptionally(failureHandler(context))
+			.thenRun(f::flag);
 		}));
 	}
 	
 	@Test
-	public void testConsumesMultiple(TestContext context) {
-		deployController(new TestConsumesMultiple(), context.asyncAssertSuccess(s -> {
-			Async f1 = context.async();
+	public void testConsumesMultiple(VertxTestContext context, Vertx vertx) {
+		deployController(new TestConsumesMultiple(), vertx, context.succeeding(s -> {
+			Checkpoint f = context.checkpoint();
 			
-			getClient().post(port, "localhost", "/multiple")
+			getClient(vertx).post(port, "localhost", "/multiple")
 			.putHeader("Content-Type", "application/json")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler(TestConsumesMultiple.message, context,f1)).end();
-			
-			Async f2 = context.async();
-			f1.handler(r -> {
-				getClient().post(port, "localhost", "/multiple")
+			.sendP()
+			.thenAccept(compareBodyHandler(TestConsumesMultiple.message, context))
+			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/multiple")
 				.putHeader("Content-Type", "application/rss+xml")
-				.exceptionHandler(context::fail)
-				.handler(compareBodyHandler(TestConsumesMultiple.message, context, f2)).end();
-			});
-			
-			Async f3 = context.async();
-			f2.handler(r -> {
-				getClient().post(port, "localhost", "/multiple")
+				.sendP())
+			.thenAccept(compareBodyHandler(TestConsumesMultiple.message, context))
+			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/multiple")
 				.putHeader("Content-Type", "text/xml")
-				.exceptionHandler(context::fail)
-				.handler(verifyMissHandler(context, f3)).end();
-			});
+				.sendP())
+			.thenAccept(r -> assertThat(r, is(status(UnsupportedMediaType.class))))
+			.exceptionally(failureHandler(context))
+			.thenRun(f::flag);
 		}));
 	}
 	
 	@Test
-	public void testConsumesGlob(TestContext context) {
-		deployController(new TestConsumesGlob(), context.asyncAssertSuccess(s -> {
-			Async f1 = context.async();
+	public void testConsumesGlob(VertxTestContext context, Vertx vertx) {
+		deployController(new TestConsumesGlob(), vertx, context.succeeding(s -> {
+			Checkpoint f = context.checkpoint();
 			
-			getClient().post(port, "localhost", "/glob")
+			getClient(vertx).post(port, "localhost", "/glob")
 			.putHeader("Content-Type", "image/png")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler(TestConsumesGlob.message, context, f1)).end();
-
-			Async f2 = context.async();
-			f1.handler(r -> {
-				getClient().post(port, "localhost", "/glob")
+			.sendP()
+			.thenAccept(compareBodyHandler(TestConsumesGlob.message, context))
+			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/glob")
 				.putHeader("Content-Type", "image/jpeg")
-				.exceptionHandler(context::fail)
-				.handler(compareBodyHandler(TestConsumesGlob.message, context,f2)).end();
-			});
-			
-			Async f3 = context.async();
-			f2.handler(r -> {
-				getClient().post(port, "localhost", "/glob")
+				.sendP())
+			.thenAccept(compareBodyHandler(TestConsumesGlob.message, context))
+			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/glob")
 				.putHeader("Content-Type", "image/tiff")
-				.exceptionHandler(context::fail)
-				.handler(compareBodyHandler(TestConsumesGlob.message, context, f3)).end();
-			});
-
-			Async f4 = context.async();
-			f3.handler(r -> {
-				getClient().post(port, "localhost", "/glob")
+				.sendP())
+			.thenAccept(compareBodyHandler(TestConsumesGlob.message, context))
+			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/glob")
 				.putHeader("Content-Type", "text/xpm")
-				.exceptionHandler(context::fail)
-				.handler(verifyMissHandler(context, f4)).end();
-			});
+				.sendP())
+			.thenAccept(r -> assertThat(r, is(status(new UnsupportedMediaType()))))
+			.exceptionally(failureHandler(context))
+			.thenRun(f::flag);
 		}));
 	}
 	
 	@Test
-	public void testConsumesWithFallback(TestContext context) {
-		deployController (new TestConsumesFallback(), context.asyncAssertSuccess(s -> {
-			Async f1 = context.async();
+	public void testConsumesWithFallback(VertxTestContext context, Vertx vertx) {
+		deployController (new TestConsumesFallback(), vertx, context.succeeding(s -> {
+			Checkpoint f = context.checkpoint();
 			
-			getClient().post(port, "localhost", "/fallback")
+			getClient(vertx).post(port, "localhost", "/fallback")
 			.putHeader("Content-Type", "application/xml")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler(TestConsumesFallback.message, context, f1)).end();
-	
-			Async f2 = context.async();
-			f1.handler(r -> {
-				getClient().post(port, "localhost", "/fallback")
+			.sendP()
+			.thenAccept(compareBodyHandler(TestConsumesFallback.message, context))
+			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/fallback")
 				.putHeader("Content-Type", "application/octet-stream")
-				.exceptionHandler(context::fail)
-				.handler(compareBodyHandler(TestConsumesFallback.messagePartial, context, f2)).end();
-			});
-			
-			Async f3 = context.async();
-			f2.handler(r -> {
-				getClient().post(port, "localhost", "/fallback")
+				.sendP())
+			.thenAccept(compareBodyHandler(TestConsumesFallback.messagePartial, context))
+			.thenCompose(v -> getClient(vertx).post(port, "localhost", "/fallback")
 				.putHeader("Content-Type", "text/plain")
-				.exceptionHandler(context::fail)
-				.handler(compareBodyHandler(TestConsumesFallback.messageFallback, context, f3)).end();
-			});
+				.sendP())
+			.thenAccept(compareBodyHandler(TestConsumesFallback.messageFallback, context))
+			.exceptionally(failureHandler(context))
+			.thenRun(f::flag);
 		}));
 	}
 	
-	private Handler<HttpClientResponse> compareBodyHandler(String message, TestContext context, Async f) {
+	private Consumer<HttpResponse<Buffer>> compareBodyHandler(String message, VertxTestContext context) {
 		return r -> {
-			context.assertEquals(200, r.statusCode(), "Failed to call consumes test '" + message + "'");
-			r.exceptionHandler(context::fail).bodyHandler(body -> {
-				context.assertEquals(message, body.toString());
-				f.complete();
-			});
+			assertThat(r, isOK());
+			assertThat(r, hasBody(message));
 		};
 	}
 	
-	private Handler<HttpClientResponse> verifyMissHandler(TestContext context, Async f) {
-		return r -> {
-			context.assertTrue(r.statusCode() == 404 || r.statusCode() == 415, "Should have received an error for incorrect type");
-			f.complete();
-		};
-	}
-
 }

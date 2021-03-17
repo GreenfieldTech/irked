@@ -44,11 +44,18 @@ public class RouteConfigurationField extends RouteConfiguration {
 			throw new InvalidRouteConfiguration(this + " is not a valid handler or controller");
 		field.setAccessible(true);
 		final Handler<RoutingContext> handler = (Handler<RoutingContext>)field.get(impl);
-		return r -> {
-			try {
-				handler.handle(r);
-			} catch (Throwable cause) {
-				handleUserException(r, cause, "field " + field);
+		return new Handler<RoutingContext>() {
+			@Override
+			public void handle(RoutingContext r) {
+				try {
+					handler.handle(r);
+				} catch (Throwable cause) {
+					handleUserException(r, cause, "field " + field);
+				}
+			}
+			@Override
+			public String toString() {
+				return field.getName();
 			}
 		};
 	}
@@ -59,7 +66,21 @@ public class RouteConfigurationField extends RouteConfiguration {
 		if (!Handler.class.isAssignableFrom(field.getType()))
 			throw new InvalidRouteConfiguration(this + " is not a valid handler");
 		field.setAccessible(true);
-		return (Handler<WebSocketMessage>)field.get(impl);
+		final Handler<WebSocketMessage> handler = (Handler<WebSocketMessage>)field.get(impl);
+		return new Handler<WebSocketMessage>() {
+			@Override
+			public void handle(WebSocketMessage m) {
+				try {
+					handler.handle(m);
+				} catch (Throwable cause) {
+					handleUserException(m, cause, "field " + field);
+				}
+			}
+			@Override
+			public String toString() {
+				return field.getName();
+			}
+		};
 	}
 
 }

@@ -7,19 +7,29 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
 public class RequestWrapper implements Function<RoutingContext, Request>, Handler<RoutingContext> {
+	
+	private enum Type { Root, Controller, Handler, Custom }
 
+	private Type type;
 	private Controller ctr;
 	protected Function<RoutingContext, Request> wrapper;
 	private Handler<? super RoutingContext> handler;
+	
+	public RequestWrapper(Controller ctr) {
+		this(ctr, Request::new);
+		type = Type.Root;
+	}
 
 	public RequestWrapper(Controller ctr, Function<RoutingContext, Request> requestWrapper) {
 		this.ctr = Objects.requireNonNull(ctr, "Controller instance is not set!");
 		this.wrapper = requestWrapper;
+		type = Type.Controller;
 	}
-
+	
 	public RequestWrapper(Handler<? super RoutingContext> handler, Function<RoutingContext, Request> requestWrapper) {
 		this.handler = Objects.requireNonNull(handler, "Handler instance is not set!");
 		this.wrapper = requestWrapper;
+		type = Type.Handler;
 	}
 	
 	/**
@@ -28,6 +38,7 @@ public class RequestWrapper implements Function<RoutingContext, Request>, Handle
 	 */
 	protected RequestWrapper(Function<RoutingContext, Request> parent) {
 		wrapper = parent;
+		type = Type.Custom;
 	}
 
 	@Override
@@ -41,6 +52,12 @@ public class RequestWrapper implements Function<RoutingContext, Request>, Handle
 	}
 
 	public String toString() {
-		return "[" + (Objects.nonNull(ctr) ? "Controller:"+ctr : "Handler:"+handler) + (Objects.nonNull(wrapper) ? "->" + wrapper : "") + "]"; 
+		switch (type) {
+		case Root: return "HTTP=>" + ctr;
+		case Controller: return wrapper + "->" + ctr;
+		case Handler: return wrapper + "." + handler;
+		default:
+		case Custom: return wrapper + "->?";
+		}
 	}
 }

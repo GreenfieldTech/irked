@@ -1,15 +1,24 @@
 package tech.greenfield.vertx.irked;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static tech.greenfield.vertx.irked.Matchers.*;
 
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.annotations.OnFail;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
+import tech.greenfield.vertx.irked.status.InternalServerError;
 
 /**
  * A set of negative tests to see how Irked handle controller with bad routing methods
@@ -67,49 +76,50 @@ public class TestInvalidMethod extends TestBase {
 	/**
 	 * This test should actually succeed, because we override the permissions. We're bad like that
 	 * @param context
+	 * @param vertx 
 	 */
 	@Test
-	public void privateMethod(TestContext context) {
-		Async async = context.async();
-		deployController(new PrivateController(), context.asyncAssertSuccess(deploymentID -> {
-			getClient().get(port, "localhost", "/private").exceptionHandler(t -> context.fail(t)).handler(res -> {
-				res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-					context.assertEquals(200, res.statusCode(), "Request failed: " + body);
-					context.assertEquals("OK", body.toString());
-					rule.vertx().undeploy(deploymentID, context.asyncAssertSuccess());
-					async.complete();
-				});
-			}).end();
+	public void privateMethod(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		deployController(new PrivateController(), vertx, context.succeeding(deploymentID -> {
+			getClient(vertx).get(port, "localhost", "/private").sendP().thenAccept(res -> {
+				assertThat(res, isOK());
+				assertThat(res.bodyAsString(), equalTo("OK"));
+				vertx.undeploy(deploymentID, context.succeedingThenComplete());
+			})
+			.exceptionally(failureHandler(context))
+			.thenRun(async::flag);
 		}));
 	}
 	
 	@Test
-	public void noArgs(TestContext context) {
-		deployController(new NoArgController(), context.asyncAssertFailure(t -> 
-			context.assertEquals(t.getClass(), InvalidRouteConfiguration.class)
-		));
+	public void noArgs(VertxTestContext context, Vertx vertx) {
+		deployController(new NoArgController(), vertx, context.failing(t -> {
+			assertThat(t, is(instanceOf(InvalidRouteConfiguration.class)));
+			context.completeNow();
+		}));
 	}
 
 	@Test
-	public void tooManyArgs(TestContext context) {
-		deployController(new ManyArgsController(), context.asyncAssertFailure(t -> 
-			context.assertEquals(t.getClass(), InvalidRouteConfiguration.class)
-		));
+	public void tooManyArgs(VertxTestContext context, Vertx vertx) {
+		deployController(new ManyArgsController(), vertx, context.failing(t -> {
+			assertThat(t, is(instanceOf(InvalidRouteConfiguration.class)));
+			context.completeNow();
+		}));
 	}
 	
 	@Test
-	public void routingMethodWantsWrongType(TestContext context) {
-		Async async = context.async();
-		deployController(new InvalidTypeController(), context.asyncAssertSuccess(deploymentID -> {
+	public void routingMethodWantsWrongType(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		deployController(new InvalidTypeController(), vertx, context.succeeding(deploymentID -> {
 			
-			getClient().get(port, "localhost", "/invalid").exceptionHandler(t -> context.fail(t)).handler(res -> {
-				res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-					context.assertEquals(500, res.statusCode(), "Request failed: " + body);
-					context.assertTrue(body.toJsonObject().getString("message").startsWith("Invalid request handler"));
-					rule.vertx().undeploy(deploymentID, context.asyncAssertSuccess());
-					async.complete();
-				});
-			}).end();
+			getClient(vertx).get(port, "localhost", "/invalid").sendP().thenAccept(res -> {
+				assertThat(res, is(status(new InternalServerError())));
+				assertThat(res.bodyAsJsonObject().getString("message"), startsWith("Invalid request handler"));
+				vertx.undeploy(deploymentID, context.succeedingThenComplete());
+			})
+			.exceptionally(failureHandler(context))
+			.thenRun(async::flag);
 		}));
 	}
 }

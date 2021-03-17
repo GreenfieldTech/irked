@@ -1,14 +1,19 @@
 package tech.greenfield.vertx.irked;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static tech.greenfield.vertx.irked.Matchers.*;
+
 import java.util.Objects;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.annotations.Put;
 import tech.greenfield.vertx.irked.base.TestBase;
@@ -52,45 +57,35 @@ public class TestRequestContext extends TestBase {
 		
 	}
 
-	@Before
-	public void deployServer(TestContext context) {
-		deployController(new TestController(), context.asyncAssertSuccess());
+	@BeforeEach
+	public void deployServer(VertxTestContext context, Vertx vertx) {
+		deployController(new TestController(), vertx, context.succeedingThenComplete());
 	}
 
 	@Test
-	public void testPassIdToMethod(TestContext context) {
-		Async async = context.async();
+	public void testPassIdToMethod(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
 		String id = "item-name";
-		getClient().get(port, "localhost", "/" + id).exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					JsonObject o = body.toJsonObject();
-					context.assertEquals(id, o.getString("id"));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-			});
-			async.complete();
-		}).end();
+		getClient(vertx).get(port, "localhost", "/" + id).sendP().thenAccept(res -> {
+			assertThat(res, isOK());
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getString("id"), equalTo(id));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testPassIdToField(TestContext context) {
-		Async async = context.async();
+	public void testPassIdToField(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
 		String id = "item-name";
-		getClient().put(port, "localhost", "/" + id).exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					JsonObject o = body.toJsonObject();
-					context.assertEquals(id, o.getString("id"));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-			});
-			async.complete();
-		}).end("{}");
+		getClient(vertx).put(port, "localhost", "/" + id).sendP("{}").thenAccept(res -> {
+			assertThat(res, isOK());
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getString("id"), equalTo(id));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 }

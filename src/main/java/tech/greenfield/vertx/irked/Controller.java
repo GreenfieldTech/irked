@@ -87,4 +87,8 @@ public class Controller {
 		routes.forEach(RouteConfiguration::remove);
 	}
 	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
+	}
 }

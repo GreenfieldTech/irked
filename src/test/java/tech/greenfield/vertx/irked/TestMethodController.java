@@ -1,11 +1,17 @@
 package tech.greenfield.vertx.irked;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static tech.greenfield.vertx.irked.Matchers.*;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Delete;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.annotations.Post;
@@ -29,7 +35,7 @@ public class TestMethodController extends TestBase {
 		
 		@Put("/put")
 		public void update(Request r) {
-			r.response().putHeader("Content-Length", "7").write("success").end();
+			r.response().putHeader("Content-Length", "7").write("success");
 		}
 		
 		@Delete("/delete")
@@ -38,67 +44,55 @@ public class TestMethodController extends TestBase {
 		}
 	}
 
-	@Before
-	public void deployServer(TestContext context) {
-		deployController(new TestController(), context.asyncAssertSuccess());
+	@BeforeEach
+	public void deployServer(VertxTestContext context, Vertx vertx) {
+		deployController(new TestController(), vertx, context.succeedingThenComplete());
 	}
 
 	@Test
-	public void testGet(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/get").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					JsonObject o = body.toJsonObject();
-					context.assertEquals(Boolean.TRUE, o.getValue("success"));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end();
+	public void testGet(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/get").sendP().thenAccept(res -> {
+			assertThat(res, isOK());
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getValue("success"), equalTo(Boolean.TRUE));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testPost(TestContext context) {
-		Async async = context.async();
-		getClient().post(port, "localhost", "/post").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(new BadRequest().getStatusCode(), res.statusCode(), "Incorrect response status");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					JsonObject o = body.toJsonObject();
-					context.assertEquals(new BadRequest().getMessage(), o.getValue("message"));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-				async.complete();
-			});
-		}).end("{}");
+	public void testPost(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).post(port, "localhost", "/post").sendP("{}").thenAccept(res -> {
+			assertThat(res, is(status(new BadRequest())));
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getValue("message"), equalTo(new BadRequest().getMessage()));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testPut(TestContext context) {
-		Async async = context.async();
-		getClient().put(port, "localhost", "/put").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				context.assertEquals("success", body.toString());
-				async.complete();
-			});
-		}).end("{}");
+	public void testPut(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).put(port, "localhost", "/put").sendP("{}").thenAccept(res -> {
+			assertThat(res, isOK());
+			assertThat(res, hasBody("success"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testDelete(TestContext context) {
-		Async async = context.async();
-		getClient().delete(port, "localhost", "/delete").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(new NoContent().getStatusCode(), res.statusCode(), "Incorrect response status");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				context.assertEquals(0, body.length());
-				async.complete();
-			});
-		}).end("{}");
+	public void testDelete(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).delete(port, "localhost", "/delete").sendP("{}").thenAccept(res -> {
+			assertThat(res, is(status(new NoContent())));
+			assertThat(res, is(bodyEmpty()));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 }

@@ -1,13 +1,15 @@
 package tech.greenfield.vertx.irked;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static tech.greenfield.vertx.irked.Matchers.*;
 
-import io.vertx.core.Handler;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.Vertx;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.base.TestBase;
@@ -51,76 +53,100 @@ public class TestMountController extends TestBase {
 		};
 	}
 
-	@Before
-	public void deployServer(TestContext context) {
-		deployController(new ParentController(), context.asyncAssertSuccess());
+	@BeforeEach
+	public void deployServer(VertxTestContext context, Vertx vertx) {
+		deployController(new ParentController(), vertx, context.succeedingThenComplete());
 	}
 
 	@Test
-	public void testParentIndex(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler("index", context, async)).end();
+	public void testParentIndex(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/")
+			.sendP().thenAccept(r -> {
+				assertThat(r, isOK());
+				assertThat(r, hasBody("index"));
+			})
+			.exceptionally(failureHandler(context))
+			.thenRun(async::flag);
 	}
 	
 	@Test
-	public void testChild(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/child")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler("child index", context, async)).end();
+	public void testChild(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/child")
+			.sendP()
+			.thenAccept(r -> {
+				assertThat(r, isOK());
+				assertThat(r, hasBody("child index"));
+			})
+			.exceptionally(failureHandler(context))
+			.thenRun(async::flag);
 	}
 
 	@Test
-	public void testChildIndex(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/child/")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler("child index", context, async)).end();
+	public void testChildIndex(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/child/")
+		.sendP()
+		.thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r, hasBody("child index"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testChildTest(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/child/test")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler("child test", context, async)).end();
+	public void testChildTest(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/child/test")
+		.sendP()
+		.thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r, hasBody("child test"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testParamChild(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/value/paramChild")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler("param child index", context, async)).end();
+	public void testParamChild(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/value/paramChild")
+		.sendP()
+		.thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r, hasBody("param child index"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	@Ignore("Wait for bug https://github.com/vert-x3/vertx-web/issues/786 to be fixed")
-	public void testParamChildIndex(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/value/paramChild/")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler("param child index", context, async)).end();
+	@Disabled("Wait for bug https://github.com/vert-x3/vertx-web/issues/786 to be fixed")
+	public void testParamChildIndex(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/value/paramChild/")
+		.sendP()
+		.thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r, hasBody("param child index"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testParamChildTest(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/value/paramChild/test")
-			.exceptionHandler(context::fail)
-			.handler(compareBodyHandler("param child test", context, async)).end();
-	}
-
-	private Handler<HttpClientResponse> compareBodyHandler(String message, TestContext context, Async f) {
-		return r -> {
-			context.assertEquals(200, r.statusCode(), "Failed to call consumes test '" + message + "'");
-			r.exceptionHandler(context::fail).bodyHandler(body -> {
-				context.assertEquals(message, body.toString());
-				f.complete();
-			});
-		};
+	public void testParamChildTest(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/value/paramChild/test")
+		.sendP()
+		.thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r, hasBody("param child test"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 }

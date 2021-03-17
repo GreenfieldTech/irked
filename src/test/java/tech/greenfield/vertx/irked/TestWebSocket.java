@@ -1,17 +1,20 @@
 package tech.greenfield.vertx.irked;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+
 import java.util.Arrays;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Test;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.WebsocketRejectedException;
-import io.vertx.core.http.impl.headers.VertxHttpHeaders;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import io.vertx.core.http.UpgradeRejectedException;
+import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.Unauthorized;
@@ -21,27 +24,25 @@ public class TestWebSocket extends TestBase {
 	private static final String PING = "ping";
 	private static final String PONG = "pong";
 
-	@Rule
-	public Timeout timeout = Timeout.seconds(2);
-	
 	public class TestControllerTextPinger extends Controller {
 		@WebSocket("/ping")
 		MessageHandler pinger = m -> { if (m.toString().equals(PING)) m.reply(PONG); };
 	}
 
 	@Test
-	public void testSimplePing(TestContext context) {
-		Async async = context.async();
-		deployController(new TestControllerTextPinger(), context.asyncAssertSuccess(s -> {
-			getClient().websocket(port, "localhost", "/ping", ws -> {
+	public void testSimplePing(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		deployController(new TestControllerTextPinger(), vertx, context.succeeding(s -> {
+			getClient(vertx).websocket(port, "localhost", "/ping")
+			.thenAccept(ws -> {
 				ws.writeTextMessage(PING);
 				ws.handler(buf -> {
-					context.assertEquals(PONG, buf.toString());
+					assertThat(buf.toString(), equalTo(PONG));
 					ws.close();
-					rule.vertx().undeploy(s);
-					async.complete();
+					vertx.undeploy(s);
+					async.flag();
 				});
-			}, context::fail);
+			}).exceptionally(failureHandler(context));
 		}));
 	}
 
@@ -55,18 +56,19 @@ public class TestWebSocket extends TestBase {
 	}
 
 	@Test
-	public void testBinaryPing(TestContext context) {
-		Async async = context.async();
-		deployController(new TestControllerBinaryPinger(), context.asyncAssertSuccess(s -> {
-			getClient().websocket(port, "localhost", "/binary-ping", ws -> {
+	public void testBinaryPing(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		deployController(new TestControllerBinaryPinger(), vertx, context.succeeding(s -> {
+			getClient(vertx).websocket(port, "localhost", "/binary-ping")
+			.thenAccept(ws -> {
 				ws.write(Buffer.buffer(BPING));
 				ws.handler(buf -> {
-					context.assertTrue(Arrays.equals(BPONG, buf.getBytes()));
+					assertThat(buf.getBytes(), equalTo(BPONG));
 					ws.close();
-					rule.vertx().undeploy(s);
-					async.complete();
+					vertx.undeploy(s);
+					async.flag();
 				});
-			}, context::fail);
+			}).exceptionally(failureHandler(context));
 		}));
 	}
 	
@@ -78,21 +80,21 @@ public class TestWebSocket extends TestBase {
 	}
 	
 	@Test
-	public void testMethodPinger(TestContext context) {
-		Async async = context.async();
-		deployController(new TestControllerMethodPinger(), context.asyncAssertSuccess(s -> {
-			getClient().websocket(port, "localhost", "/ping-method", new VertxHttpHeaders().add("Authorization","ok"), ws -> {
+	public void testMethodPinger(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		deployController(new TestControllerMethodPinger(), vertx, context.succeeding(s -> {
+			getClient(vertx).websocket(port, "localhost", "/ping-method", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			.thenAccept(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
-					context.assertEquals(PONG, text);
+					assertThat(text, equalTo(PONG));
 					ws.close();
-					rule.vertx().undeploy(s);
-					async.complete();
+					vertx.undeploy(s);
+					async.flag();
 				});
-			}, context::fail);
+			}).exceptionally(failureHandler(context));
 		}));
 	}
-	
 	
 	public class TestControllerAdvancedMethodPinger extends Controller {
 		private class AutoReply extends Request {
@@ -115,18 +117,19 @@ public class TestWebSocket extends TestBase {
 	}
 	
 	@Test
-	public void testAdvancedMethodPinger(TestContext context) {
-		Async async = context.async();
-		deployController(new TestControllerAdvancedMethodPinger(), context.asyncAssertSuccess(s -> {
-			getClient().websocket(port, "localhost", "/ping-adv-method", new VertxHttpHeaders().add("Authorization","ok"), ws -> {
+	public void testAdvancedMethodPinger(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		deployController(new TestControllerAdvancedMethodPinger(), vertx, context.succeeding(s -> {
+			getClient(vertx).websocket(port, "localhost", "/ping-adv-method", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			.thenAccept(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
-					context.assertEquals(PONG, text);
+					assertThat(text, equalTo(PONG));
 					ws.close();
-					rule.vertx().undeploy(s);
-					async.complete();
+					vertx.undeploy(s);
+					async.flag();
 				});
-			}, context::fail);
+			}).exceptionally(failureHandler(context));
 		}));
 	}
 	
@@ -150,36 +153,64 @@ public class TestWebSocket extends TestBase {
 	}
 	
 	@Test
-	public void testAuthorizedPing(TestContext context) {
-		Async async = context.async();
-		deployController(new TestControllerAuthorizePing(), context.asyncAssertSuccess(s -> {
-			getClient().websocket(port, "localhost", "/with-auth", new VertxHttpHeaders().add("Authorization","ok"), ws -> {
+	public void testAuthorizedPing(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		deployController(new TestControllerAuthorizePing(), vertx, context.succeeding(s -> {
+			getClient(vertx).websocket(port, "localhost", "/with-auth", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			.thenAccept(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
-					context.assertEquals(PONG, text);
+					assertThat(text, equalTo(PONG));
 					ws.close();
-					rule.vertx().undeploy(s);
-					async.complete();
+					vertx.undeploy(s);
+					async.flag();
 				});
-			}, context::fail);
+			}).exceptionally(failureHandler(context));
 		}));
 	}
 
 	@Test
-	public void testFailedToAuthorizedPing(TestContext context) {
-		Async async = context.async();
-		deployController(new TestControllerAuthorizePing(), context.asyncAssertSuccess(s -> {
-			getClient().websocket(port, "localhost", "/with-auth", new VertxHttpHeaders().add("Authorization","invalid"), ws -> {
-				context.fail("Invalid authorization should not succeed");
-			}, t -> {
-				if (t instanceof WebsocketRejectedException) {
-					WebsocketRejectedException e = (WebsocketRejectedException)t;
-					context.assertEquals(401, e.getStatus());
-					rule.vertx().undeploy(s);
-					async.complete();
+	public void testFailedToAuthorizedPing(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		deployController(new TestControllerAuthorizePing(), vertx, context.succeeding(s -> {
+			getClient(vertx).websocket(port, "localhost", "/with-auth", HeadersMultiMap.httpHeaders().add("Authorization","invalid"))
+			.thenAccept(ws -> {
+				context.failNow(new Exception("Invalid authorization should not succeed"));
+			}).exceptionally(t -> {
+				while (t instanceof RuntimeException && t.getCause() != null) t = t.getCause();
+				if (t instanceof UpgradeRejectedException) {
+					var e = (UpgradeRejectedException)t;
+					assertThat(e.getStatus(), equalTo(401));
+					vertx.undeploy(s);
+					async.flag();
 				} else
-					context.fail(t);
+					context.failNow(t);
+				return null;
 			});
+		}));
+	}
+
+	public class TestMessageHandlingFailure extends Controller {
+		@WebSocket("/failures")
+		void pinger(WebSocketMessage m) {
+			throw new RuntimeException("Unexpected exception");
+		}
+	}
+	
+	@Test
+	public void testMessageHandlingFailure(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		vertx.exceptionHandler(context::failNow);
+		deployController(new TestMessageHandlingFailure(), vertx, context.succeeding(s -> {
+			getClient(vertx).websocket(port, "localhost", "/failures", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			.thenAccept(ws -> {
+				ws.closeHandler(v -> {
+					assertThat(ws.closeStatusCode(), is(equalTo((short)1011)));
+					assertThat(ws.closeReason(), is(equalTo("Unexpected exception")));
+					async.flag();
+				});
+				ws.writeTextMessage(PING);
+			}).exceptionally(failureHandler(context));
 		}));
 	}
 
