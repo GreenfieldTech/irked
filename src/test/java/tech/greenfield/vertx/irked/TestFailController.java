@@ -1,11 +1,16 @@
 package tech.greenfield.vertx.irked;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static tech.greenfield.vertx.irked.Matchers.*;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.annotations.OnFail;
@@ -26,26 +31,21 @@ public class TestFailController extends TestBase {
 		};
 	}
 
-	@Before
-	public void deployServer(TestContext context) {
-		deployController(new TestController(), context.asyncAssertSuccess());
+	@BeforeEach
+	public void deployServer(VertxTestContext context, Vertx vertx) {
+		deployController(new TestController(), vertx, context.succeedingThenComplete());
 	}
 
 	@Test
-	public void testFail(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/").exceptionHandler(t -> context.fail(t)).handler(res -> {
-			context.assertEquals(200, res.statusCode(), "Request failed");
-			res.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				try {
-					JsonObject o = body.toJsonObject();
-					context.assertEquals(Boolean.FALSE, o.getValue("success"));
-				} catch (Exception e) {
-					context.fail(e);
-				}
-			});
-			async.complete();
-		}).end();
+	public void testFail(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/").sendP().thenAccept(res -> {
+			assertThat(res, isOK());
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getValue("success"), equalTo(Boolean.FALSE));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 }

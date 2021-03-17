@@ -1,42 +1,56 @@
 package tech.greenfield.vertx.irked.base;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static tech.greenfield.vertx.irked.Matchers.notFound;
+
 import java.util.Random;
+import java.util.function.Function;
 
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
-import io.vertx.core.http.HttpClient;
+import io.vertx.core.*;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.junit.RunTestOnContext;
-import io.vertx.ext.unit.junit.Timeout;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.Controller;
 import tech.greenfield.vertx.irked.server.Server;
 
-@RunWith(VertxUnitRunner.class)
-@Ignore public class TestBase {
+public class TestBase {
 
-	@ClassRule
-	public static RunTestOnContext rule = new RunTestOnContext();
-	@Rule
-	public Timeout timeoutRule = Timeout.seconds(3600);
+	// client max message
+	private static final int MAX_WEBSOCKET_MESSAGE_SIZE = 1024 * 1024 * 1024; // 1G. Frame size is 64K
+
+	@RegisterExtension
+	static VertxExtension vertxExtension = new VertxExtension();
 	protected final Integer port = new Random().nextInt(30000)+10000;
 
-	protected HttpClient getClient() {
-		return rule.vertx().createHttpClient(new HttpClientOptions().setIdleTimeout(0));
+	protected static WebClientExt getClient(Vertx vertx) {
+		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions()
+				.setIdleTimeout(0)
+				.setMaxWebSocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
 	}
 
-	protected void deployController(Controller controller, Handler<AsyncResult<String>> handler) {
+	protected void deployController(Controller controller, Vertx vertx, Handler<AsyncResult<String>> handler) {
 		Server server = new Server(controller);
-	
+
 		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("port", port));
-		rule.vertx().deployVerticle(server, options, handler);
+		vertx.deployVerticle(server, options, handler);
+	}
+
+	protected static Function<Throwable, Void> failureHandler(VertxTestContext context) {
+		return  t -> {
+			context.failNow(t);
+			return null;
+		};
+	}
+	
+	protected void verifyNotFound(HttpResponse<Buffer> r) {
+		assertThat(r, is(notFound()));
 	}
 
 }

@@ -71,23 +71,30 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	@Override
 	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
 		method.setAccessible(true);
-		return r -> {
-			// run time check for correct type
-			// we support working with methods that take specializations for Request, we'll rely on the specific implementation's
-			// getRequest() to provide the correct type
-			if (!params[0].isAssignableFrom(r.getClass())) {
-				r.fail(new InternalServerError("Invalid request handler " + this + " - can't handle request of type " + r.getClass()));
-				return;
+		return new Handler<RoutingContext>() {
+			@Override
+			public void handle(RoutingContext r) {
+				// run time check for correct type
+				// we support working with methods that take specializations for Request, we'll rely on the specific implementation's
+				// getRequest() to provide the correct type
+				if (!params[0].isAssignableFrom(r.getClass())) {
+					r.fail(new InternalServerError("Invalid request handler " + this + " - can't handle request of type " + r.getClass()));
+					return;
+				}
+				
+				try {
+					method.invoke(impl, r);
+				} catch (InvocationTargetException e) { // user exception
+					handleUserException(r, e.getCause(), "method " + method);
+				} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
+					r.fail(new InternalServerError("Invalid request handler " + this + ": " + e, e));
+				} catch (IllegalArgumentException e) { // shouldn't happen because we checked the type before calling
+					r.fail(new InternalServerError("Mistyped request handler " + this + ": " + e, e));
+				}
 			}
-			
-			try {
-				method.invoke(impl, r);
-			} catch (InvocationTargetException e) { // user exception
-				handleUserException(r, e.getCause(), "method " + method);
-			} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
-				r.fail(new InternalServerError("Invalid request handler " + this + ": " + e, e));
-			} catch (IllegalArgumentException e) { // shouldn't happen because we checked the type before calling
-				r.fail(new InternalServerError("Mistyped request handler " + this + ": " + e, e));
+			@Override
+			public String toString() {
+				return method.getName() + "(" + Arrays.asList(method.getParameterTypes()).stream().map(Class::getSimpleName).collect(Collectors.joining(", ")) + ")";
 			}
 		};
 	}
@@ -95,27 +102,33 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	@Override
 	Handler<? super WebSocketMessage> getMessageHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
 		method.setAccessible(true);
-		return m -> {
-			Request req = m.request();
-			// run time check for correct type
-			// we support working with methods that take specializations for Request, we'll rely on the specific implementation's
-			// getRequest() to provide the correct type
-			if (!params[0].isAssignableFrom(m.getClass()) && !params[0].isAssignableFrom(req.getClass())) {
-				req.fail(new InternalServerError("Invalid request handler " + this + " - can't handle request of type " + req.getClass()));
-				return;
+		return new Handler<WebSocketMessage>() {
+			@Override
+			public void handle(WebSocketMessage m) {
+				Request req = m.request();
+				// run time check for correct type
+				// we support working with methods that take specializations for Request, we'll rely on the specific implementation's
+				// getRequest() to provide the correct type
+				if (!params[0].isAssignableFrom(m.getClass()) && !params[0].isAssignableFrom(req.getClass())) {
+					req.fail(new InternalServerError("Invalid request handler " + this + " - can't handle request of type " + req.getClass()));
+					return;
+				}
+				
+				try {
+					if (params.length == 1)
+						method.invoke(impl, m);
+					else
+						method.invoke(impl, req, m);
+				} catch (InvocationTargetException e) { // user exception
+					handleUserException(m, e.getCause(), "method " + method);
+				} catch (IllegalAccessException | IllegalArgumentException e) {
+					// shouldn't happen because we setAccessible above and we checked the type before calling
+					handleUserException(m, e, "method " + method);
+				}
 			}
-			
-			try {
-				if (params.length == 1)
-					method.invoke(impl, m);
-				else
-					method.invoke(impl, req, m);
-			} catch (InvocationTargetException e) { // user exception
-				m.request().fail(e.getCause()); // propagate exceptions thrown by the method to the Vert.x fail handler
-			} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
-				m.request().fail(new InternalServerError("Invalid request handler " + this + ": " + e, e));
-			} catch (IllegalArgumentException e) { // shouldn't happen because we checked the type before calling
-				m.request().fail(new InternalServerError("Mistyped request handler " + this + ": " + e, e));
+			@Override
+			public String toString() {
+				return method.getName() + "(" + Arrays.asList(method.getParameterTypes()).stream().map(Class::getSimpleName).collect(Collectors.joining(", ")) + ")";
 			}
 		};
 	}

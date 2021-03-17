@@ -63,8 +63,8 @@ public class StatusClassGenerator {
 		writer.format("package %s;\n\n", packageName);
 		for (String imp : new String[] {
 				"java.util.TreeMap", "java.util.Map",
-				"tech.greenfield.vertx.irked.HttpError"
-
+				"tech.greenfield.vertx.irked.HttpError",
+				"java.lang.reflect.InvocationTargetException",
 		}) {
 			writer.format("import %s;\n", imp);
 		}
@@ -74,11 +74,16 @@ public class StatusClassGenerator {
 		statusClasses.forEach((code, errorclass) -> {
 			writer.format("HTTP_STATUS_CODES.put(%d,%s.class);\n", code, errorclass);
 		});
-		writer.format("};\n");
-		writer.format("public static HttpError create(int statusCode) throws InstantiationException, IllegalAccessException {\n");
-		writer.format("return HTTP_STATUS_CODES.get(statusCode).newInstance();\n");
-		writer.format("}\n");
-		writer.format("}\n");
+		writer.format("};\n"+
+				"public static HttpError create(int statusCode) throws InstantiationException {\n"+
+				"try {\n"+
+				"return HTTP_STATUS_CODES.get(statusCode).getConstructor().newInstance();\n"+
+				"} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException\n"+
+				"\t| NoSuchMethodException | SecurityException e) {\n"+
+				"throw new InstantiationException(e.toString());\n"+
+				"}\n"+
+				"}\n"+
+				"}\n");
 		writer.close();
 	}
 	

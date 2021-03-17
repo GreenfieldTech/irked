@@ -1,13 +1,19 @@
 package tech.greenfield.vertx.irked;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static tech.greenfield.vertx.irked.Matchers.*;
+
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.InternalServerError;
@@ -26,7 +32,7 @@ public class TestRouteCascade extends TestBase {
 
 		@Put("/")
 		WebHandler update = r -> {
-			rule.vertx().executeBlocking(f -> {
+			r.vertx().executeBlocking(f -> {
 				data.mergeIn(r.getBodyAsJson());
 				f.complete();
 			}, f -> {
@@ -86,56 +92,52 @@ public class TestRouteCascade extends TestBase {
 	}
 
 	@Test
-	public void testCascadingFieldHandlers(TestContext context) {
-		deployController(new TestControllerCascadeField(), context.asyncAssertSuccess(s -> executeTest(context)));
+	public void testCascadingFieldHandlers(VertxTestContext context, Vertx vertx) {
+		deployController(new TestControllerCascadeField(), vertx, context.succeeding(s -> executeTest(context, vertx)));
 	}
 
-	private void executeTest(TestContext context) {
+	private void executeTest(VertxTestContext context, Vertx vertx) {
 		int newVal = 5;
-		Async async = context.async();
-		getClient().put(port, "localhost", "/").exceptionHandler(t -> context.fail(t)).handler(r -> {
-			context.assertEquals(200, r.statusCode(), "Failed to call PUT");
-			r.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				context.assertEquals(newVal, body.toJsonObject().getInteger(fieldName));
-				async.complete();
-			});
-		}).end(new JsonObject().put(fieldName, newVal).encode());
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).put(port, "localhost", "/").sendP(new JsonObject().put(fieldName, newVal)).thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r.bodyAsJsonObject().getInteger(fieldName), equalTo(newVal));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	@Test
-	public void testNotCascadingFieldHandlers(TestContext context) {
-		deployController(new TestControllerNotCascadedGet(), context.asyncAssertSuccess(s -> executeTestNoCascade(context)));
+	public void testNotCascadingFieldHandlers(VertxTestContext context, Vertx vertx) {
+		deployController(new TestControllerNotCascadedGet(), vertx, context.succeeding(s -> executeTestNoCascade(context, vertx)));
 	}
 
-	private void executeTestNoCascade(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/foo").exceptionHandler(t -> context.fail(t)).handler(r -> {
-			context.assertEquals(200, r.statusCode(), "Failed to call GET /foo");
-			r.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				context.assertEquals("ok", body.toString());
-				context.assertEquals(0, failedTests.get());
-				async.complete();
-			});
-		}).end();
+	private CompletableFuture<Void> executeTestNoCascade(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		return getClient(vertx).get(port, "localhost", "/foo").sendP().thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r.bodyAsString(), equalTo("ok"));
+			assertThat(failedTests.get(), equalTo(0));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
 
 	
 	@Test
-	public void testNotCascadingFieldHandlersOnFail(TestContext context) {
-		deployController(new TestControllerNotCascadedOnFail(), context.asyncAssertSuccess(s -> executeTestNoCascadeOnFail(context)));
+	public void testNotCascadingFieldHandlersOnFail(VertxTestContext context, Vertx vertx) {
+		deployController(new TestControllerNotCascadedOnFail(), vertx, context.succeeding(s -> executeTestNoCascadeOnFail(context, vertx)));
 	}
 
-	private void executeTestNoCascadeOnFail(TestContext context) {
-		Async async = context.async();
-		getClient().get(port, "localhost", "/foo").exceptionHandler(t -> context.fail(t)).handler(r -> {
-			context.assertEquals(200, r.statusCode(), "Failed to call GET /foo");
-			r.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				context.assertEquals("ok", body.toString());
-				context.assertEquals(0, failedTests.get());
-				async.complete();
-			});
-		}).end();
+	private CompletableFuture<Void> executeTestNoCascadeOnFail(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		return getClient(vertx).get(port, "localhost", "/foo").sendP().thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r.bodyAsString(), equalTo("ok"));
+			assertThat(failedTests.get(), equalTo(0));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(async::flag);
 	}
-
 	
 }

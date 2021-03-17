@@ -1,9 +1,13 @@
 package tech.greenfield.vertx.irked;
 
-import org.junit.Test;
+import static tech.greenfield.vertx.irked.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.Vertx;
+import io.vertx.junit5.Checkpoint;
+import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.OK;
@@ -19,29 +23,27 @@ public class TestMultipleEndpoints extends TestBase {
 	}
 
 	@Test
-	public void testMultipleEndpoints(TestContext context) {
-		deployController(new TestControllerEndpoints(), context.asyncAssertSuccess(s -> executeTest(context)));
+	public void testMultipleEndpoints(VertxTestContext context, Vertx vertx) {
+		deployController(new TestControllerEndpoints(), vertx, context.succeeding(s -> executeTest(context, vertx)));
 	}
 
-	private void executeTest(TestContext context) {
-		Async asyncRed = context.async();
-		Async asyncBlue = context.async();
+	private void executeTest(VertxTestContext context, Vertx vertx) {
+		Checkpoint asyncRed = context.checkpoint();
+		Checkpoint asyncBlue = context.checkpoint();
 		
-		getClient().get(port, "localhost", "/red").exceptionHandler(t -> context.fail(t)).handler(r -> {
-			context.assertEquals(200, r.statusCode(), "Failed to call red");
-			r.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				context.assertTrue(body.toString().contains("red"));
-				asyncRed.complete();
-			});
-		}).end();
+		getClient(vertx).get(port, "localhost", "/red").sendP().thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r, bodyContains("red"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(asyncRed::flag);
 		
-		getClient().get(port, "localhost", "/blue").exceptionHandler(t -> context.fail(t)).handler(r -> {
-			context.assertEquals(200, r.statusCode(), "Failed to call blue");
-			r.exceptionHandler(t -> context.fail(t)).bodyHandler(body -> {
-				context.assertTrue(body.toString().contains("blue"));
-				asyncBlue.complete();
-			});
-		}).end();
+		getClient(vertx).get(port, "localhost", "/blue").sendP().thenAccept(r -> {
+			assertThat(r, isOK());
+			assertThat(r, bodyContains("blue"));
+		})
+		.exceptionally(failureHandler(context))
+		.thenRun(asyncBlue::flag);
 	}
 
 }

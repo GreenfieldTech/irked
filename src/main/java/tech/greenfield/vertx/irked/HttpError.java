@@ -3,7 +3,7 @@ package tech.greenfield.vertx.irked;
 import java.util.*;
 
 import io.vertx.core.MultiMap;
-import io.vertx.core.http.impl.headers.VertxHttpHeaders;
+import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.InternalServerError;
@@ -22,7 +22,7 @@ public class HttpError extends Exception {
 	
 	private int statusCode;
 	private String statusText;
-	private MultiMap headers = new VertxHttpHeaders();
+	private HeadersMultiMap headers = HeadersMultiMap.httpHeaders();
 	
 	public HttpError(int statusCode, String statusText) {
 		super(statusText);
@@ -138,9 +138,14 @@ public class HttpError extends Exception {
 			return new InternalServerError("Unknown HTTP status code " + ctx.statusCode());
 		try {
 			return HttpStatuses.create(ctx.statusCode());
-		} catch (InstantiationException | IllegalAccessException e) {
-			// should never happen
+		} catch (InstantiationException e) {
+			// should never happen, assuming we know all valid HTTP status codes
 			return new InternalServerError("Failed to translate failed context to HTTP error");
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return "HTTP " + statusCode + " " + statusText;
 	}
 }
