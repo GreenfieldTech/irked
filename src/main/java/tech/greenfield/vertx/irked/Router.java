@@ -1,7 +1,10 @@
 package tech.greenfield.vertx.irked;
 
+import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,7 +28,7 @@ public class Router implements io.vertx.ext.web.Router {
 	private Vertx vertx;
 	private io.vertx.ext.web.Router router;
 
-	private Set<String> routePaths = new HashSet<>();
+	private Set<Route> routePaths = new HashSet<>(); // used for debugging only
 
 	public Router(Vertx vertx) {
 		this.vertx = vertx;
@@ -46,9 +49,43 @@ public class Router implements io.vertx.ext.web.Router {
 		return this;
 	}
 
-	public Router configReport() {
-		routePaths.stream().sorted().forEach(p -> System.out.println(p));
+	public Router configReport(PrintStream reportStream) {
+		reportStream.println("Configured routes:");
+		routePaths.stream().sorted(this::routeComparator).forEach(r -> reportStream.println(
+				"  " +
+				(r.methods() == null ? "*" : r.methods().stream().map(Object::toString).collect(Collectors.joining("|"))) + " " +
+				r.getPath() + " -> " + listHandlers(r)));
 		return this;
+	}
+	
+	private int routeComparator(Route a, Route b) {
+		String[] aPath = a.getPath().split("/"), bPath = b.getPath().split("/");
+		for (int i = 0; i < Math.min(aPath.length, bPath.length); i++) {
+			int c = aPath[i].compareTo(bPath[i]);
+			if (c != 0) return c;
+		}
+		return Integer.compare(aPath.length, bPath.length);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private String listHandlers(Route r) {
+		try {
+			Method m = r.getClass().getDeclaredMethod("state");
+			m.setAccessible(true);
+			Object state = m.invoke(r);
+			m = state.getClass().getDeclaredMethod("getContextHandlers");
+			m.setAccessible(true);
+			List<Handler<RoutingContext>> ctxhandlers = (List<Handler<RoutingContext>>) m.invoke(state);
+			m = state.getClass().getDeclaredMethod("getFailureHandlers");
+			m.setAccessible(true);
+			List<Handler<RoutingContext>> failhandlers = (List<Handler<RoutingContext>>) m.invoke(state);
+			return String.join(" ",
+					(ctxhandlers != null && !ctxhandlers.isEmpty()) ? ctxhandlers.stream().map(Object::toString).collect(Collectors.joining(" ")) : "",
+							failhandlers != null && !failhandlers.isEmpty() ? ("@OnFail " + failhandlers.stream().map(Object::toString).collect(Collectors.joining(" "))) : "")
+					.replaceAll("\\s+", " ");
+		} catch (ClassCastException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException("Assumptions about Vert.x RouterImpl internal state have been broken. Please fix and/or stop calling configReport");
+		}
 	}
 
 	public Router configure(Controller api) throws InvalidRouteConfiguration {
@@ -56,7 +93,7 @@ public class Router implements io.vertx.ext.web.Router {
 	}
 
 	public Router configure(Controller api, String path) throws InvalidRouteConfiguration {
-		configure(api, path, new RequestWrapper(api, Request::new));
+		configure(api, path, new RequestWrapper(api));
 		return this;
 	}
 

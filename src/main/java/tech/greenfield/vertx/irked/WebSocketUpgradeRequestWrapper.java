@@ -23,5 +23,10 @@ public class WebSocketUpgradeRequestWrapper extends RequestWrapper {
 		else
 			req.next();
 	}
+	
+	@Override
+	public String toString() {
+		return "WS=>" + wrapper + "." + msghandler;
+	}
 
 }

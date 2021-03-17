@@ -120,8 +120,8 @@ public abstract class RouteConfiguration {
 		;
 	}
 
-	public <T extends Annotation> List<String> buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method, RequestWrapper requestWrapper) throws IllegalArgumentException, InvalidRouteConfiguration {
-		List<String> out = new LinkedList<>();
+	public <T extends Annotation> List<Route> buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
+		List<Route> out = new LinkedList<>();
 		for (Route r : pathsForAnnotation(prefix, anot)
 				.flatMap(s -> getRoutes(method, s))
 				.collect(Collectors.toList())) {
@@ -132,7 +132,7 @@ public abstract class RouteConfiguration {
 			else
 				r.handler(getHandler(requestWrapper));
 			routes.add(r);
-			out.add(r.toString());
+			out.add(r);
 		}
 		return out;
 	}
@@ -201,5 +201,13 @@ public abstract class RouteConfiguration {
 		}
 	}
 
+	protected void handleUserException(WebSocketMessage r, Throwable cause, String invocationDescription) {
+		if (cause instanceof UncheckedHttpError || cause instanceof HttpError || HttpError.unwrap(cause) instanceof HttpError)
+			r.request().fail(HttpError.toHttpError(cause));
+		else {
+			log.error("Handler " + invocationDescription + " threw an unexpected exception",cause);
+			r.request().fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
+		}
+	}
 
 }
