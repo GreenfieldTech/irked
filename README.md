@@ -402,22 +402,37 @@ you can always add the handler when initializing the server, before or after set
 this method blocks any other WebSocket implementation strategy suggested in this document - the WebSocket Stream handler
 will consume all incoming connection upgrade requests regardless of the path these target.
 2. Upgrading a request: this can be done in an Irked controller and Irked offers some minimal support to help you
-manage the process, with the `Request.needUpgrade()` method to help you detect upgrade requests. An implementation
-can be as simple as:
+manage the process, with the `Request.needUpgrade()` method to help you detect upgrade requests. 
+
+The following example shows how to handle the WebSocket upgrade request and register event handlers to the created Vert.x WebSocket implementation class.
+As you can see there is quite a bit of heavy lifting and you need to work harder to maintain context and state, compared to Irked `WebSocketMessage` API
+and programmable request contexts.
 
 ```java
-@Get("/listener")
-WebHandler lisener = r -> {
-  if (r.needUpgrade("websocket"))
-    startConnection(r.request().upgrade());
-  else 
-    r.fail(new BadRequest());
+
+@Get("/websocket")
+WebHandler websocketStart = r -> {
+  if (!r.needUpgrade("websocket"))
+    throw new BadRequest("This URL only accepts WebSocket connections").unchecked()
+  r.request().toWebSocket()
+    .onFailure(t -> r.fail(new InternalServerError("Failed to upgrade to WebSocket")))
+    .onSuccess(ws -> {
+      ws.binaryMessageHandler(msg -> handleBinaryMessage(ws, msg));
+      ws.textMessageHandler(msg -> handleTextMessage(ws, msg));
+      ws.exceptionHandler(err -> handleErrors(ws, err));
+    });
 };
 
-private void startConnection(ServerWebSocket sock) {
-  sock.textMessageHandler(message -> {
-   sock.writeTextMessage("Echo: " + message + "\n");
-  });
+private handleBinaryMessage(ServerWebSocket ws, Buffer message) {
+  // ...
+}
+
+private handleTextMessage(ServerWebSocket ws, String message) {
+  // ...
+}
+
+private handleErrors(ServerWebSocket ws, Throwable error) {
+  // ...
 }
 ```
 
