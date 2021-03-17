@@ -19,7 +19,7 @@ get-repo:
   - tags
  script:
   - pip install awscli
-  - aws s3 sync s3://cloudonix-dist/maven2/releases/tech/greenfield/irked-vertx/ maven-repo/releases/tech/greenfield/irked-vertx/
+  - aws s3 sync s3://cloudonix-dist/maven2/releases/tech/greenfield/irked-vertx/maven-metadata.xml maven-repo/releases/tech/greenfield/irked-vertx/maven-metadata.xml
  artifacts:
   paths:
    - maven-repo/*
