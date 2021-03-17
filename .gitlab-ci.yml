@@ -4,6 +4,9 @@ stages:
  - build
  - deploy
 
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2"
+
 cache:
   paths:
     - .m2/
