@@ -70,7 +70,11 @@ public class RouteConfigurationField extends RouteConfiguration {
 		return new Handler<WebSocketMessage>() {
 			@Override
 			public void handle(WebSocketMessage m) {
-				handler.handle(m);
+				try {
+					handler.handle(m);
+				} catch (Throwable cause) {
+					m.request().fail(cause);
+				}
 			}
 			@Override
 			public String toString() {

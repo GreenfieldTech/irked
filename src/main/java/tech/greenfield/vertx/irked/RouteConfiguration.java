@@ -201,13 +201,4 @@ public abstract class RouteConfiguration {
 		}
 	}
 
-	protected void handleUserException(WebSocketMessage r, Throwable cause, String invocationDescription) {
-		if (cause instanceof UncheckedHttpError || cause instanceof HttpError || HttpError.unwrap(cause) instanceof HttpError)
-			r.request().fail(HttpError.toHttpError(cause));
-		else {
-			log.error("Handler " + invocationDescription + " threw an unexpected exception",cause);
-			r.request().fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
-		}
-	}
-
 }
