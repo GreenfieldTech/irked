@@ -73,7 +73,7 @@ public class TestWebSocketPayloads extends TestBase {
 		WebHandler testhandler = r -> {
 			log.info("Starting web handler manual upgrade {}", r.needUpgrade("websocket"));
 			r.request().toWebSocket().onFailure(t -> log.error("Failed to upgrade",t))
-			.onSuccess(this::websocketHandler).onSuccess(ws -> r.request().resume());
+			.onSuccess(this::websocketHandler);
 		};
 		
 		void websocketHandler(ServerWebSocket ws) {
