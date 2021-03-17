@@ -5,14 +5,17 @@ stages:
  - deploy
 
 get-repo:
-  stage: prep
-  image: python
+ stage: prep
+ image: python
  only:
   - master
   - tags
  script:
   - pip install awscli
   - aws s3 sync s3://cloudonix-dist/maven2/releases/tech/greenfield/irked-vertx/  maven-repo/releases/tech/greenfield/irked-vertx/
+ artifacts:
+  paths:
+   - maven-repo/*
 
 package:
  stage: build
