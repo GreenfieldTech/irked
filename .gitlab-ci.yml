@@ -28,6 +28,7 @@ package:
  stage: build
  image: maven:3-jdk-11
  script:
+  - mkdir -p .m2 && cp m2-settings.xml .m2/settings.xml
   - mvn -B package
   - mvn -DskipTests -DaltDeploymentRepository=repo::default::file:./maven-repo/$(grep -q SNAPSHOT pom.xml && echo snapshots || echo releases) deploy
  artifacts:
