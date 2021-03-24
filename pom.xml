@@ -14,6 +14,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<generated.statuses.directory>${project.build.directory}/generated-sources/irked</generated.statuses.directory>
+		<maven.gpg.skip>true</maven.gpg.skip>
 	</properties>
 
 	<licenses>
@@ -218,7 +219,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
+				<configuration>
+					<skip>${maven.gpg.skip}</skip>
+					<gpgArguments><arg>--pinentry-mode</arg><arg>loopback</arg></gpgArguments>
+				</configuration>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
@@ -226,9 +231,6 @@
 						<goals>
 							<goal>sign</goal>
 						</goals>
-						<configuration>
-							<gpgArguments><arg>--pinentry-mode</arg><arg>loopback</arg></gpgArguments>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -270,60 +272,9 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<extensions>
-			<extension>
-				<groupId>io.packagecloud.maven.wagon</groupId>
-				<artifactId>maven-packagecloud-wagon</artifactId>
-				<version>[0,)</version>
-			</extension>
-		</extensions>
 	</build>
 
 	<profiles>
-		<profile>
-			<id>ossrh</id>
-			<distributionManagement>
-				<snapshotRepository>
-					<id>ossrh</id>
-					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-				</snapshotRepository>
-				<repository>
-					<id>ossrh</id>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-				</repository>
-			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<keyname>${env.GPG_KEYNAME}</keyname>
-							<passphrase>${env.GPG_PASSPHRASE}</passphrase>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<extensions>true</extensions>
-						<configuration>
-							<serverId>ossrh</serverId>
-							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-							<autoReleaseAfterClose>true</autoReleaseAfterClose>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 	</profiles>
 
 </project>

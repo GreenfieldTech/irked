@@ -80,6 +80,7 @@ public class Request extends RoutingContextDecorator {
 	 * the success value (or null if there was a failure) for the next async
 	 * element. Subsequent code can check whether a failure was propagated
 	 * by calling {@link #failed()}
+	 * @param <V> the type of previous completion value that will be returned as the completion value for completion stages running this method 
 	 * @param successValue successful completion value to return in case no failure occurred
 	 * @param throwable A {@link Throwable} error to fail on
 	 * @return null
