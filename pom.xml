@@ -29,9 +29,19 @@
 	</scm>
 
 	<distributionManagement>
+		<!--
 		<repository>
 			<id>default</id>
 			<url>file:./maven-repo/releases</url>
+		</repository>
+		-->
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
 
@@ -204,6 +214,23 @@
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>3.0.0-M1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+						<configuration>
+							<gpgArguments><arg>--pinentry-mode</arg><arg>loopback</arg></gpgArguments>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 
