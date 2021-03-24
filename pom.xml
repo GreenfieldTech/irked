@@ -16,6 +16,7 @@
 		<java.version>11</java.version>
 		<generated.statuses.directory>${project.build.directory}/generated-sources/irked</generated.statuses.directory>
 		<vertx.version>[4.0.3,)</vertx.version>
+		<maven.gpg.skip>true</maven.gpg.skip>
 	</properties>
 
 	<licenses>
@@ -250,7 +251,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
+				<configuration>
+					<skip>${maven.gpg.skip}</skip>
+					<gpgArguments><arg>--pinentry-mode</arg><arg>loopback</arg></gpgArguments>
+				</configuration>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
@@ -258,9 +263,6 @@
 						<goals>
 							<goal>sign</goal>
 						</goals>
-						<configuration>
-							<gpgArguments><arg>--pinentry-mode</arg><arg>loopback</arg></gpgArguments>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
