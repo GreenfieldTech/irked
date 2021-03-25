@@ -26,7 +26,7 @@ get-repo:
 
 package:
  stage: build
- image: maven:3-jdk-8-slim
+ image: maven:3-jdk-8
  script:
   - mvn -s m2-settings.xml -B package
   - base64 -d <<<${GPG_PRIVATE_KEY} | gpg --import --batch
