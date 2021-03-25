@@ -1,6 +1,8 @@
 package tech.greenfield.vertx.irked;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -10,6 +12,9 @@ import tech.greenfield.vertx.irked.status.OK;
 
 public class TestRepeatables extends TestBase {
 
+	@Rule
+	public Timeout timeout = Timeout.seconds(2);
+	
 	public class TestRepeatableField extends Controller {
 		@Post("/red")
 		@Post("/blue")

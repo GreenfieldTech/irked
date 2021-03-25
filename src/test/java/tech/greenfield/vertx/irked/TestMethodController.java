@@ -2,6 +2,8 @@ package tech.greenfield.vertx.irked;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Rule;
+import org.junit.rules.Timeout;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -15,6 +17,9 @@ import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.NoContent;
 
 public class TestMethodController extends TestBase {
+
+	@Rule
+	public Timeout timeout = Timeout.seconds(5);
 
 	public class TestController extends Controller {
 		@Get("/get")
