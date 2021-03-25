@@ -36,13 +36,15 @@ public class WebSocketConnection implements ServerWebSocket {
 		});
 	}
 
+	/**
+	 * Retrieve the Irked {@link Request} object that originated this WebSocket connection
+	 * @return Irked HTTP request routing context wrapper
+	 */
 	public Request request() {
 		return request;
 	}
 
 	/**
-	 * @param data
-	 * @return
 	 * @see io.vertx.core.streams.WriteStream#write(java.lang.Object)
 	 */
 	public Future<Void> write(Buffer data) {
@@ -50,8 +52,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#exceptionHandler(io.vertx.core.Handler)
 	 */
 	public ServerWebSocket exceptionHandler(Handler<Throwable> handler) {
@@ -59,8 +59,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#handler(io.vertx.core.Handler)
 	 */
 	public ServerWebSocket handler(Handler<Buffer> handler) {
@@ -68,7 +66,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#pause()
 	 */
 	public ServerWebSocket pause() {
@@ -76,7 +73,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#resume()
 	 */
 	public ServerWebSocket resume() {
@@ -84,8 +80,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param amount
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#fetch(long)
 	 */
 	public ServerWebSocket fetch(long amount) {
@@ -93,8 +87,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param endHandler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#endHandler(io.vertx.core.Handler)
 	 */
 	public ServerWebSocket endHandler(Handler<Void> endHandler) {
@@ -102,8 +94,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param maxSize
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#setWriteQueueMaxSize(int)
 	 */
 	public ServerWebSocket setWriteQueueMaxSize(int maxSize) {
@@ -111,7 +101,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#binaryHandlerID()
 	 */
 	public String binaryHandlerID() {
@@ -119,8 +108,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#drainHandler(io.vertx.core.Handler)
 	 */
 	public ServerWebSocket drainHandler(Handler<Void> handler) {
@@ -128,8 +115,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @param handler
 	 * @see io.vertx.core.streams.WriteStream#write(java.lang.Object, io.vertx.core.Handler)
 	 */
 	public void write(Buffer data, Handler<AsyncResult<Void>> handler) {
@@ -137,9 +122,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param frame
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#writeFrame(io.vertx.core.http.WebSocketFrame, io.vertx.core.Handler)
 	 */
 	public ServerWebSocket writeFrame(WebSocketFrame frame, Handler<AsyncResult<Void>> handler) {
@@ -147,9 +129,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param text
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#writeFinalTextFrame(java.lang.String, io.vertx.core.Handler)
 	 */
 	public ServerWebSocket writeFinalTextFrame(String text, Handler<AsyncResult<Void>> handler) {
@@ -157,9 +136,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#writeFinalBinaryFrame(io.vertx.core.buffer.Buffer, io.vertx.core.Handler)
 	 */
 	public ServerWebSocket writeFinalBinaryFrame(Buffer data, Handler<AsyncResult<Void>> handler) {
@@ -167,9 +143,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#writeBinaryMessage(io.vertx.core.buffer.Buffer, io.vertx.core.Handler)
 	 */
 	public ServerWebSocket writeBinaryMessage(Buffer data, Handler<AsyncResult<Void>> handler) {
@@ -177,9 +150,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param text
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#writeTextMessage(java.lang.String, io.vertx.core.Handler)
 	 */
 	public ServerWebSocket writeTextMessage(String text, Handler<AsyncResult<Void>> handler) {
@@ -187,8 +157,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#closeHandler(io.vertx.core.Handler)
 	 */
 	public ServerWebSocket closeHandler(Handler<Void> handler) {
@@ -196,7 +164,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#textHandlerID()
 	 */
 	public String textHandlerID() {
@@ -204,8 +171,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @return
 	 * @see io.vertx.core.streams.WriteStream#end(java.lang.Object)
 	 */
 	public Future<Void> end(Buffer data) {
@@ -213,8 +178,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#frameHandler(io.vertx.core.Handler)
 	 */
 	public ServerWebSocket frameHandler(Handler<WebSocketFrame> handler) {
@@ -222,7 +185,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#uri()
 	 */
 	public String uri() {
@@ -230,7 +192,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#path()
 	 */
 	public String path() {
@@ -238,7 +199,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#query()
 	 */
 	public String query() {
@@ -246,7 +206,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 *
 	 * @see io.vertx.core.http.ServerWebSocket#accept()
 	 */
 	public void accept() {
@@ -254,7 +213,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#subProtocol()
 	 */
 	public String subProtocol() {
@@ -262,8 +220,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @param handler
 	 * @see io.vertx.core.streams.WriteStream#end(java.lang.Object, io.vertx.core.Handler)
 	 */
 	public void end(Buffer data, Handler<AsyncResult<Void>> handler) {
@@ -271,7 +227,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 *
 	 * @see io.vertx.core.http.ServerWebSocket#reject()
 	 */
 	public void reject() {
@@ -279,7 +234,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#closeStatusCode()
 	 */
 	public Short closeStatusCode() {
@@ -287,7 +241,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#closeReason()
 	 */
 	public String closeReason() {
@@ -295,7 +248,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#headers()
 	 */
 	public MultiMap headers() {
@@ -303,7 +255,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param status
 	 * @see io.vertx.core.http.ServerWebSocket#reject(int)
 	 */
 	public void reject(int status) {
@@ -311,7 +262,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.streams.ReadStream#pipe()
 	 */
 	public Pipe<Buffer> pipe() {
@@ -319,8 +269,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param future
-	 * @param handler
 	 * @see io.vertx.core.http.ServerWebSocket#setHandshake(io.vertx.core.Future, io.vertx.core.Handler)
 	 */
 	public void setHandshake(Future<Integer> future, Handler<AsyncResult<Integer>> handler) {
@@ -328,8 +276,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param frame
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writeFrame(io.vertx.core.http.WebSocketFrame)
 	 */
 	public Future<Void> writeFrame(WebSocketFrame frame) {
@@ -337,8 +283,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param dst
-	 * @return
 	 * @see io.vertx.core.streams.ReadStream#pipeTo(io.vertx.core.streams.WriteStream)
 	 */
 	public Future<Void> pipeTo(WriteStream<Buffer> dst) {
@@ -346,7 +290,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.streams.WriteStream#writeQueueFull()
 	 */
 	public boolean writeQueueFull() {
@@ -354,8 +297,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param text
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writeFinalTextFrame(java.lang.String)
 	 */
 	public Future<Void> writeFinalTextFrame(String text) {
@@ -363,8 +304,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param dst
-	 * @param handler
 	 * @see io.vertx.core.streams.ReadStream#pipeTo(io.vertx.core.streams.WriteStream, io.vertx.core.Handler)
 	 */
 	public void pipeTo(WriteStream<Buffer> dst, Handler<AsyncResult<Void>> handler) {
@@ -372,8 +311,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writeFinalBinaryFrame(io.vertx.core.buffer.Buffer)
 	 */
 	public Future<Void> writeFinalBinaryFrame(Buffer data) {
@@ -381,8 +318,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param future
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#setHandshake(io.vertx.core.Future)
 	 */
 	public Future<Integer> setHandshake(Future<Integer> future) {
@@ -390,8 +325,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writeBinaryMessage(io.vertx.core.buffer.Buffer)
 	 */
 	public Future<Void> writeBinaryMessage(Buffer data) {
@@ -399,7 +332,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#close()
 	 */
 	public Future<Void> close() {
@@ -407,7 +339,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.ServerWebSocket#sslSession()
 	 */
 	public SSLSession sslSession() {
@@ -415,8 +346,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param text
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writeTextMessage(java.lang.String)
 	 */
 	public Future<Void> writeTextMessage(String text) {
@@ -424,8 +353,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
-	 * @throws SSLPeerUnverifiedException
 	 * @see io.vertx.core.http.ServerWebSocket#peerCertificateChain()
 	 */
 	public X509Certificate[] peerCertificateChain() throws SSLPeerUnverifiedException {
@@ -433,9 +360,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writePing(io.vertx.core.buffer.Buffer, io.vertx.core.Handler)
 	 */
 	public WebSocketBase writePing(Buffer data, Handler<AsyncResult<Void>> handler) {
@@ -443,8 +367,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writePing(io.vertx.core.buffer.Buffer)
 	 */
 	public Future<Void> writePing(Buffer data) {
@@ -452,9 +374,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writePong(io.vertx.core.buffer.Buffer, io.vertx.core.Handler)
 	 */
 	public WebSocketBase writePong(Buffer data, Handler<AsyncResult<Void>> handler) {
@@ -462,8 +381,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param data
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#writePong(io.vertx.core.buffer.Buffer)
 	 */
 	public Future<Void> writePong(Buffer data) {
@@ -471,8 +388,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#textMessageHandler(io.vertx.core.Handler)
 	 */
 	public WebSocketBase textMessageHandler(Handler<String> handler) {
@@ -480,8 +395,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#binaryMessageHandler(io.vertx.core.Handler)
 	 */
 	public WebSocketBase binaryMessageHandler(Handler<Buffer> handler) {
@@ -489,8 +402,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#pongHandler(io.vertx.core.Handler)
 	 */
 	public WebSocketBase pongHandler(Handler<Buffer> handler) {
@@ -498,7 +409,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#end()
 	 */
 	public Future<Void> end() {
@@ -506,7 +416,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
 	 * @see io.vertx.core.http.WebSocketBase#end(io.vertx.core.Handler)
 	 */
 	public void end(Handler<AsyncResult<Void>> handler) {
@@ -514,7 +423,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param handler
 	 * @see io.vertx.core.http.WebSocketBase#close(io.vertx.core.Handler)
 	 */
 	public void close(Handler<AsyncResult<Void>> handler) {
@@ -522,8 +430,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param statusCode
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#close(short)
 	 */
 	public Future<Void> close(short statusCode) {
@@ -531,8 +437,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param statusCode
-	 * @param handler
 	 * @see io.vertx.core.http.WebSocketBase#close(short, io.vertx.core.Handler)
 	 */
 	public void close(short statusCode, Handler<AsyncResult<Void>> handler) {
@@ -540,9 +444,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param statusCode
-	 * @param reason
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#close(short, java.lang.String)
 	 */
 	public Future<Void> close(short statusCode, String reason) {
@@ -550,9 +451,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @param statusCode
-	 * @param reason
-	 * @param handler
 	 * @see io.vertx.core.http.WebSocketBase#close(short, java.lang.String, io.vertx.core.Handler)
 	 */
 	public void close(short statusCode, String reason, Handler<AsyncResult<Void>> handler) {
@@ -560,7 +458,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#remoteAddress()
 	 */
 	public SocketAddress remoteAddress() {
@@ -568,7 +465,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#localAddress()
 	 */
 	public SocketAddress localAddress() {
@@ -576,7 +472,6 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#isSsl()
 	 */
 	public boolean isSsl() {
@@ -584,18 +479,23 @@ public class WebSocketConnection implements ServerWebSocket {
 	}
 
 	/**
-	 * @return
 	 * @see io.vertx.core.http.WebSocketBase#isClosed()
 	 */
 	public boolean isClosed() {
 		return socket.isClosed();
 	}
 
+	/**
+	 * @see io.vertx.core.http.ServerWebSocket#scheme()
+	 */
 	@Override
 	public String scheme() {
 		return socket.scheme();
 	}
 
+	/**
+	 * @see io.vertx.core.http.ServerWebSocket#host()
+	 */
 	@Override
 	public String host() {
 		return socket.host();
