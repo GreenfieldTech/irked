@@ -5,11 +5,28 @@
 
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>1.17.10-SNAPSHOT</version>
+	<version>1.17.10</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
 	<url>https://github.com/GreenfieldTech/irked</url>
+
+	<developers>
+		<developer>
+			<id>odeda</id>
+			<name>Oded Arbel</name>
+			<email>odeda@cloudonix.io</email>
+			<url>http://cloudonix.io</url>
+			<organization>Cloudonix</organization>
+			<organizationUrl>http://cloudonix.io</organizationUrl>
+			<roles><role>developer</role></roles>
+			<timezone>Etc/UTC</timezone>
+			<properties>
+				<altEmail>oded@geek.co.il</altEmail>
+				<picUrl>https://geek.co.il/odeda.png</picUrl>
+			</properties>
+		</developer>
+	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
