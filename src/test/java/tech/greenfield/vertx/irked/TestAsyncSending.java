@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
@@ -19,6 +21,9 @@ import tech.greenfield.vertx.irked.status.OK;
 
 public class TestAsyncSending extends TestBase {
 
+	@Rule
+	public Timeout timeout = Timeout.seconds(2);
+	
 	public final static byte[] data = new byte[]{ 0x01, 0x02, 0x03, 0x04, 0x00, 0x00, 0x10, 0x20, 0x30, 0x40 };
 	
 	public static class TestValue {
