@@ -49,6 +49,10 @@ public class Router implements io.vertx.ext.web.Router {
 		return this;
 	}
 
+	public Router configReport() {
+		return configReport(System.err);
+	}
+
 	public Router configReport(PrintStream reportStream) {
 		reportStream.println("Configured routes:");
 		routePaths.stream().sorted(this::routeComparator).forEach(r -> reportStream.println(
