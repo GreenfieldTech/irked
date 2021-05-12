@@ -209,24 +209,24 @@ class Root extends Controller {
 	@Endpoint("/*")
 	BodyHandler bodyHandler = BodyHandler.create();
 
-	@Put("/")
+	@Put("/:id")
 	WebHandler update = r -> {
 		// start an async operation to store the new data
-		Future<Void> f = Future.future();
-		store(r.pathParam("id"), r.getBodyAsJson(), f.completer());
-		f.setHandler(res -> { // once the operation completes
-			if (res.failed()) // if it failed
-				r.send(new InternalServerError(res.cause())); // send an 500 error
-			else // but if it succeeds
-				r.next(); // we don't send a response - we stop handling the request and let
-				// the next handler send the response
+		store(r.pathParam("id"), r.getBodyAsJson())
+		.onSuccess(v -> { // Instead of sending the response
+			r.next(); // let the next handler do it
+		})
+		.onFailure(err -> { // if storing failed
+			r.send(new InternalServerError(err)); // send an 500 error
 		});
 	};
 	
-	@Put("/")
-	@Get("/")
+	@Put("/:id")
+	@Get("/:id")
 	WebHandler retrieve = r -> {
-		r.send(data);
+		load(r.pathParam("id"))
+		.onSuccess(data -> r.send(data))
+		.onFailure(err -> r.send(new InternalServerError(err)))
 	};
 
 }
