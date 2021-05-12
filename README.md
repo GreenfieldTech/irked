@@ -263,12 +263,7 @@ class Root extends Controller {
 
 	@Get("/foo")
 	WebHandler fooAPI = r -> {
-		loadFoo(AsyncResult<Foo> ar -> {
-			if (ar.succeeded())
-				r.send(ar.result());
-			else
-				r.fail(r.cause());
-		});
+		loadFoo().onSuccess(r::send).onFailure(r::fail);
 	};
 
 	@Post("/foo")
