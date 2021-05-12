@@ -11,19 +11,7 @@ Vert.X 3.9 has changed its API in a non-backward compatible way (method return t
 
 ## Installation
 
-In your `pom.xml` file, add the repository for Irked (we are currently not hosted
-in the public Maven repository) as an element under `<project>`:
-
-```
-<repositories>
-  <repository>
-    <id>cloudonix-dist</id>
-    <url>http://cloudonix-dist.s3-website-us-west-1.amazonaws.com/maven2/releases</url>
-  </repository>
-</repositories>
-```
-
-Then add Irked as a dependency:
+In your `pom.xml` file, add Irked as a dependency:
 
 ```
 <dependency>
