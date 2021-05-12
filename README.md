@@ -14,19 +14,7 @@ non-backward compatible API changes).
 
 ## Installation
 
-In your `pom.xml` file, add the repository for Irked (we are currently not hosted
-in the public Maven repository) as an element under `<project>`:
-
-```xml
-<repositories>
-  <repository>
-    <id>cloudonix-dist</id>
-    <url>http://cloudonix-dist.s3-website-us-west-1.amazonaws.com/maven2/releases</url>
-  </repository>
-</repositories>
-```
-
-Then add Irked as a dependency:
+In your `pom.xml` file, add Irked as a dependency:
 
 ```xml
 <dependency>
