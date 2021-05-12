@@ -33,7 +33,7 @@ handlers for routes and that will handle incoming HTTP requests from `vertx-web`
 A "master controller" is created to define the root of the URI hierarchy - all configured routes
 on that controller will be parsed relative to the root of the host.
 
-### Simple Routing
+### Setup and Simple Routing
 
 To publish routes to the server's "Request Handler", create your controller class by extending the
 irked `Controller` class, define fields or methods to handle HTTP requests and annotate them with
@@ -63,6 +63,20 @@ class Root extends Controller {
 		r.send(new BadRequest("Creating resources is not yet implemented"));
 	}
 }
+```
+
+#### Initializing
+
+After creating your set of `Controller` implementations, deploy them to Vert.x by setting up
+a `Verticle` like you would do for a [`vertx-web` Router](https://vertx.io/docs/vertx-web/java/#_basic_vert_x_web_concepts),
+but use Irked to create a router from your root controller - and set that as the request handler.
+
+#### Sample Vert.x Web HTTP Server
+
+```
+HttpServer server = vertx.createHttpServer();
+Router router = Irked.router(vertx).with(new com.example.api.Root());
+server.requestHandler(router).listen(8080);
 ```
 
 ### Sub Controllers
@@ -324,21 +338,6 @@ WebHandler catalog = r -> // we don't even need curly braces
 ```
 
 You can review the Irked unit test [`TestAsyncSending.java`](src/test/java/tech/greenfield/vertx/irked/TestAsyncSending.java) for more examples.
-
-### Initializing
-
-After creating your set of `Controller` implementations, deploy them to Vert.x by setting up
-a `Verticle` in the standard way, and set the HTTP request handler for the HTTP server by
-asking Irked to set up the request handler.
-
-#### Sample Vert.x HTTP Server
-
-```java
-Future<HttpServer> async = Future.future();
-vertx.createHttpServer()
-		.requestHandler(Irked.router(getVertx()).with(new com.example.api.Root()))
-		.listen(port, async);
-```
 
 ### WebSockets and SockJS
 
