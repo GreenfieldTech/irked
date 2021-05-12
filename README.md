@@ -15,25 +15,13 @@ ported to all releases.
 
 ## Installation
 
-In your `pom.xml` file, add the repository for Irked (we are currently not hosted
-in the public Maven repository) as an element under `<project>`:
-
-```xml
-<repositories>
-  <repository>
-    <id>cloudonix-dist</id>
-    <url>http://cloudonix-dist.s3-website-us-west-1.amazonaws.com/maven2/releases</url>
-  </repository>
-</repositories>
-```
-
-Then add Irked as a dependency:
+In your `pom.xml` file, add Irked as a dependency:
 
 ```xml
 <dependency>
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>[2,2.999)</version>
+	<version>[4,4.999)</version>
 </dependency>
 ```
 
