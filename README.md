@@ -247,9 +247,9 @@ and unify error handling which is often very repetitive. Irked supports
 [Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail`
 annotation that you can assign a request handler.
 
-Note: the request handler still needs to be configured properly for a URI and HTTP method - so we
-often find it useful to use the catch all `@Endpoint` annotation with a wild card URI to configure
-a main failure handler, though multiple and specific failure handlers would work fine.
+Note: the request failure handler still needs to be configured properly for a URI and HTTP method -
+so we often find it useful to use the catch all `@Endpoint` annotation with a wild card URI to
+configure a main failure handler, though multiple and specific failure handlers would work fine.
 
 #### A Failure Handler Sample
 
