@@ -245,9 +245,11 @@ does keep the order for fields.
 It is often useful to move failure handling away from the request handler - to keep the code clean
 and unify error handling which is often very repetitive. Irked supports 
 [Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail`
-annotation that you can assign a request handler. Note: the request handler still needs to be
-configured properly for a URI and HTTP method - so we often find it useful to use the catch all
-`@Endpoint` annotation with a wild card URI to configure the failure handler:
+annotation that you can assign a request handler.
+
+Note: the request handler still needs to be configured properly for a URI and HTTP method - so we
+often find it useful to use the catch all `@Endpoint` annotation with a wild card URI to configure
+a main failure handler, though multiple and specific failure handlers would work fine.
 
 #### A Failure Handler Sample
 
@@ -259,6 +261,21 @@ import tech.greenfield.vertx.irked.status.*;
 import tech.greenfield.vertx.irked.annotations.*; 
 
 class Root extends Controller {
+
+	@Get("/foo")
+	WebHandler fooAPI = r -> {
+		loadFoo(AsyncResult<Foo> ar -> {
+			if (ar.succeeded())
+				r.send(ar.result());
+			else
+				r.fail(r.cause());
+		});
+	};
+
+	@Post("/foo")
+	WebHandler fooAPI = r -> {
+		r.fail(new UnsupportedOperationException("Not implemented yet"));
+	};
 
 	@OnFail
 	@Endpoint("/*")
