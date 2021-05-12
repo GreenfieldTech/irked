@@ -6,11 +6,12 @@ It allows you to write your REST API code without writing routing boiler plate b
 annotations, auto-discovery through reflection and optionally (if you're into that as well)
 dependency injection.
 
-This version supports Vert.X 3.9. To use with earlier Vert.X versions, try Irked 1, as
-Vert.X 3.9 has changed its API in a non-backward compatible way (method return types were changed).
-Other than different backward compatibility, Irked 1 and 2 are essentially identical.
-To use Irked with Vert.X 4, try Irked 4 (we skipped 3 to try to sync versions numbers with Vert.X's
-non-backward compatible API changes).
+This version supports Vert.X 4. To use with earlier Vert.X versions, try Irked 2 for Vert.x 3.9
+support or Irked 1 for earlier versions (Vert.X 3.9 has changed its API in a non-backward compatible
+way - method return types were changed - which required that 1 + 2 split).
+
+Other than different backward compatibility, Irked versions are essentially the same with bug fixes
+ported to all releases.
 
 ## Installation
 
