@@ -212,7 +212,7 @@ class Root extends Controller {
 		store(r.pathParam("id"), r.getBodyAsJson(), f.completer());
 		f.setHandler(res -> { // once the operation completes
 			if (res.failed()) // if it failed
-				r.send(new InternalServerError(res.cause())); // send an 500 error
+				r.sendError(new InternalServerError(res.cause())); // send an 500 error
 			else // but if it succeeds
 				r.next(); // we don't send a response - we stop handling the request and let
 				// the next handler send the response
@@ -226,7 +226,7 @@ class Root extends Controller {
 			if (ar.succeeded())
 				r.send(ar.result());
 			else
-				r.send(new InternalServerError(ar.cause()));
+				r.sendError(new InternalServerError(ar.cause()));
 		});
 	};
 
