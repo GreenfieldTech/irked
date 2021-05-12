@@ -217,7 +217,7 @@ class Root extends Controller {
 			r.next(); // let the next handler do it
 		})
 		.onFailure(err -> { // if storing failed
-			r.send(new InternalServerError(err)); // send an 500 error
+			r.sendError(new InternalServerError(err)); // send an 500 error
 		});
 	};
 	
@@ -226,7 +226,7 @@ class Root extends Controller {
 	WebHandler retrieve = r -> {
 		load(r.pathParam("id"))
 		.onSuccess(data -> r.send(data))
-		.onFailure(err -> r.send(new InternalServerError(err)))
+		.onFailure(err -> r.sendError(new InternalServerError(err)))
 	};
 
 }
