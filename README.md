@@ -209,7 +209,7 @@ class Root extends Controller {
 	@Endpoint("/*")
 	BodyHandler bodyHandler = BodyHandler.create();
 
-	@Put("/")
+	@Put("/:id")
 	WebHandler update = r -> {
 		// start an async operation to store the new data
 		Future<Void> f = Future.future();
@@ -223,10 +223,15 @@ class Root extends Controller {
 		});
 	};
 	
-	@Put("/")
-	@Get("/")
+	@Put("/:id")
+	@Get("/:id")
 	WebHandler retrieve = r -> {
-		r.send(data);
+		load(r.pathParam("id"), AsyncResult<Stuff> ar -> {
+			if (ar.succeeded())
+				r.send(ar.result());
+			else
+				r.send(new InternalServerError(ar.cause()));
+		});
 	};
 
 }
