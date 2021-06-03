@@ -1,5 +1,8 @@
 package tech.greenfield.vertx.irked.websocket;
 
+import java.security.cert.Certificate;
+import java.util.List;
+
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.security.cert.X509Certificate;
@@ -499,6 +502,11 @@ public class WebSocketConnection implements ServerWebSocket {
 	@Override
 	public String host() {
 		return socket.host();
+	}
+
+	@Override
+	public List<Certificate> peerCertificates() throws SSLPeerUnverifiedException {
+		return socket.peerCertificates();
 	}
 
 }
