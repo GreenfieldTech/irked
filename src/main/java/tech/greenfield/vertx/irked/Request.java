@@ -11,6 +11,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.*;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.auth.AuthorizationToken;
@@ -48,7 +49,16 @@ public class Request extends RoutingContextDecorator {
 		// and let it do what's right
 		this.outerContext.fail(statusCode);
 	}
-
+	
+	/**
+	 * Fail helper that wraps Irked HTTP errors in Vert.x-web (final?!) HttpException class
+	 * that is better handled by the RoutingContextImpl
+	 * @param httpError error to fail with
+	 */
+	public void fail(HttpError httpError) {
+		fail(new HttpException(httpError.getStatusCode(), httpError));
+	}
+	
 	@Override
 	public void fail(Throwable throwable) {
 		// we're overriding the fail handlers, which for some reason the decorator 

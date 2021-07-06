@@ -193,7 +193,7 @@ public abstract class RouteConfiguration {
 			log.warn("Exception occured on a fail route, ignoring",cause);
 			return;
 		}
-		if (cause instanceof UncheckedHttpError || cause instanceof HttpError || HttpError.unwrap(cause) instanceof HttpError)
+		if (HttpError.unwrap(cause) instanceof HttpError)
 			r.fail(HttpError.toHttpError(cause));
 		else {
 			log.error("Handler " + invocationDescription + " threw an unexpected exception",cause);

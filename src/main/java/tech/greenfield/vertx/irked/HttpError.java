@@ -92,9 +92,9 @@ public class HttpError extends Exception {
 	public static Throwable unwrap(Throwable t) {
 		Throwable orig = t;
 		while (!(t instanceof HttpError)) {
-			if (Objects.isNull(t.getCause()))
-				return orig; // can't find HTTP Error
 			t = t.getCause();
+			if (t == null)
+				return orig; // can't find HTTP Error
 		}
 		return t; // must be an HTTP Error
 	}
