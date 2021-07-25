@@ -5,7 +5,7 @@
 
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.1.1.1</version>
+	<version>4.1.2</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -32,7 +32,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<generated.statuses.directory>${project.build.directory}/generated-sources/irked</generated.statuses.directory>
-		<vertx.version>[4.1.1,)</vertx.version>
+		<vertx.version>[4.1.2,)</vertx.version>
 		<maven.gpg.skip>true</maven.gpg.skip>
 	</properties>
 
@@ -161,6 +161,7 @@
 						</goals>
 						<configuration>
 							<sources>
+								<source>${project.basedir}/src/example/java</source>
 								<source>${project.build.directory}/generated-sources/irked</source>
 							</sources>
 						</configuration>
@@ -203,6 +204,24 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<exclude>tech/greenfield/vertx/irked/example/*</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

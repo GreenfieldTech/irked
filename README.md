@@ -25,6 +25,22 @@ In your `pom.xml` file, add Irked as a dependency:
 </dependency>
 ```
 
+## Quick Start
+
+You may want to take a look at the example application at [`src/example/java/tech/greenfield/vertx/irked/example/App.java`](src/example/java/tech/greenfield/vertx/irked/example/App.java) which shows how to create a new Vert.x Verticle using an Irked `Router` and a few very simple APIs. Then you may want to read the rest of this document for explanations, rationale and more complex API examples.
+
+To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.1.2 installation:
+
+```
+vertx run -cp target/classes/ tech.greenfield.vertx.irked.example.App
+```
+
+Or, alternatively, using the Vert.x JAR dependencies in the Irked maven project:
+
+```
+mvn exec:exec -Dexec.executable=java -Dexec.args="-cp %classpath io.vertx.core.Launcher run tech.greenfield.vertx.irked.example.App"
+```
+
 ## Usage
 
 Under Irked we use the concept of a "Controller" - a class whose fields and methods are used as
@@ -73,10 +89,9 @@ but use Irked to create a router from your root controller - and set that as the
 
 #### Sample Vert.x Web HTTP Server
 
-```
-HttpServer server = vertx.createHttpServer();
+```java
 Router router = Irked.router(vertx).with(new com.example.api.Root());
-server.requestHandler(router).listen(8080);
+vertx.createHttpServer().requestHandler(router).listen(8080);
 ```
 
 ### Sub Controllers

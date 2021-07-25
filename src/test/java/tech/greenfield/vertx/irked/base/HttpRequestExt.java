@@ -417,12 +417,6 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 		return fut;
 	}
 
-	/**
-	 * @param name
-	 * @param value
-	 * @return
-	 * @see io.vertx.ext.web.client.HttpRequest#putHeader(java.lang.String, java.lang.Iterable)
-	 */
 	@Override
 	public HttpRequest<T> putHeader(String name, Iterable<String> value) {
 		httpRequest.putHeader(name, value);
@@ -433,6 +427,11 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 	public HttpRequest<T> authentication(Credentials credentials) {
 		httpRequest.authentication(credentials);
 		return null;
+	}
+
+	@Override
+	public void sendForm(MultiMap body, String charset, Handler<AsyncResult<HttpResponse<T>>> handler) {
+		httpRequest.sendForm(body, charset, handler);
 	}
 
 }

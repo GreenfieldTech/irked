@@ -71,8 +71,8 @@ public class StatusClassGenerator {
 		writer.format("public class %s {\n\n", className);
 		writer.format("public static Map<Integer, Class<? extends HttpError>> HTTP_STATUS_CODES = new TreeMap<Integer, Class<? extends HttpError>>();\n");
 		writer.format("static {\n");
-		statusClasses.forEach((code, errorclass) -> {
-			writer.format("HTTP_STATUS_CODES.put(%d,%s.class);\n", code, errorclass);
+		statusClasses.entrySet().stream().sorted((a,b) -> Integer.compare(a.getKey(), b.getKey())).forEach(e -> {
+			writer.format("HTTP_STATUS_CODES.put(%d,%s.class);\n", e.getKey(), e.getValue());
 		});
 		writer.format("};\n"+
 				"public static HttpError create(int statusCode) throws InstantiationException {\n"+
@@ -96,12 +96,31 @@ public class StatusClassGenerator {
 		PrintWriter writer = new PrintWriter(new FileWriter(file));
 		writer.format("package %s;\n\n", packageName);
 		writer.format("import tech.greenfield.vertx.irked.HttpError;\n\n");
+		writer.format("/**\n"
+				+ " * HTTP Status Code for %s\n"
+				+ " * To send this in the response, either pass an instance (with optional custom message) to \n"
+				+ " * {@link tech.greenfield.vertx.irked.Request#send(HttpError)} or throw it out of an Irked controller handler.\n"
+				+ " * To throw this response out of a functional interface implementation (lambda) that does not\n"
+				+ " * declare throwing {@link HttpError}, use the {@link #unchecked()} method. \n"
+				+ " */\n", phrase);
 		writer.format("public class %s extends HttpError {\n\n", className);
 		writer.format("private static final long serialVersionUID = %dL;\n\n", new SecureRandom(fullyQualified.getBytes()).nextLong());
+		writer.format("/** HTTP status code for '%s' */\n", phrase);
 		writer.format("public static final int code = %d;\n\n", code);
+		writer.format("/** Create a '%s' HTTP Response. */\n", phrase);
 		writer.format("public %s() {\nsuper(%d,\"%s\");\n}\n\n", className, code, phrase);
+		writer.format("/** Create a '%s' HTTP Response with an underlying cause.\n"
+				+ " * @param t underlying cause\n"
+				+ " **/\n", phrase);
 		writer.format("public %s(Throwable t) {\nsuper(%d,\"%s\", t);\n}\n\n", className, code, phrase);
+		writer.format("/** Create a '%s' HTTP Response with a custom message in the body.\n"
+				+ " * @param m custom response message\n"
+				+ " **/\n", phrase);
 		writer.format("public %s(String m) {\nsuper(%d,\"%s\", m);\n}\n\n", className, code, phrase);
+		writer.format("/** Create a '%s' HTTP Response with a custom message in the body and an underlying cause.\n"
+				+ " * @param m custom response message\n"
+				+ " * @param t underlying cause\n"
+				+ " **/\n", phrase);
 		writer.format("public %s(String m, Throwable t) {\nsuper(%d,\"%s\", m, t);\n}\n\n", className, code, phrase);
 		writer.format("}\n");
 		writer.close();
