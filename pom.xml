@@ -161,6 +161,7 @@
 						</goals>
 						<configuration>
 							<sources>
+								<source>${project.basedir}/src/example/java</source>
 								<source>${project.build.directory}/generated-sources/irked</source>
 							</sources>
 						</configuration>
@@ -203,6 +204,24 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<exclude>tech/greenfield/vertx/irked/example/*</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
