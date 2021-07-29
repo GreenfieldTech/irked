@@ -12,7 +12,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.*;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.HttpException;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.auth.AuthorizationToken;
@@ -57,7 +56,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param httpError error to fail with
 	 */
 	public void fail(HttpError httpError) {
-		fail(new HttpException(httpError.getStatusCode(), httpError));
+		fail(httpError.getStatusCode(), httpError);
 	}
 	
 	@Override
