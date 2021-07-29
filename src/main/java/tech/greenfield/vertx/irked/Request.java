@@ -77,7 +77,11 @@ public class Request extends RoutingContextDecorator {
 	 * @return null
 	 */
 	public Void handleFailure(Throwable throwable) {
-		fail(HttpError.unwrap(throwable));
+		var failure = HttpError.unwrap(throwable);
+		if (failure instanceof HttpError)
+			fail((HttpError)failure);
+		else
+			fail(failure);
 		return null;
 	}
 	
