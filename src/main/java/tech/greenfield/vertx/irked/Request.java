@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.*;
@@ -233,10 +234,12 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will resolve when the body was sent successfully
 	 */
 	public Future<Void> sendContent(Buffer content, HttpError status, String contentType) {
-		return response(status)
+		var res = response(status)
 				.putHeader("Content-Type", contentType)
-				.putHeader("Content-Length", String.valueOf(content.length()))
-				.end(content);
+				.putHeader("Content-Length", String.valueOf(content.length()));
+		if (isHead())
+			return res.end();
+		return res.end(content);
 	}
 	
 	/**
@@ -427,6 +430,15 @@ public class Request extends RoutingContextDecorator {
 				value instanceof Map)
 			return value;
 		return JsonObject.mapFrom(value);
+	}
+
+	/**
+	 * Check if this request is a HEAD request, in which case {@link #sendContent(Buffer, HttpError, String)}
+	 * will not send any content (but will send all headers including content-type and content-length).
+	 * @return whether the request is a HEAD request
+	 */
+	public boolean isHead() {
+		return request().method() == HttpMethod.HEAD;
 	}
 
 }

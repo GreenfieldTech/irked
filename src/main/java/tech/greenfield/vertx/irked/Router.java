@@ -114,6 +114,7 @@ public class Router implements io.vertx.ext.web.Router {
 			tryConfigureRoute(router::put, prefix, f, Put.class, requestWrapper);
 			tryConfigureRoute(router::delete, prefix, f, Delete.class, requestWrapper);
 			tryConfigureRoute(router::patch, prefix, f, Patch.class, requestWrapper);
+			tryConfigureRoute(router::head, prefix, f, Head.class, requestWrapper);
 			tryConfigureRoute(router::options, prefix, f, Options.class, requestWrapper);
 			tryConfigureRoute(router::get, prefix, f, WebSocket.class, requestWrapper);
 		}
