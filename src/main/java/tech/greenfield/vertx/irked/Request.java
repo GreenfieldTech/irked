@@ -6,12 +6,13 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.*;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.HttpException;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.auth.AuthorizationToken;
@@ -56,7 +57,7 @@ public class Request extends RoutingContextDecorator {
 	 * @param httpError error to fail with
 	 */
 	public void fail(HttpError httpError) {
-		fail(new HttpException(httpError.getStatusCode(), httpError));
+		fail(httpError.getStatusCode(), httpError);
 	}
 	
 	@Override
@@ -77,7 +78,11 @@ public class Request extends RoutingContextDecorator {
 	 * @return null
 	 */
 	public Void handleFailure(Throwable throwable) {
-		fail(HttpError.unwrap(throwable));
+		var failure = HttpError.unwrap(throwable);
+		if (failure instanceof HttpError)
+			fail((HttpError)failure);
+		else
+			fail(failure);
 		return null;
 	}
 	
@@ -149,27 +154,30 @@ public class Request extends RoutingContextDecorator {
 	 * Helper method to terminate request processing with a success (200 OK) response 
 	 * containing a JSON body.
 	 * @param json {@link JsonObject} containing the output to encode
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendJSON(JsonObject json) {
-		sendJSON(json, new OK());
+	public Future<Void> sendJSON(JsonObject json) {
+		return sendJSON(json, new OK());
 	}
 	
 	/**
 	 * Helper method to terminate a request processing with a success (200 OK) response
 	 * containing a JSON object mapped from the specified POJO
 	 * @param data POJO containing the data to map to a JSON encoded object
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendObject(Object data) {
-		sendJSON(JsonObject.mapFrom(data));
+	public Future<Void> sendObject(Object data) {
+		return sendJSON(JsonObject.mapFrom(data));
 	}
 	
 	/**
 	 * Helper method to terminate request processing with a success (200 OK) response 
 	 * containing a JSON body.
 	 * @param json {@link JsonArray} containing the output to encode
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendJSON(JsonArray json) {
-		sendJSON(json, new OK());
+	public Future<Void> sendJSON(JsonArray json) {
+		return sendJSON(json, new OK());
 	}
 	
 	/**
@@ -177,9 +185,10 @@ public class Request extends RoutingContextDecorator {
 	 * containing a JSON body and the specified status line.
 	 * @param json {@link JsonObject} containing the output to encode
 	 * @param status An HttpError object representing the HTTP status to be sent
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendJSON(JsonObject json, HttpError status) {
-		sendContent(json.encode(), status, "application/json");
+	public Future<Void> sendJSON(JsonObject json, HttpError status) {
+		return sendContent(json.encode(), status, "application/json");
 	}
 	
 	/**
@@ -187,9 +196,10 @@ public class Request extends RoutingContextDecorator {
 	 * containing a JSON object mapped from the specified POJO and the specified status line.
 	 * @param data POJO containing the data to map to a JSON encoded object
 	 * @param status An HttpError object representing the HTTP status to be sent
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendObject(Object data, HttpError status) {
-		sendJSON(JsonObject.mapFrom(data), status);
+	public Future<Void> sendObject(Object data, HttpError status) {
+		return sendJSON(JsonObject.mapFrom(data), status);
 	}
 	
 	/**
@@ -197,9 +207,10 @@ public class Request extends RoutingContextDecorator {
 	 * containing a JSON body and the specified status line.
 	 * @param json {@link JsonArray} containing the output to encode
 	 * @param status HTTP status to send
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendJSON(JsonArray json, HttpError status) {
-		sendContent(json.encode(), status, "application/json");
+	public Future<Void> sendJSON(JsonArray json, HttpError status) {
+		return sendContent(json.encode(), status, "application/json");
 	}
 	
 	/**
@@ -208,9 +219,10 @@ public class Request extends RoutingContextDecorator {
 	 * @param content Text content to send in the response
 	 * @param status An HttpError object representing the HTTP status to be sent
 	 * @param contentType The MIME Content-Type to be set for the response
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendContent(String content, HttpError status, String contentType) {
-		sendContent(Buffer.buffer(content), status, contentType);
+	public Future<Void> sendContent(String content, HttpError status, String contentType) {
+		return sendContent(Buffer.buffer(content), status, contentType);
 	}
 	
 	/**
@@ -219,12 +231,15 @@ public class Request extends RoutingContextDecorator {
 	 * @param content Binary content to send in the response
 	 * @param status An HttpError object representing the HTTP status to be sent
 	 * @param contentType The MIME Content-Type to be set for the response
+	 * @return a promise that will resolve when the body was sent successfully
 	 */
-	public void sendContent(Buffer content, HttpError status, String contentType) {
-		response(status)
+	public Future<Void> sendContent(Buffer content, HttpError status, String contentType) {
+		var res = response(status)
 				.putHeader("Content-Type", contentType)
-				.putHeader("Content-Length", String.valueOf(content.length()))
-				.end(content);
+				.putHeader("Content-Length", String.valueOf(content.length()));
+		if (isHead())
+			return res.end();
+		return res.end(content);
 	}
 	
 	/**
@@ -232,9 +247,10 @@ public class Request extends RoutingContextDecorator {
 	 * containing some text and the specifeid status line.
 	 * @param content Text content to send in the response
 	 * @param contentType The MIME Content-Type to be set for the response
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendContent(String content, String contentType) {
-		sendContent(content, new OK(), contentType);
+	public Future<Void> sendContent(String content, String contentType) {
+		return sendContent(content, new OK(), contentType);
 	}
 	
 	/**
@@ -242,18 +258,20 @@ public class Request extends RoutingContextDecorator {
 	 * containing some text and the specifeid status line.
 	 * @param content Text content to send in the response
 	 * @param status An HttpError object representing the HTTP status to be sent
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendContent(String content, HttpError status) {
-		sendContent(content, status, "text/plain");
+	public Future<Void> sendContent(String content, HttpError status) {
+		return sendContent(content, status, "text/plain");
 	}
 	
 	/**
 	 * Helper method to terminate request processing with a custom response
 	 * containing some text and the specifeid status line.
 	 * @param content Text content to send in the response
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendContent(String content) {
-		sendContent(content, new OK(), "text/plain");
+	public Future<Void> sendContent(String content) {
+		return sendContent(content, new OK(), "text/plain");
 	}
 	
 	/**
@@ -262,49 +280,55 @@ public class Request extends RoutingContextDecorator {
 	 * with a JSON encoded object containing the fields "status" set to "false" and "message" set
 	 * to the {@link HttpError}'s message.
 	 * @param status An HttpError object representing the HTTP status to be sent
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void sendError(HttpError status) {
-		sendJSON(new JsonObject().put("status", status.getStatusCode() / 100 == 2).put("message", status.getMessage()), status);
+	public Future<Void> sendError(HttpError status) {
+		return sendJSON(new JsonObject().put("status", status.getStatusCode() / 100 == 2).put("message", status.getMessage()), status);
 	}
 	
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and a JSON response
 	 * @param object {@link JsonObject} of data to send
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void send(JsonObject object) {
-		sendJSON(object);
+	public Future<Void> send(JsonObject object) {
+		return sendJSON(object);
 	}
 	
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and a JSON response
 	 * @param list {@link JsonArray} of a list of data to send
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void send(JsonArray list) {
-		sendJSON(list);
+	public Future<Void> send(JsonArray list) {
+		return sendJSON(list);
 	}
 	
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and a text/plain response
 	 * @param content text to send
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void send(String content) {
-		sendContent(content);
+	public Future<Void> send(String content) {
+		return sendContent(content);
 	}
 	
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and a application/octet-stream response
 	 * @param buffer binary data to send
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void send(Buffer buffer) {
-		sendContent(buffer, new OK(), "application/octet-stream");
+	public Future<Void> send(Buffer buffer) {
+		return sendContent(buffer, new OK(), "application/octet-stream");
 	}
 	
 	/**
 	 * Helper method to terminate request processing with a non-OK HTTP response with default text
 	 * @param status {@link HttpError} to send
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public void send(HttpError status) {
-		sendError(status);
+	public Future<Void> send(HttpError status) {
+		return sendError(status);
 	}
 	
 	/**
@@ -312,9 +336,10 @@ public class Request extends RoutingContextDecorator {
 	 * response containing a list of {@link io.vertx.core.json.Json}-encoded objects
 	 * @param <G> type of objects in the list
 	 * @param list List to convert to a JSON array for sending
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public <G> void sendList(List<G> list) {
-		sendStream(list.stream());
+	public <G> Future<Void> sendList(List<G> list) {
+		return sendStream(list.stream());
 	}
 	
 	/**
@@ -324,23 +349,25 @@ public class Request extends RoutingContextDecorator {
 	 * based collector.
 	 * @param <G> type of objects in the stream
 	 * @param stream Stream to convert to a JSON array for sending
+	 * @return a promise that will complete when the body was sent successfully
 	 */
-	public <G> void sendStream(Stream<G> stream) {
-		sendJSON(stream.map(this::encodeToJsonType).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+	public <G> Future<Void> sendStream(Stream<G> stream) {
+		return sendJSON(stream.map(this::encodeToJsonType).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 	}
 	
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and a JSON response
 	 * @param object custom object to process through Jackson's {@link ObjectMapper} to generate JSON content
+	 * @return a promise that will complete when the body was sent successfully
 	 */
 	@SuppressWarnings("unchecked")
-	public void send(Object object) {
+	public Future<Void> send(Object object) {
 		if (object instanceof List)
-			sendList((List<Object>)object);
+			return sendList((List<Object>)object);
 		else if (object instanceof Stream)
-			sendStream((Stream<Object>)object);
+			return sendStream((Stream<Object>)object);
 		else
-			sendObject(object);
+			return sendObject(object);
 	}
 
 	/**
@@ -403,6 +430,15 @@ public class Request extends RoutingContextDecorator {
 				value instanceof Map)
 			return value;
 		return JsonObject.mapFrom(value);
+	}
+
+	/**
+	 * Check if this request is a HEAD request, in which case {@link #sendContent(Buffer, HttpError, String)}
+	 * will not send any content (but will send all headers including content-type and content-length).
+	 * @return whether the request is a HEAD request
+	 */
+	public boolean isHead() {
+		return request().method() == HttpMethod.HEAD;
 	}
 
 }

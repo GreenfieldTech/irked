@@ -21,6 +21,7 @@ import tech.greenfield.vertx.irked.HttpError.UncheckedHttpError;
 import tech.greenfield.vertx.irked.Router.RoutingMethod;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
+import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
 public abstract class RouteConfiguration {
@@ -195,7 +196,11 @@ public abstract class RouteConfiguration {
 		}
 		if (HttpError.unwrap(cause) instanceof HttpError)
 			r.fail(HttpError.toHttpError(cause));
-		else {
+		if (invocationDescription.contains("io.vertx.ext.web") && cause instanceof IllegalStateException) {
+			// a Vert.x handler detected an invalid request
+			log.warn("Handler " + invocationDescription + " encountered an illegal state: " + cause.getMessage(),cause);
+			r.fail(new BadRequest("Illegal state in request", cause));
+		} else {
 			log.error("Handler " + invocationDescription + " threw an unexpected exception",cause);
 			r.fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
 		}
