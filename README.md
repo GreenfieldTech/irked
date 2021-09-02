@@ -111,7 +111,7 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Endpoint("/blocks")
+	@Endpoint("/blocks") // the block API handles all requests that start with "/blocks/"
 	BlockApi blocks = new BlockApi();
 	
 }
@@ -125,7 +125,7 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class BlockApi extends Controller {
 
-	@Get("/:id")
+	@Get("/:id") // handle requests like "GET /blocks/identifier"
 	Handler<Request> retrieve = r -> {
 		// irked supports vertx-web path parameters 
 		r.send(loadBlock(r.pathParam("id")));
