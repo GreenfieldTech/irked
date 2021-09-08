@@ -31,7 +31,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<generated.statuses.directory>${project.build.directory}/generated-sources/irked</generated.statuses.directory>
-		<vertx.version>[3.9,3.9.999]</vertx.version>
+		<vertx.version>3.9.9</vertx.version>
 		<maven.gpg.skip>true</maven.gpg.skip>
 	</properties>
 
