@@ -428,7 +428,7 @@ and programmable request contexts.
 @Get("/websocket")
 WebHandler websocketStart = r -> {
   if (!r.needUpgrade("websocket"))
-    throw new BadRequest("This URL only accepts WebSocket connections").unchecked()
+    throw new BadRequest("This URL only accepts WebSocket connections").unchecked();
   r.request().toWebSocket()
     .onFailure(t -> r.fail(new InternalServerError("Failed to upgrade to WebSocket")))
     .onSuccess(ws -> {
