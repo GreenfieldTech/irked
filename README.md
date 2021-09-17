@@ -136,7 +136,7 @@ class BlockApi extends Controller {
 ### Request Context Re-programming
 
 As hinted above, irked supports path parameters using Vert.X web, but 
-[unlike Vert.x web's sub-router](https://github.com/vert-x3/vertx-web/blob/master/vertx-web/src/main/java/io/vertx/ext/web/impl/RouterImpl.java#L269),
+[unlike Vert.x web's sub-router](https://github.com/vert-x3/vertx-web/blob/b778f450bc4e0e928f8b6c761a376b5ab9f24151/vertx-web/src/main/java/io/vertx/ext/web/impl/RouteImpl.java#L156),
 irked controllers support path parameters everywhere, including as base paths for mounting sub-controllers.
 
 As a result, a sub-controller might be interested in reading data from a path parameter defined in
