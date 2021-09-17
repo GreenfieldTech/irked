@@ -26,18 +26,26 @@ get-repo:
 
 package:
  stage: build
- image: maven:3-jdk-8
+ image: maven:3-jdk-11
  script:
   - mvn -s m2-settings.xml -B package
   - base64 -d <<<${GPG_PRIVATE_KEY} | gpg --import --batch
   - mvn -s m2-settings.xml -B -DskipTests -DaltDeploymentRepository=repo::default::file:./maven-repo/$(grep -q SNAPSHOT pom.xml && echo snapshots || echo releases) deploy
-  - mvn -s m2-settings.xml -B -DskipTests package gpg:sign deploy -DrepositoryId=ossrh
-    -Dmaven.gpg.skip=false -Dgpg.keyname=${GPG_KEYNAME} -Dgpg.passphrase="$(base64 -d <<<${GPG_PASSPHRASE})"
-    -Drepository.username=${REPO_USERNAME} -Drepository.password="$(base64 -d <<<${REPO_PASSWORD})"
  artifacts:
   paths:
    - maven-repo/*
    - target/*
+
+ossrh:
+ stage: deploy
+ image: maven:3-jdk-11
+ only:
+  - tags
+ script:
+  - mvn -s m2-settings.xml -B -DskipTests package gpg:sign deploy
+    -DrepositoryId=ossrh -Dmaven.gpg.skip=false
+    -Dgpg.keyname=${GPG_KEYNAME} -Dgpg.passphrase="$(base64 -d <<<${GPG_PASSPHRASE})"
+    -Drepository.username=${REPO_USERNAME} -Drepository.password="$(base64 -d <<<${REPO_PASSWORD})"
 
 s3:
  stage: deploy
