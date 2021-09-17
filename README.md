@@ -21,7 +21,7 @@ In your `pom.xml` file, add Irked as a dependency:
 <dependency>
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>[4,4.999)</version>
+	<version>4.1.4</version>
 </dependency>
 ```
 
@@ -29,7 +29,7 @@ In your `pom.xml` file, add Irked as a dependency:
 
 You may want to take a look at the example application at [`src/example/java/tech/greenfield/vertx/irked/example/App.java`](src/example/java/tech/greenfield/vertx/irked/example/App.java) which shows how to create a new Vert.x Verticle using an Irked `Router` and a few very simple APIs. Then you may want to read the rest of this document for explanations, rationale and more complex API examples.
 
-To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.1.2 installation:
+To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.1.4 installation:
 
 ```
 vertx run -cp target/classes/ tech.greenfield.vertx.irked.example.App
@@ -111,7 +111,7 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Endpoint("/blocks")
+	@Endpoint("/blocks") // the block API handles all requests that start with "/blocks/"
 	BlockApi blocks = new BlockApi();
 	
 }
@@ -125,7 +125,7 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class BlockApi extends Controller {
 
-	@Get("/:id")
+	@Get("/:id") // handle requests like "GET /blocks/identifier"
 	Handler<Request> retrieve = r -> {
 		// irked supports vertx-web path parameters 
 		r.send(loadBlock(r.pathParam("id")));
