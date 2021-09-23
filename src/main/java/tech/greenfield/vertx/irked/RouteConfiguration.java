@@ -195,7 +195,7 @@ public abstract class RouteConfiguration {
 		}
 		if (cause instanceof UncheckedHttpError || cause instanceof HttpError || HttpError.unwrap(cause) instanceof HttpError)
 			r.fail(HttpError.toHttpError(cause));
-		if (invocationDescription.contains("io.vertx.ext.web") && cause instanceof IllegalStateException) {
+		else if (invocationDescription.contains("io.vertx.ext.web") && cause instanceof IllegalStateException) {
 			// a Vert.x handler detected an invalid request
 			log.warn("Handler " + invocationDescription + " encountered an illegal state: " + cause.getMessage(),cause);
 			r.fail(new BadRequest("Illegal state in request", cause));
