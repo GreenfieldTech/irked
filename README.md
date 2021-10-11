@@ -21,7 +21,7 @@ In your `pom.xml` file, add Irked as a dependency:
 <dependency>
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.1.4</version>
+	<version>4.1.5</version>
 </dependency>
 ```
 
