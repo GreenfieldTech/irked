@@ -14,6 +14,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.*;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
+import io.vertx.ext.web.impl.RoutingContextInternal;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.auth.AuthorizationToken;
 import tech.greenfield.vertx.irked.exceptions.MissingBodyException;
@@ -31,10 +32,27 @@ import tech.greenfield.vertx.irked.status.OK;
  */
 public class Request extends RoutingContextDecorator {
 
+	private static RoutingContextInternal downCastOrFailWithExplanation(RoutingContext outerContext) {
+		if (outerContext instanceof RoutingContextInternal)
+			return (RoutingContextInternal) outerContext;
+		/*
+		 * This is an issue because of https://github.com/vert-x3/vertx-web/commit/65972a2e43a853ae6a226a25cc24351d685e0a44
+		 * Under the guise of "Feature." [sic], required functionality was added to the (supposedly internal) RoutingContextInternal
+		 * extension interface and then requiring it for the RoutingContextDecorator c'tor, but without modifying all the other APIs
+		 * that still use RoutingContext. If you think this code here is bad, than check out RouterImpl that does an *unchecked* cast down:
+		 * https://github.com/vert-x3/vertx-web/blob/e9430acf6edd029ddc80bcb00f87a56e10171312/vertx-web/src/main/java/io/vertx/ext/web/impl/RouterImpl.java#L248
+		 * 
+		 * At the time of this writing all vertx-web implementations of RoutingContext actually implement RoutingContextInternal, and all are
+		 * created by RouterImpl - which we use explicitly through io.vertx.ext.web.Router.router() (in tech.greenfield.vertx.irked.Router), but
+		 * this here now relies on vertx-web developers always paying attention instead on compiler type checking...
+		 */
+		throw new RuntimeException("Unexpected parent context that does not implement RoutingContextInternal! This is a bug in vertx-web 4.2.2");
+	}
+	
 	private RoutingContext outerContext;
 
 	public Request(RoutingContext outerContext) {
-		super(outerContext.currentRoute(), outerContext);
+		super(outerContext.currentRoute(), downCastOrFailWithExplanation(outerContext));
 		this.outerContext = outerContext;
 	}
 	
