@@ -191,7 +191,7 @@ public abstract class RouteConfiguration {
 	 */
 	protected void handleUserException(RoutingContext r, Throwable cause, String invocationDescription) {
 		if (r.failed()) {
-			log.warn("Exception occured on a fail route, ignoring",cause);
+			log.warn("Exception occured on a fail route '{}', ignoring", r.normalizedPath(), cause);
 			return;
 		}
 		if (HttpError.unwrap(cause) instanceof HttpError)

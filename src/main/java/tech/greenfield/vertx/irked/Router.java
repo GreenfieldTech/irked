@@ -352,4 +352,14 @@ public class Router implements io.vertx.ext.web.Router {
 		return this;
 	}
 
+	@Override
+	public io.vertx.ext.web.Router putMetadata(String key, Object value) {
+		return router.putMetadata(key, value);
+	}
+
+	@Override
+	public Map<String, Object> metadata() {
+		return metadata();
+	}
+
 }
