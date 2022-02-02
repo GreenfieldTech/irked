@@ -3,6 +3,11 @@ package tech.greenfield.vertx.irked.auth;
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * Base implementation for authentication schemes where the value is a white-space separated list
+ * of parameters in the format <code>key=value</code> or <code>key="long value"</code>
+ * @author odeda
+ */
 public class ParameterEncodedAuthorizationToken extends AuthorizationToken {
 
 	Map<String,String> parameters = new HashMap<>();

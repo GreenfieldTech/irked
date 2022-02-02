@@ -14,6 +14,14 @@ import io.vertx.core.buffer.Buffer;
 import tech.greenfield.vertx.irked.Request;
 import tech.greenfield.vertx.irked.helpers.DigestAuthenticate;
 
+/**
+ * Implementation of the standard RFC 7616 Digest authentication scheme token
+ * 
+ * Complete implementation of token validation and data access is provided, depending on the
+ * specified digest algorithm being available from the JVM cryptography provider.
+ * 
+ * @author odeda
+ */
 public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken {
 
 	private static Logger logger = LoggerFactory.getLogger(DigestAuthorizationToken.class);
