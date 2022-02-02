@@ -51,6 +51,13 @@ public class Request extends RoutingContextDecorator {
 	
 	private RoutingContext outerContext;
 
+	/**
+	 * Create a new request wrapper as a {@link RoutingContextDecorator} around the specified parent routing context
+	 * (what vertx-web calls "inner context").
+	 * 
+	 * This is an internal constructor to be used by {@link Router} - use at your own risk.
+	 * @param outerContext parent routing context to wrap
+	 */
 	public Request(RoutingContext outerContext) {
 		super(outerContext.currentRoute(), downCastOrFailWithExplanation(outerContext));
 		this.outerContext = outerContext;
@@ -134,6 +141,25 @@ public class Request extends RoutingContextDecorator {
 		};
 	}
 	
+	/**
+	 * Convert request body to an instance of the specified POJO
+	 * 
+	 * Currently the followed request body content types are supported:
+	 *  * <code>application/json</code> - the body is read using {@link RoutingContext#getBodyAsJson()} then
+	 *    mapped to the bean type using {@link JsonObject#mapTo(Class)}
+	 *  * <code>application/x-www-form-urlencoded</code> - the body is read using {@link HttpServerRequest#formAttributes()}
+	 *   into a {@link JsonObject} as keys with string values, then mapped to the bean type using {@link JsonObject#mapTo(Class)}.
+	 *   If the same key is present multiple times, the values will be stored into the JsonObject as a {@link JsonArray} with string values.
+	 * 
+	 * If no content-type header is specified in the request, <code>application/json</code> is assumed.
+	 * 
+	 * If no body is present, this method will throw an unchecked {@link MissingBodyException} - i.e. a "Bad Request"
+	 * HTTP error with the text "Required request body is missing".
+	 * 
+	 * @param <T>
+	 * @param type
+	 * @return
+	 */
 	public <T> T getBodyAs(Class<T> type) {
 		String contentType = this.request().getHeader("Content-Type");
 		if (Objects.isNull(contentType)) contentType = "application/json"; // we love JSON
