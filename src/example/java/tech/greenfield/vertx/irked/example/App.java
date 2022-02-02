@@ -10,6 +10,10 @@ import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.OnFail;
 import tech.greenfield.vertx.irked.helpers.Redirect;
 
+/**
+ * Example Irked verticle
+ * @author odeda
+ */
 public class App extends AbstractVerticle {
 
 	@Override
