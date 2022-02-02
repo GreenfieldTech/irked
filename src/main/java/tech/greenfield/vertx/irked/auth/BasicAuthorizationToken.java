@@ -3,6 +3,13 @@ package tech.greenfield.vertx.irked.auth;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 
+/**
+ * Implementation of the standard RFC 7617 Bearer authentication scheme token
+ * 
+ * This implementation parses the token and makes the user name and password available through the API.
+ * 
+ * @author odeda
+ */
 public class BasicAuthorizationToken extends AuthorizationToken {
 
 	private String username;
