@@ -7,6 +7,7 @@ import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.ProxyOptions;
 import io.vertx.core.streams.ReadStream;
 import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.web.client.HttpRequest;
@@ -432,6 +433,11 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 	@Override
 	public void sendForm(MultiMap body, String charset, Handler<AsyncResult<HttpResponse<T>>> handler) {
 		httpRequest.sendForm(body, charset, handler);
+	}
+
+	@Override
+	public HttpRequest<T> proxy(ProxyOptions proxyOptions) {
+		return httpRequest.proxy(proxyOptions);
 	}
 
 }
