@@ -5,7 +5,7 @@
 
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.2.5</version>
+	<version>4.2.6</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -32,7 +32,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<generated.statuses.directory>${project.build.directory}/generated-sources/irked</generated.statuses.directory>
-		<vertx.version>4.2.5</vertx.version>
+		<vertx.version>4.2.6</vertx.version>
 		<maven.gpg.skip>true</maven.gpg.skip>
 	</properties>
 
@@ -75,7 +75,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.12.2</version>
+			<version>2.12.6.1</version>
 		</dependency>
 
 		<!-- libraries -->
