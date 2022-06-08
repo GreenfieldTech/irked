@@ -1,5 +1,7 @@
 package tech.greenfield.vertx.irked.base;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -16,6 +18,7 @@ import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.client.predicate.ResponsePredicateResult;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.ext.web.multipart.MultipartForm;
+import io.vertx.uritemplate.Variables;
 
 public class HttpRequestExt<T> implements HttpRequest<T> {
 
@@ -438,6 +441,26 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 	@Override
 	public HttpRequest<T> proxy(ProxyOptions proxyOptions) {
 		return httpRequest.proxy(proxyOptions);
+	}
+
+	@Override
+	public HttpRequest<T> setTemplateParam(String paramName, String paramValue) {
+		return httpRequest.setTemplateParam(paramName, paramValue);
+	}
+
+	@Override
+	public HttpRequest<T> setTemplateParam(String paramName, List<String> paramValue) {
+		return httpRequest.setTemplateParam(paramName, paramValue);
+	}
+
+	@Override
+	public HttpRequest<T> setTemplateParam(String paramName, Map<String, String> paramValue) {
+		return httpRequest.setTemplateParam(paramName, paramValue);
+	}
+
+	@Override
+	public Variables templateParams() {
+		return httpRequest.templateParams();
 	}
 
 }
