@@ -33,7 +33,7 @@ public class TestRouteCascade extends TestBase {
 		@Put("/")
 		WebHandler update = r -> {
 			r.vertx().executeBlocking(f -> {
-				data.mergeIn(r.getBodyAsJson());
+				data.mergeIn(r.body().asJsonObject());
 				f.complete();
 			}, f -> {
 				if (f.failed())

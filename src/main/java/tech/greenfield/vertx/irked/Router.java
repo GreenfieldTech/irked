@@ -314,6 +314,7 @@ public class Router implements io.vertx.ext.web.Router {
 		return router.clear();
 	}
 
+	@Deprecated
 	@Override
 	public Route mountSubRouter(String mountPoint, io.vertx.ext.web.Router subRouter) {
 		return router.mountSubRouter(mountPoint, subRouter);

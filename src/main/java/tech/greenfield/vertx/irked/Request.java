@@ -12,6 +12,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.*;
+import io.vertx.ext.web.RequestBody;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RoutingContextDecorator;
 import io.vertx.ext.web.impl.RoutingContextInternal;
@@ -156,6 +157,10 @@ public class Request extends RoutingContextDecorator {
 	 * If no body is present, this method will throw an unchecked {@link MissingBodyException} - i.e. a "Bad Request"
 	 * HTTP error with the text "Required request body is missing".
 	 * 
+	 * @apiNote this API is very similar to the Vert.x 4.3 API {@link RequestBody#asPojo(Class)}. The notable difference
+	 *   is that this implementation checks the request Content-Type and if its a form POST, it will read the form post fields
+	 *   to mimic a JSON object. This may or may not be a desired behavior.
+	 * 
 	 * @param <T>
 	 * @param type
 	 * @return
@@ -183,7 +188,7 @@ public class Request extends RoutingContextDecorator {
 		case "application/json":
 		default:
 			try {
-				JsonObject body = getBodyAsJson();
+				JsonObject body = body().asJsonObject();
 				if (body == null)
 					throw new MissingBodyException().unchecked();
 				return body.mapTo(type);
