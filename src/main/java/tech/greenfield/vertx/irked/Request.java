@@ -69,6 +69,26 @@ public class Request extends RoutingContextDecorator {
 		this.outerContext.next();
 	}
 
+	/**
+	 * Helper to attach {@link #next()} to Vert.x {@link Future#onSuccess(io.vertx.core.Handler)} handler.
+	 * The input value is ignored and it is just defined so that you can do {@code asyncAPI().onSuccess(r::next)}
+	 * 
+	 * You often will want to store the result on the routing context for use in the next handler, so a more
+	 * complete example might look like this:
+	 * 
+	 * <pre>{@code
+	 * asyncAPI()
+	 * .onSuccess(data -> r.put("data", data))
+	 * .onSuccess(r::next)
+	 * .onFailure(r::handleFailure);
+	 * }</pre>
+	 * @param <T> Type of value provided by handler caller, that will be ignored
+	 * @param value result provided by handler caller, that will be ignored
+	 */
+	public <T> void next(T value) {
+		this.outerContext.next();
+	}
+
 	@Override
 	public void fail(int statusCode) { 
 		// we're overriding the fail handlers, which for some reason the decorator 
