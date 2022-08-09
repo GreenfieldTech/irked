@@ -331,25 +331,27 @@ WebHandler fileUpload = r -> {
 
 ### Async Processing
 
-Irked contains a few helpers for using Java 8's Promise API (`CompletableFuture`) to asynchronously process
-requests, most notable `Request.send()` to send responses and `Request.handleFailure` to forward
-"exceptional completion" Exceptions to the failure handlers.
+Irked contains a few helpers for using Promise-style APIs, such as Vert.x `Promise`/`Future` or Java 8's
+`CompletableFuture`, to asynchronously process requests using friendly method references, most notably
+`Request.send()` to send responses and `Request.handleFailure` to forward "exceptional completion"
+Exceptions to the failure handlers, or `Request.next()` which makes it easier to attach `RoutingContext.next()`
+to `Future.onSuccess()` handlers.
 
 #### An Async Processing Sample
 
 ```java
-CompletableFuture<List<PojoType>> loadSomeRecords() {
+Future<List<PojoType>> loadSomeRecords() {
 	// ... access a database asynchronously to load some POJOs
 }
 
 @Get("/")
 WebHandler catalog = r -> // we don't even need curly braces
 	loadSomeRecords() // fetch records
-	.thenApply(l -> l.stream() // stream loaded records as POJOs
+	.map(l -> l.stream() // stream loaded records as POJOs
 			.map(JsonObject::mapFrom) // bean map each record to a JSON object
 			.collect(JsonArray::new, JsonArray::add, JsonArray::addAll)) // collect everything to a JSON array
-	.thenAccept(r::send) // send the list to the client
-	.exceptionally(r::handleFailure); // capture any exceptions and forward to the failure handler
+	.onSuccess(r::send) // send the list to the client
+	.onFailure(r::handleFailure); // capture any exceptions and forward to the failure handler
 ```
 
 You can review the Irked unit test [`TestAsyncSending.java`](src/test/java/tech/greenfield/vertx/irked/TestAsyncSending.java) for more examples.
