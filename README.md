@@ -21,7 +21,7 @@ In your `pom.xml` file, add Irked as a dependency:
 <dependency>
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.3.2</version>
+	<version>4.3.3</version>
 </dependency>
 ```
 
@@ -29,7 +29,7 @@ In your `pom.xml` file, add Irked as a dependency:
 
 You may want to take a look at the example application at [`src/example/java/tech/greenfield/vertx/irked/example/App.java`](src/example/java/tech/greenfield/vertx/irked/example/App.java) which shows how to create a new Vert.x Verticle using an Irked `Router` and a few very simple APIs. Then you may want to read the rest of this document for explanations, rationale and more complex API examples.
 
-To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.3.2 installation:
+To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.3.3 installation:
 
 ```
 vertx run -cp target/classes/ tech.greenfield.vertx.irked.example.App
@@ -331,25 +331,27 @@ WebHandler fileUpload = r -> {
 
 ### Async Processing
 
-Irked contains a few helpers for using Java 8's Promise API (`CompletableFuture`) to asynchronously process
-requests, most notable `Request.send()` to send responses and `Request.handleFailure` to forward
-"exceptional completion" Exceptions to the failure handlers.
+Irked contains a few helpers for using Promise-style APIs, such as Vert.x `Promise`/`Future` or Java 8's
+`CompletableFuture`, to asynchronously process requests using friendly method references, most notably
+`Request.send()` to send responses and `Request.handleFailure` to forward "exceptional completion"
+Exceptions to the failure handlers, or `Request.next()` which makes it easier to attach `RoutingContext.next()`
+to `Future.onSuccess()` handlers.
 
 #### An Async Processing Sample
 
 ```java
-CompletableFuture<List<PojoType>> loadSomeRecords() {
+Future<List<PojoType>> loadSomeRecords() {
 	// ... access a database asynchronously to load some POJOs
 }
 
 @Get("/")
 WebHandler catalog = r -> // we don't even need curly braces
 	loadSomeRecords() // fetch records
-	.thenApply(l -> l.stream() // stream loaded records as POJOs
+	.map(l -> l.stream() // stream loaded records as POJOs
 			.map(JsonObject::mapFrom) // bean map each record to a JSON object
 			.collect(JsonArray::new, JsonArray::add, JsonArray::addAll)) // collect everything to a JSON array
-	.thenAccept(r::send) // send the list to the client
-	.exceptionally(r::handleFailure); // capture any exceptions and forward to the failure handler
+	.onSuccess(r::send) // send the list to the client
+	.onFailure(r::handleFailure); // capture any exceptions and forward to the failure handler
 ```
 
 You can review the Irked unit test [`TestAsyncSending.java`](src/test/java/tech/greenfield/vertx/irked/TestAsyncSending.java) for more examples.
