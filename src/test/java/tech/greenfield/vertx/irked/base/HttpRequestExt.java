@@ -430,7 +430,7 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 	@Override
 	public HttpRequest<T> authentication(Credentials credentials) {
 		httpRequest.authentication(credentials);
-		return null;
+		return this;
 	}
 
 	@Override
@@ -440,27 +440,90 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 
 	@Override
 	public HttpRequest<T> proxy(ProxyOptions proxyOptions) {
-		return httpRequest.proxy(proxyOptions);
+		httpRequest.proxy(proxyOptions);
+		return this;
 	}
 
 	@Override
 	public HttpRequest<T> setTemplateParam(String paramName, String paramValue) {
-		return httpRequest.setTemplateParam(paramName, paramValue);
+		httpRequest.setTemplateParam(paramName, paramValue);
+		return this;
 	}
 
 	@Override
 	public HttpRequest<T> setTemplateParam(String paramName, List<String> paramValue) {
-		return httpRequest.setTemplateParam(paramName, paramValue);
+		httpRequest.setTemplateParam(paramName, paramValue);
+		return this;
 	}
 
 	@Override
 	public HttpRequest<T> setTemplateParam(String paramName, Map<String, String> paramValue) {
-		return httpRequest.setTemplateParam(paramName, paramValue);
+		httpRequest.setTemplateParam(paramName, paramValue);
+		return this;
 	}
 
 	@Override
 	public Variables templateParams() {
 		return httpRequest.templateParams();
+	}
+
+	@Override
+	public String traceOperation() {
+		return httpRequest.traceOperation();
+	}
+	
+	@Override
+	public HttpRequest<T> traceOperation(String traceOperation) {
+		httpRequest.traceOperation(traceOperation);
+		return this;
+	}
+
+	public HttpMethod method() {
+		return httpRequest.method();
+	}
+
+	public int port() {
+		return httpRequest.port();
+	}
+
+	public BodyCodec<T> bodyCodec() {
+		return httpRequest.bodyCodec();
+	}
+
+	public String host() {
+		return httpRequest.host();
+	}
+
+	public String virtualHost() {
+		return httpRequest.virtualHost();
+	}
+
+	public String uri() {
+		return httpRequest.uri();
+	}
+
+	public Boolean ssl() {
+		return httpRequest.ssl();
+	}
+
+	public boolean followRedirects() {
+		return httpRequest.followRedirects();
+	}
+
+	public ProxyOptions proxy() {
+		return httpRequest.proxy();
+	}
+
+	public List<ResponsePredicate> expectations() {
+		return httpRequest.expectations();
+	}
+
+	public boolean multipartMixed() {
+		return httpRequest.multipartMixed();
+	}
+
+	public Future<HttpResponse<T>> sendForm(MultiMap body, String charset) {
+		return httpRequest.sendForm(body, charset);
 	}
 
 }
