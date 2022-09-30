@@ -1,3 +1,4 @@
+
 package tech.greenfield.vertx.irked.base;
 
 import java.util.List;
@@ -524,6 +525,11 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 
 	public Future<HttpResponse<T>> sendForm(MultiMap body, String charset) {
 		return httpRequest.sendForm(body, charset);
+	}
+
+	@Override
+	public long timeout() {
+		return httpRequest.timeout();
 	}
 
 }
