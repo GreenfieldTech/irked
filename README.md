@@ -187,7 +187,7 @@ class Root extends Controller {
 		r.response(new OK()).end(createReport(r.getId()));
 	}
 
-	@Endpoint("/:id/blocks")
+	@Endpoint("/:id/blocks") // ":id" is read by the MyRequest class
 	BlockApi blocks = new BlockApi();
 	
 	@Override
@@ -207,7 +207,7 @@ class BlockApi extends Controller {
 
 	@Get("/")
 	Handler<MyRequest> retrieve = r -> {
-		r.send(getAllBlocksFor(r.getId()));
+		r.send(getAllBlocksFor(r.getId())); // read the identifier field defined by Root and MyRequest
 	};
 }
 ```
