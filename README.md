@@ -235,7 +235,7 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Endpoint("/*")
+	@Endpoint("/*") // set up body reading middle-ware (see more below)
 	BodyHandler bodyHandler = BodyHandler.create();
 
 	@Put("/:id")
@@ -399,7 +399,7 @@ void messageHandler(UserContextRequest req, WebSocketMessage msg) {
 #### SockJS service
 
 If you are interested in a [Sock.JS](http://sockjs.org) server implementation, Vert.x Web offers `SockJSHandler` that
-can be mounted directly in an Irked controller as any other Vert.x middle-ware:
+can be mounted directly in an Irked controller as any other Vert.x middle-ware (see below for more about middle-ware):
 
 ```java
 @Get("/listener")
@@ -457,12 +457,18 @@ private handleErrors(ServerWebSocket ws, Throwable error) {
 
 #### Mounting Middle-Ware
 
-Under Vert.x its often useful to have a "middle-ware" that parses all your requests, for example:
-the [Vert.x Web BodyHandler](https://github.com/vert-x3/vertx-examples/blob/master/web-examples/src/main/java/io/vertx/example/web/rest/SimpleREST.java#L50) implementation reads the HTTP request body and handles all kinds of body formats for you.
+Under Vert.x its often useful to have a "middle-ware" that processes requests before passing
+control back to your application, such as the Vert.x Web [`BodyHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/BodyHandler.html)
+that reads the HTTP request body and handles all kinds of body formats for you, the
+[`LoggerHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/LoggerHandler.html)
+that automatically logs web requests to an Apache style log,
+the [`CorsHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/CorsHandler.html)
+that lets you easily configure [CORS](https://fetch.spec.whatwg.org/#http-cors-protocol) rules,
+[and many others](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/package-summary.html).
 
 This type of middle-ware can be easily used in irked by registering it on a catch all end-point,
 very similar to how you set it up using the Vert.x web's `Router` implementation. In your root
-controller, add a field like this:
+controller, add a field - at the top of the class definition - like this:
 
 ```java
 @Endpoint("/*")
