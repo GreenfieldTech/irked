@@ -272,8 +272,7 @@ does keep the order for fields. Trying to cascade between methods will execute h
 
 It is often useful to move failure handling away from the request handler - to keep the code clean
 and unify error handling which is often very repetitive. Irked supports 
-[Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail`
-annotation that you can assign a request handler.
+[Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign a request handler.
 
 Note: the request failure handler still needs to be configured properly for a URI and HTTP method -
 so we often find it useful to use the catch all `@Endpoint` annotation with a wild card URI to
@@ -308,7 +307,7 @@ class Root extends Controller {
 }
 ```
 
-Irked's `Request.sendError()` works with HTTP status codes classes and will create an HTTP response with the appropriate error status and an `application/json` body with a JSON object containing the fields "`status`" set to `false` and "`message`" set to the exception's detail message. The response's content can be further controlled by instead using one of the `Request.sendJSON()` or `Request.sendContent()` methods that take an `HttpError` parameter.
+Irked `Request.sendError()` works with HTTP status codes classes and will create an HTTP response with the appropriate error status and an `application/json` body with a JSON object containing the fields "`status`" set to `false` and "`message`" set to the exception's detail message. The response's content can be further controlled by instead using one of the `Request.sendJSON()` or `Request.sendContent()` methods that take an `HttpError` parameter.
 
 Also see the tips section below for a more complex failure handler that may be useful.
 
@@ -532,6 +531,21 @@ WebHandler failureHandler = Request.failureHandler();
 
 By the way, it is possible to use the throwable `HttpError` types to `throw` any kind of HTTP status,
 including a "200 OK", like this: `throw new OK().unchecked()`.
+
+##### Declare Thrown Exceptions
+
+If your controllers use method handlers, and you prefer not to use "unchecked" `HttpError`s, you can also declare thrown exceptions generally (declare throwing `HttpError`) or specific errors:
+
+```java
+@Get("/:id")
+void getTheStuff(MyRequest r) throws Unauthorized {
+    if (!r.authorizedToGetStuff())
+        throw new Unauthorized("You are not authorized to get our stuff");
+    r.send(r.theStuff());
+}
+```
+
+Irked will gladly setup such method handlers and will forward any exceptions they throw to the failure handlers.
 
 #### Specify Custom Headers
 
