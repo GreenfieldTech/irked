@@ -138,7 +138,7 @@ public class HttpError extends Exception {
 			return new InternalServerError("Unknown HTTP status code " + ctx.statusCode());
 		try {
 			return HttpStatuses.create(ctx.statusCode());
-		} catch (InstantiationException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			// should never happen, assuming we know all valid HTTP status codes
 			return new InternalServerError("Failed to translate failed context to HTTP error");
 		}

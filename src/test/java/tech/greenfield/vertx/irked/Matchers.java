@@ -66,7 +66,7 @@ public class Matchers {
 			public HttpError get() {
 				try {
 					return HttpStatuses.create(code);
-				} catch (InstantiationException e) {
+				} catch (InstantiationException | IllegalAccessException e) {
 				}
 				return new HttpError(code, "Unknown status code!");
 			}}).get();
