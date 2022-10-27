@@ -187,7 +187,7 @@ class Root extends Controller {
 		r.response(new OK()).end(createReport(r.getId()));
 	}
 
-	@Endpoint("/:id/blocks")
+	@Endpoint("/:id/blocks") // ":id" is read by the MyRequest class
 	BlockApi blocks = new BlockApi();
 	
 	@Override
@@ -207,7 +207,7 @@ class BlockApi extends Controller {
 
 	@Get("/")
 	Handler<MyRequest> retrieve = r -> {
-		r.send(getAllBlocksFor(r.getId()));
+		r.send(getAllBlocksFor(r.getId())); // read the identifier field defined by Root and MyRequest
 	};
 }
 ```
@@ -235,7 +235,7 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Endpoint("/*")
+	@Endpoint("/*") // set up body reading middle-ware (see more below)
 	BodyHandler bodyHandler = BodyHandler.create();
 
 	@Put("/:id")
@@ -272,8 +272,7 @@ does keep the order for fields. Trying to cascade between methods will execute h
 
 It is often useful to move failure handling away from the request handler - to keep the code clean
 and unify error handling which is often very repetitive. Irked supports 
-[Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail`
-annotation that you can assign a request handler.
+[Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign a request handler.
 
 Note: the request failure handler still needs to be configured properly for a URI and HTTP method -
 so we often find it useful to use the catch all `@Endpoint` annotation with a wild card URI to
@@ -308,7 +307,7 @@ class Root extends Controller {
 }
 ```
 
-Irked's `Request.sendError()` works with HTTP status codes classes and will create an HTTP response with the appropriate error status and an `application/json` body with a JSON object containing the fields "`status`" set to `false` and "`message`" set to the exception's detail message. The response's content can be further controlled by instead using one of the `Request.sendJSON()` or `Request.sendContent()` methods that take an `HttpError` parameter.
+Irked `Request.sendError()` works with HTTP status codes classes and will create an HTTP response with the appropriate error status and an `application/json` body with a JSON object containing the fields "`status`" set to `false` and "`message`" set to the exception's detail message. The response's content can be further controlled by instead using one of the `Request.sendJSON()` or `Request.sendContent()` methods that take an `HttpError` parameter.
 
 Also see the tips section below for a more complex failure handler that may be useful.
 
@@ -399,7 +398,7 @@ void messageHandler(UserContextRequest req, WebSocketMessage msg) {
 #### SockJS service
 
 If you are interested in a [Sock.JS](http://sockjs.org) server implementation, Vert.x Web offers `SockJSHandler` that
-can be mounted directly in an Irked controller as any other Vert.x middle-ware:
+can be mounted directly in an Irked controller as any other Vert.x middle-ware (see below for more about middle-ware):
 
 ```java
 @Get("/listener")
@@ -457,12 +456,18 @@ private handleErrors(ServerWebSocket ws, Throwable error) {
 
 #### Mounting Middle-Ware
 
-Under Vert.x its often useful to have a "middle-ware" that parses all your requests, for example:
-the [Vert.x Web BodyHandler](https://github.com/vert-x3/vertx-examples/blob/master/web-examples/src/main/java/io/vertx/example/web/rest/SimpleREST.java#L50) implementation reads the HTTP request body and handles all kinds of body formats for you.
+Under Vert.x its often useful to have a "middle-ware" that processes requests before passing
+control back to your application, such as the Vert.x Web [`BodyHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/BodyHandler.html)
+that reads the HTTP request body and handles all kinds of body formats for you, the
+[`LoggerHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/LoggerHandler.html)
+that automatically logs web requests to an Apache style log,
+the [`CorsHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/CorsHandler.html)
+that lets you easily configure [CORS](https://fetch.spec.whatwg.org/#http-cors-protocol) rules,
+[and many others](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/package-summary.html).
 
 This type of middle-ware can be easily used in irked by registering it on a catch all end-point,
 very similar to how you set it up using the Vert.x web's `Router` implementation. In your root
-controller, add a field like this:
+controller, add a field - at the top of the class definition - like this:
 
 ```java
 @Endpoint("/*")
@@ -526,6 +531,21 @@ WebHandler failureHandler = Request.failureHandler();
 
 By the way, it is possible to use the throwable `HttpError` types to `throw` any kind of HTTP status,
 including a "200 OK", like this: `throw new OK().unchecked()`.
+
+##### Declare Thrown Exceptions
+
+If your controllers use method handlers, and you prefer not to use "unchecked" `HttpError`s, you can also declare thrown exceptions generally (declare throwing `HttpError`) or specific errors:
+
+```java
+@Get("/:id")
+void getTheStuff(MyRequest r) throws Unauthorized {
+    if (!r.authorizedToGetStuff())
+        throw new Unauthorized("You are not authorized to get our stuff");
+    r.send(r.theStuff());
+}
+```
+
+Irked will gladly setup such method handlers and will forward any exceptions they throw to the failure handlers.
 
 #### Specify Custom Headers
 

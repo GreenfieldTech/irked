@@ -56,6 +56,26 @@ public class HttpError extends Exception {
 		return statusText;
 	}
 	
+	public boolean isOK() {
+		return statusCode / 100 == 2;
+	}
+	
+	public boolean isRedirect() {
+		return statusCode / 100 == 3;
+	}
+	
+	public boolean isClientError() {
+		return statusCode / 100 == 4;
+	}
+	
+	public boolean isServerError() {
+		return statusCode / 100 == 5;
+	}
+	
+	public boolean isError() {
+		return isClientError() || isServerError();
+	}
+	
 	public HttpError addHeader(String header, String value) {
 		this.headers.add(header, value);
 		return this;
