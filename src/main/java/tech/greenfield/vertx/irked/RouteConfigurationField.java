@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.impl.OrderListener;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
@@ -36,7 +37,7 @@ public class RouteConfigurationField extends RouteConfiguration {
 	protected String getName() {
 		return field.getName();
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
@@ -44,20 +45,9 @@ public class RouteConfigurationField extends RouteConfiguration {
 			throw new InvalidRouteConfiguration(this + " is not a valid handler or controller");
 		field.setAccessible(true);
 		final Handler<RoutingContext> handler = (Handler<RoutingContext>)field.get(impl);
-		return new Handler<RoutingContext>() {
-			@Override
-			public void handle(RoutingContext r) {
-				try {
-					handler.handle(r);
-				} catch (Throwable cause) {
-					handleUserException(r, cause, "field " + field);
-				}
-			}
-			@Override
-			public String toString() {
-				return field.getName();
-			}
-		};
+		if (handler instanceof OrderListener)
+			return new FieldHandlerWithOrderListener(handler);
+		return new FieldHandler(handler);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -81,6 +71,38 @@ public class RouteConfigurationField extends RouteConfiguration {
 				return field.getName();
 			}
 		};
+	}
+
+	private class FieldHandler implements Handler<RoutingContext> {
+		protected Handler<RoutingContext> handler;
+		public FieldHandler(Handler<RoutingContext> handler) {
+			this.handler = handler;
+		}
+		@Override
+		public void handle(RoutingContext r) {
+			try {
+				handler.handle(r);
+			} catch (Throwable cause) {
+				handleUserException(r, cause, "field " + field);
+			}
+		}
+		@Override
+		public String toString() {
+			return field.getName();
+		}
+	};
+	
+	private class FieldHandlerWithOrderListener extends FieldHandler implements OrderListener {
+
+		public FieldHandlerWithOrderListener(Handler<RoutingContext> handler) {
+			super(handler);
+		}
+
+		@Override
+		public void onOrder(int order) {
+			((OrderListener)handler).onOrder(order);
+		}
+		
 	}
 
 }
