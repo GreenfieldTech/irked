@@ -1,7 +1,8 @@
 package tech.greenfield.vertx.irked.auth;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 import java.util.Objects;
-import java.util.ServiceLoader;
 
 /**
  * Base class for RFC 7235 authentication/authorization tokens
@@ -11,6 +12,53 @@ public class AuthorizationToken {
 	
 	private String token;
 	private String type;
+	
+	public enum TokenTypes {
+		// not actually a type - just a base implementation:
+		// PARAMETER(ParameterEncodedAuthorizationToken.class)
+		
+		NULL(NullAuthorizationToken.class),
+		SIMPLE(SimpleAuthrizationToken.class),
+		BASIC(BasicAuthorizationToken.class),
+		BEARER(BearerAuthorizationToken.class),
+		DIGEST(DigestAuthorizationToken.class),
+		HOB(HOBAAuthorizationToken.class),
+		MUTUAL(MutualAuthorizationToken.class),
+		NEGOTIATE(NegotiateAuthorizationToken.class),
+		OAUTH(OAuthAuthorizationToken.class);
+
+		private Class<? extends AuthorizationToken> clz;
+
+		TokenTypes(Class<? extends AuthorizationToken> clz) {
+			this.clz = clz;
+		}
+
+		public static Iterable<AuthorizationToken> instances() {
+			return new Iterable<>() {
+				private TokenTypes[] types = values();
+				@Override
+				public Iterator<AuthorizationToken> iterator() {
+					return new Iterator<>() {
+						private int index = 0;
+						private int max = types.length;
+						@Override
+						public boolean hasNext() {
+							return index < max;
+						}
+						@Override
+						public AuthorizationToken next() {
+							try {
+								return types[index++].clz.getConstructor().newInstance();
+							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+								System.err.print("Unexpected exception instantiating a known authorization token type! this shouldn't happen");
+								throw new Error(e);
+							}
+						}
+					};
+				}};
+		}
+	}
 
 	/**
 	 * Constructor for token implementations is internal - use {@link #parse(String)} to create tokens
@@ -36,7 +84,7 @@ public class AuthorizationToken {
 		String[] parts = authorizationHeader.split("\\s+",2);
 		if (parts.length == 1)
 			return new SimpleAuthrizationToken(parts[0]);
-		for (AuthorizationToken a : ServiceLoader.load(AuthorizationToken.class)) {
+		for (AuthorizationToken a : TokenTypes.instances()) {
 			if (a.supports(parts[0]))
 				return a.update(parts[0], parts[1]);
 		}
