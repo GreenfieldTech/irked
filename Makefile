@@ -25,7 +25,7 @@ clean:
 	$(MVNCMD) clean
 
 push:
-	git push --all && git push --tags
+	for remote in `git remote`; do git push $$remote --all && git push $$remote --tags; done
 
 release:
 	$(eval SHELL := /bin/bash)
