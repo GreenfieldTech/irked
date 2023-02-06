@@ -157,7 +157,7 @@ package com.example.api;
 import tech.greenfield.vertx.irked.*;
 import tech.greenfield.vertx.irked.annotations.*;
 
-class MyRequest extend Request {
+class MyRequest extends Request {
 
 	String id;
 
