@@ -573,9 +573,9 @@ throw new Redirect("https://example.com");
 
 #### Using classic Java methods for handlers, while keeping handler order
 
-As discussed above, while Irked supports both using fields to route requests too as well as
-methods, when annotating methods to handle incoming requests, the order of registration in the
-Vert.x Web router is not guaranteed - and as a result the `Request.next()` calls may not go
+As discussed above, while Irked supports both using fields to route requests to, as well as
+methods, when annotating methods to handle incoming requests - the order of registration in the
+Vert.x Web router is not guaranteed and as a result the `Request.next()` calls may not go
 where you expected them to.
 
 If you still want to order your requests logically (which is useful, for example, as detailed
