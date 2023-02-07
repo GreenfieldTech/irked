@@ -111,7 +111,7 @@ public class Request extends RoutingContextDecorator {
 		// we're overriding the fail handlers, which for some reason the decorator 
 		// feels should be moved to another thread. Instead, use the outer implementation
 		// and let it do what's right
-		this.outerContext.fail(throwable);
+		this.outerContext.fail(Objects.requireNonNull(throwable));
 	}
 	
 	/**
