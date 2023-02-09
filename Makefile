@@ -19,13 +19,14 @@ compile: $(wildcard src/main/java/**/*.java)
 test: $(wildcard src/test/java/**/*.java)
 	$(MVNCMD) test
 
-.PHONY: release push
-
 clean:
 	$(MVNCMD) clean
 
+check-updates:
+	mvn versions:display-dependency-updates
+
 push:
-	git push --all && git push --tags
+	for remote in `git remote`; do git push $$remote --all && git push $$remote --tags; done
 
 release:
 	$(eval SHELL := /bin/bash)
@@ -38,3 +39,5 @@ release:
 	git flow release finish -m "release $(VERSION)" </dev/null
 	perl -pi -e 'BEGIN{sub bump{@v=split(/\./,$$_[0]);join(".",@v[0..1]).".".($$v[-1]+1);}}s,<version>($(VERSION))</version>,"<version>".(bump($$1))."-SNAPSHOT</version>",e' pom.xml
 	git commit pom.xml -m "develop back to snapshot mode"
+
+.PHONY: release push clean compile test all check-updates
