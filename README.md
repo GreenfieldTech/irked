@@ -15,7 +15,7 @@ ported to all releases.
 
 ## Installation
 
-Irked is available from the [Maven Central Repository](https://search.maven.org/artifact/tech.greenfield/irked-vertx/4.3.7.1/jar).
+Irked is available from the [Maven Central Repository](https://search.maven.org/artifact/tech.greenfield/irked-vertx/4.3.8/jar).
 
 In your `pom.xml` file, add Irked as a dependency:
 
@@ -23,7 +23,7 @@ In your `pom.xml` file, add Irked as a dependency:
 <dependency>
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.3.7.1</version>
+	<version>4.3.8</version>
 </dependency>
 ```
 
