@@ -21,9 +21,9 @@ In your `pom.xml` file, add Irked as a dependency:
 
 ```xml
 <dependency>
-	<groupId>tech.greenfield</groupId>
-	<artifactId>irked-vertx</artifactId>
-	<version>4.3.8</version>
+    <groupId>tech.greenfield</groupId>
+    <artifactId>irked-vertx</artifactId>
+    <version>4.3.8</version>
 </dependency>
 ```
 
@@ -57,7 +57,7 @@ To publish routes to the server's "Request Handler", create your controller clas
 irked `Controller` class, define fields or methods to handle HTTP requests and annotate them with
 the relevant method annotations and URIs that those handlers should receive requests for.
 
-#### A Sample Controller
+#### An Example Controller
 
 ```java
 package com.example.api;
@@ -68,18 +68,18 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Get("/")
-	Handler<RoutingContext> index = r -> {
-		// classic Vert.x RoutingContext usage
-		r.response().setStatusCode(200).end("Hello World!");
-	};
-	
-	@Post("/")
-	void create(Request r) {
-		// the irked Request object offers some useful helper methods over the
-		// standard Vert.x RoutingContext
-		r.send(new BadRequest("Creating resources is not yet implemented"));
-	}
+    @Get("/")
+    Handler<RoutingContext> index = r -> {
+        // classic Vert.x RoutingContext usage
+        r.response().setStatusCode(200).end("Hello World!");
+    };
+
+    @Post("/")
+    void create(Request r) {
+        // the irked Request object offers some useful helper methods over the
+        // standard Vert.x RoutingContext
+        r.send(new BadRequest("Creating resources is not yet implemented"));
+    }
 }
 ```
 
@@ -89,7 +89,7 @@ After creating your set of `Controller` implementations, deploy them to Vert.x b
 a `Verticle` like you would do for a [`vertx-web` Router](https://vertx.io/docs/vertx-web/java/#_basic_vert_x_web_concepts),
 but use Irked to create a router from your root controller - and set that as the request handler.
 
-#### Sample Vert.x Web HTTP Server
+#### A Vert.x Web HTTP Server Example
 
 ```java
 Router router = Irked.router(vertx).with(new com.example.api.Root());
@@ -103,7 +103,7 @@ the main controller - by setting fields to additional `Controller` implementatio
 them with the `@Endpoint` annotation with the URI set to the endpoint you want your sub-controller
 to be accessible under.
 
-### A Sample Main and Sub Controllers
+### Main and Sub Controllers Example
 
 ```java
 package com.example.api;
@@ -113,9 +113,9 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Endpoint("/blocks") // the block API handles all requests that start with "/blocks/"
-	BlockApi blocks = new BlockApi();
-	
+    @Endpoint("/blocks") // the block API handles all requests that start with "/blocks/"
+    BlockApi blocks = new BlockApi();
+
 }
 ```
 
@@ -127,11 +127,11 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class BlockApi extends Controller {
 
-	@Get("/:id") // handle requests like "GET /blocks/identifier"
-	Handler<Request> retrieve = r -> {
-		// irked supports vertx-web path parameters 
-		r.send(loadBlock(r.pathParam("id")));
-	};
+    @Get("/:id") // handle requests like "GET /blocks/identifier"
+    Handler<Request> retrieve = r -> {
+        // irked supports vertx-web path parameters 
+        r.send(loadBlock(r.pathParam("id")));
+    };
 }
 ```
 
@@ -151,7 +151,7 @@ A parent controller can define path parameters and then extract the data and han
 handlers and sub-controllers through a well defined API, by overriding the
 `Controller.getRequestContext()` method.
 
-#### A Sample Route Context Re-programming
+#### Route Context Re-programming Example
 
 ```java
 package com.example.api;
@@ -161,17 +161,17 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class MyRequest extends Request {
 
-	String id;
+    String id;
 
-	public MyRequest(Request req) {
-		super(req);
-		id = req.pathParam("id");
-	}
-	
-	public String getId() {
-		return id;
-	}
-	
+    public MyRequest(Request req) {
+        super(req);
+        id = req.pathParam("id");
+    }
+
+    public String getId() {
+        return id;
+    }
+
 }
 ```
 
@@ -184,18 +184,18 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Get("/:id")
-	void report(MyRequest r) {
-		r.response(new OK()).end(createReport(r.getId()));
-	}
+    @Get("/:id")
+    void report(MyRequest r) {
+        r.response(new OK()).end(createReport(r.getId()));
+    }
 
-	@Endpoint("/:id/blocks") // ":id" is read by the MyRequest class
-	BlockApi blocks = new BlockApi();
-	
-	@Override
-	protected MyRequest getRequestContext(Request req) {
-		return new MyRequest(req);
-	}
+    @Endpoint("/:id/blocks") // ":id" is read by the MyRequest class
+    BlockApi blocks = new BlockApi();
+
+    @Override
+    protected MyRequest getRequestContext(Request req) {
+        return new MyRequest(req);
+    }
 }
 ```
 
@@ -207,10 +207,10 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class BlockApi extends Controller {
 
-	@Get("/")
-	Handler<MyRequest> retrieve = r -> {
-		r.send(getAllBlocksFor(r.getId())); // read the identifier field defined by Root and MyRequest
-	};
+    @Get("/")
+    Handler<MyRequest> retrieve = r -> {
+        r.send(getAllBlocksFor(r.getId())); // read the identifier field defined by Root and MyRequest
+    };
 }
 ```
 
@@ -226,7 +226,7 @@ This is not an irked feature, but irked allows you to use all the power of Vert.
 is a small "gotcha" here that we should note - the order of the handlers definition is important,
 and is the order they will be called:
 
-#### A Sample Cascading Request Handlers
+#### Cascading Request Handlers Example
 
 ```java
 package com.example.api;
@@ -237,28 +237,28 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Endpoint("/*") // set up body reading middle-ware (see more below)
-	BodyHandler bodyHandler = BodyHandler.create();
+    @Endpoint("/*") // set up body reading middle-ware (see more below)
+    BodyHandler bodyHandler = BodyHandler.create();
 
-	@Put("/:id")
-	WebHandler update = r -> {
-		// start an async operation to store the new data
-		store(r.pathParam("id"), r.getBodyAsJson())
-		.onSuccess(v -> { // Instead of sending the response
-			r.next(); // let the next handler do it
-		})
-		.onFailure(err -> { // if storing failed
-			r.sendError(new InternalServerError(err)); // send an 500 error
-		});
-	};
-	
-	@Put("/:id")
-	@Get("/:id")
-	WebHandler retrieve = r -> {
-		load(r.pathParam("id"))
-		.onSuccess(data -> r.send(data))
-		.onFailure(err -> r.sendError(new InternalServerError(err)))
-	};
+    @Put("/:id")
+    WebHandler update = r -> {
+        // start an async operation to store the new data
+        store(r.pathParam("id"), r.getBodyAsJson())
+        .onSuccess(v -> { // Instead of sending the response
+            r.next(); // let the next handler do it
+        })
+        .onFailure(err -> { // if storing failed
+            r.sendError(new InternalServerError(err)); // send an 500 error
+        });
+    };
+
+    @Put("/:id")
+    @Get("/:id")
+    WebHandler retrieve = r -> {
+        load(r.pathParam("id"))
+        .onSuccess(data -> r.send(data))
+        .onFailure(err -> r.sendError(new InternalServerError(err)))
+    };
 
 }
 ```
@@ -274,13 +274,13 @@ does keep the order for fields. Trying to cascade between methods will execute h
 
 It is often useful to move failure handling away from the request handler - to keep the code clean
 and unify error handling which is often very repetitive. Irked supports 
-[Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign a request handler.
+[Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign to a request handler, which makes it so that the handler is only called for requests for which `fail()` has been called. 
 
 Note: the request failure handler still needs to be configured properly for a URI and HTTP method -
 so we often find it useful to use the catch all `@Endpoint` annotation with a wild card URI to
 configure a main failure handler, though multiple and specific failure handlers would work fine.
 
-#### A Failure Handler Sample
+#### A Failure Handler Example
 
 ```java
 package com.example.api;
@@ -291,21 +291,21 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-	@Get("/foo")
-	WebHandler fooAPI = r -> {
-		loadFoo().onSuccess(r::send).onFailure(r::fail);
-	};
+    @Get("/foo")
+    WebHandler fooAPI = r -> {
+        loadFoo().onSuccess(r::send).onFailure(r::fail);
+    };
 
-	@Post("/foo")
-	WebHandler fooAPI = r -> {
-		r.fail(new UnsupportedOperationException("Not implemented yet"));
-	};
+    @Post("/foo")
+    WebHandler fooAPI = r -> {
+        r.fail(new UnsupportedOperationException("Not implemented yet"));
+    };
 
-	@OnFail
-	@Endpoint("/*")
-	void failureHandler(Request r) {
-		r.sendError(new InternalServerError(r.failure()));
-	}
+    @OnFail
+    @Endpoint("/*")
+    void failureHandler(Request r) {
+        r.sendError(new InternalServerError(r.failure()));
+    }
 }
 ```
 
@@ -313,20 +313,45 @@ Irked `Request.sendError()` works with HTTP status codes classes and will create
 
 Also see the tips section below for a more complex failure handler that may be useful.
 
+#### Status Code Specific and Exception Specific Failure Handlers
+
+The `@OnFail` annotation allows customizing the failure handler to only handle specific HTTP status codes (when propagated using the `RoutingContext.fail(int)` or `RoutingContext.fail(int, Throwable)` methods) or only handle specific exceptions (when propagated using the `RoutingContext.fail(int, Throwable)` or `RoutingContext.fail(Throwable)`). This allows for creating smaller failure handlers, that - like `catch` clauses - only handle a specific exception or status.
+
+##### A Specific Exception Failure Handler Example
+
+```java
+class Root extends Controller {
+    @Post("/foo")
+    WebHandler fooAPI = r -> {
+        database.store(r.body().asJsonObject(4096));
+    };
+
+    @OnFail(exception = DecodeException.class)
+    @Post("/foo")
+    WebHandler fooDecodeError = r -> r.sendContent("/foo requires a valid JSON document to be sent!",new BadRequest());
+
+    @OnFail(exception = IllegalStateException.class)
+    @Post("/foo")
+    WebHandler fooDecodeError = r -> r.sendContent("Request body is too big!",new BadRequest());
+}
+```
+
+
+
 ### Request Content-Type Specific Handlers
 
 Irked supports the Vert.x Web `consumes()` filter to specify request handlers
 that only handle specific request content-types, using the `@Consumes`
 annotation. Specify it like URI annotations with the expected request content type. Like the `consumes()` method, it supports wild cards.
 
-#### A Request Content-Type Handler Sample
+#### A Request Content-Type Handler Example
 
 ```java
 @Post("/upload")
 @Consumes("multipart/form-data")
 WebHandler fileUpload = r -> {
-	for (FileUpload f : r.fileUploads()) saveFile(f);
-	r.send("Uploaded!");
+    for (FileUpload f : r.fileUploads()) saveFile(f);
+    r.send("Uploaded!");
 };
 ```
 
@@ -338,21 +363,21 @@ Irked contains a few helpers for using Promise-style APIs, such as Vert.x `Promi
 Exceptions to the failure handlers, or `Request.next()` which makes it easier to attach `RoutingContext.next()`
 to `Future.onSuccess()` handlers.
 
-#### An Async Processing Sample
+#### An Asynchronous Processing Example
 
 ```java
 Future<List<PojoType>> loadSomeRecords() {
-	// ... access a database asynchronously to load some POJOs
+    // ... access a database asynchronously to load some POJOs
 }
 
 @Get("/")
 WebHandler catalog = r -> // we don't even need curly braces
-	loadSomeRecords() // fetch records
-	.map(l -> l.stream() // stream loaded records as POJOs
-			.map(JsonObject::mapFrom) // bean map each record to a JSON object
-			.collect(JsonArray::new, JsonArray::add, JsonArray::addAll)) // collect everything to a JSON array
-	.onSuccess(r::send) // send the list to the client
-	.onFailure(r::handleFailure); // capture any exceptions and forward to the failure handler
+    loadSomeRecords() // fetch records
+    .map(l -> l.stream() // stream loaded records as POJOs
+            .map(JsonObject::mapFrom) // bean map each record to a JSON object
+            .collect(JsonArray::new, JsonArray::add, JsonArray::addAll)) // collect everything to a JSON array
+    .onSuccess(r::send) // send the list to the client
+    .onFailure(r::handleFailure); // capture any exceptions and forward to the failure handler
 ```
 
 You can review the Irked unit test [`TestAsyncSending.java`](src/test/java/tech/greenfield/vertx/irked/TestAsyncSending.java) for more examples.
@@ -375,7 +400,6 @@ Instances of this class implement all the method from the `Buffer` class to acce
 This example shows how an incoming WebSocket request can be checked for authorization before handing the request to the WebSocket handler, using cascading requests. The `WebHandler` will be called once for each WebSocket handshake. It can also add data to the request using Vert.x `put()` facility that can be accessed from the `MessageHandler` using `WebSocketMessage.request()`.
 
 ```java
-
 @Get("/websocket")
 WebHandler authIncoming = r -> { // called once for each new WebSocket connection
   if (!isAuthorized(r.request().getHeader("Authorization"))) r.fail(new Unauthorized());
@@ -405,9 +429,9 @@ can be mounted directly in an Irked controller as any other Vert.x middle-ware (
 ```java
 @Get("/listener")
 SockJSHandler listener = SockJSHandler.create(vertx).socketHandler(sock -> {
-	sock.handler(buf -> {
-		sock.write("You said: " + buf.toString().trim() + "\n");
-	});
+    sock.handler(buf -> {
+        sock.write("You said: " + buf.toString().trim() + "\n");
+    });
 });
 ```
 
@@ -416,18 +440,17 @@ SockJSHandler listener = SockJSHandler.create(vertx).socketHandler(sock -> {
 There are two main implementations for WebSocket handling under Vert.x Core, as documented in the [WebSocket section of the core manual](http://vertx.io/docs/vertx-core/java/#_websockets):
 
 1. Adding a handler for the server's `websocketStream()`: Irked doesn't support this method directly but
-you can always add the handler when initializing the server, before or after setting up Irked. Please note that using 
-this method blocks any other WebSocket implementation strategy suggested in this document - the WebSocket Stream handler
-will consume all incoming connection upgrade requests regardless of the path these target.
+   you can always add the handler when initializing the server, before or after setting up Irked. Please note that using 
+   this method blocks any other WebSocket implementation strategy suggested in this document - the WebSocket Stream handler
+   will consume all incoming connection upgrade requests regardless of the path these target.
 2. Upgrading a request: this can be done in an Irked controller and Irked offers some minimal support to help you
-manage the process, with the `Request.needUpgrade()` method to help you detect upgrade requests. 
+   manage the process, with the `Request.needUpgrade()` method to help you detect upgrade requests. 
 
 The following example shows how to handle the WebSocket upgrade request and register event handlers to the created Vert.x WebSocket implementation class.
 As you can see there is quite a bit of heavy lifting and you need to work harder to maintain context and state, compared to Irked `WebSocketMessage` API
 and programmable request contexts.
 
 ```java
-
 @Get("/websocket")
 WebHandler websocketStart = r -> {
   if (!r.needUpgrade("websocket"))
@@ -495,9 +518,9 @@ a 404 Not Found error:
 ```java
 @Get("/:id")
 Handler<Request> retrieve = r -> {
-	if (!existsItem(r.pathParam("id")))
-		throw new NotFound("No such item!").unchecked();
-	r.send(load(r.pathParam("id")));
+    if (!existsItem(r.pathParam("id")))
+        throw new NotFound("No such item!").unchecked();
+    r.send(load(r.pathParam("id")));
 }
 ```
 
@@ -512,7 +535,7 @@ Then the `@OnFail` handler can be configured to automatically forward this statu
 @OnFail
 @Endpoint("/*")
 Handler<Request> failureHandler = r -> {
-	r.sendError(HttpError.toHttpError(r));
+    r.sendError(HttpError.toHttpError(r));
 };
 ```
 
@@ -536,7 +559,7 @@ including a "200 OK", like this: `throw new OK().unchecked()`.
 
 ##### Declare Thrown Exceptions
 
-If your controllers use method handlers, and you prefer not to use "unchecked" `HttpError`s, you can also declare thrown exceptions generally (declare throwing `HttpError`) or specific errors:
+If your controllers uses method handlers, and you prefer not to use "unchecked" `HttpError`s, you can also declare thrown exceptions generally (declare throwing `HttpError`) or specific errors:
 
 ```java
 @Get("/:id")
@@ -593,19 +616,19 @@ import tech.greenfield.vertx.irked.*;
 import tech.greenfield.vertx.irked.status.*;
 import tech.greenfield.vertx.irked.annotations.*;
 
-class Sample extends Controller {
-	
-	public void helloWorld(Request r) {
-		r.sendContent(r.get("message"), new OK());
-	}
-	
-	public void thisComesFirst(Request r) {
-		r.put("message","Hello World!");
-		r.next();
-	}
-	
-	@Get("/") WebHandler messageMiddleware = this::thisComesFirst;
-	@Get("/") WebHandler helloHandler = this::helloWorld;
+class Example extends Controller {
+
+    public void helloWorld(Request r) {
+        r.sendContent(r.get("message"), new OK());
+    }
+
+    public void thisComesFirst(Request r) {
+        r.put("message","Hello World!");
+        r.next();
+    }
+
+    @Get("/") WebHandler messageMiddleware = this::thisComesFirst;
+    @Get("/") WebHandler helloHandler = this::helloWorld;
 }
 ```
 

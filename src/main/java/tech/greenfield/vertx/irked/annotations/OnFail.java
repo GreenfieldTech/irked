@@ -13,5 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target(FIELD)
 public @interface OnFail {
-
+	int status() default -1;
+	Class<? extends Throwable> exception() default Throwable.class;
 }
