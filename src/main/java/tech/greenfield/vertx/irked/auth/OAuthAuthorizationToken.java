@@ -17,7 +17,7 @@ public class OAuthAuthorizationToken extends ParameterEncodedAuthorizationToken 
 
 	/**
 	 * C'tor for unmarshaling from an authorization header
-	 * @param token
+	 * @param token The OAuth 1.0 token for this authorization
 	 */
 	public OAuthAuthorizationToken(String token) {
 		update("OAuth", token);

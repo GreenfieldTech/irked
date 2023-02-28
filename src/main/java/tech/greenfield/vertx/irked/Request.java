@@ -181,9 +181,9 @@ public class Request extends RoutingContextDecorator {
 	 *   is that this implementation checks the request Content-Type and if its a form POST, it will read the form post fields
 	 *   to mimic a JSON object. This may or may not be a desired behavior.
 	 * 
-	 * @param <T>
-	 * @param type
-	 * @return
+	 * @param <T> Result type into which the body will be decoded
+	 * @param type The class from which an instance should be created to hold the body content
+	 * @return An object of the specified type that was initialized using the Vert.x JSON decoder API
 	 */
 	public <T> T getBodyAs(Class<T> type) {
 		String contentType = this.request().getHeader("Content-Type");
