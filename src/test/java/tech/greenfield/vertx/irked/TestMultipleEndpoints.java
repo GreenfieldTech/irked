@@ -31,19 +31,21 @@ public class TestMultipleEndpoints extends TestBase {
 		Checkpoint asyncRed = context.checkpoint();
 		Checkpoint asyncBlue = context.checkpoint();
 		
-		getClient(vertx).get(port, "localhost", "/red").sendP().thenAccept(r -> {
+		getClient(vertx).get(port, "localhost", "/red").send().map(r -> {
 			assertThat(r, isOK());
 			assertThat(r, bodyContains("red"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(asyncRed::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(asyncRed));
 		
-		getClient(vertx).get(port, "localhost", "/blue").sendP().thenAccept(r -> {
+		getClient(vertx).get(port, "localhost", "/blue").send().map(r -> {
 			assertThat(r, isOK());
 			assertThat(r, bodyContains("blue"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(asyncBlue::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(asyncBlue));
 	}
 
 }

@@ -15,6 +15,7 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.Controller;
@@ -51,6 +52,10 @@ public class TestBase {
 	
 	protected void verifyNotFound(HttpResponse<Buffer> r) {
 		assertThat(r, is(notFound()));
+	}
+	
+	protected static <G> Handler<G> flag(Checkpoint cp) {
+		return g -> { cp.flag(); };
 	}
 
 }

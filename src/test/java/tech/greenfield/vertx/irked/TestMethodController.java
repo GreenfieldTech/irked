@@ -52,47 +52,51 @@ public class TestMethodController extends TestBase {
 	@Test
 	public void testGet(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).get(port, "localhost", "/get").sendP().thenAccept(res -> {
+		getClient(vertx).get(port, "localhost", "/get").send().map(res -> {
 			assertThat(res, isOK());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), equalTo(Boolean.TRUE));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testPost(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).post(port, "localhost", "/post").sendP("{}").thenAccept(res -> {
+		getClient(vertx).post(port, "localhost", "/post").send("{}").map(res -> {
 			assertThat(res, is(status(new BadRequest())));
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("message"), equalTo(new BadRequest().getMessage()));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testPut(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).put(port, "localhost", "/put").sendP("{}").thenAccept(res -> {
+		getClient(vertx).put(port, "localhost", "/put").send("{}").map(res -> {
 			assertThat(res, isOK());
 			assertThat(res, hasBody("success"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testDelete(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).delete(port, "localhost", "/delete").sendP("{}").thenAccept(res -> {
+		getClient(vertx).delete(port, "localhost", "/delete").send("{}").map(res -> {
 			assertThat(res, is(status(new NoContent())));
 			assertThat(res, is(bodyEmpty()));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 }

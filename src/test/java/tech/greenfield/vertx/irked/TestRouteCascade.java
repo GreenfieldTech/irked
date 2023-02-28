@@ -4,11 +4,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static tech.greenfield.vertx.irked.Matchers.*;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -99,12 +99,13 @@ public class TestRouteCascade extends TestBase {
 	private void executeTest(VertxTestContext context, Vertx vertx) {
 		int newVal = 5;
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).put(port, "localhost", "/").sendP(new JsonObject().put(fieldName, newVal)).thenAccept(r -> {
+		getClient(vertx).put(port, "localhost", "/").send(new JsonObject().put(fieldName, newVal)).map(r -> {
 			assertThat(r, isOK());
 			assertThat(r.bodyAsJsonObject().getInteger(fieldName), equalTo(newVal));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
@@ -112,15 +113,17 @@ public class TestRouteCascade extends TestBase {
 		deployController(new TestControllerNotCascadedGet(), vertx, context.succeeding(s -> executeTestNoCascade(context, vertx)));
 	}
 
-	private CompletableFuture<Void> executeTestNoCascade(VertxTestContext context, Vertx vertx) {
+	private Future<Void> executeTestNoCascade(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		return getClient(vertx).get(port, "localhost", "/foo").sendP().thenAccept(r -> {
+		return getClient(vertx).get(port, "localhost", "/foo").send().map(r -> {
 			assertThat(r, isOK());
 			assertThat(r.bodyAsString(), equalTo("ok"));
 			assertThat(failedTests.get(), equalTo(0));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async))
+		.mapEmpty();
 	}
 
 	
@@ -129,15 +132,17 @@ public class TestRouteCascade extends TestBase {
 		deployController(new TestControllerNotCascadedOnFail(), vertx, context.succeeding(s -> executeTestNoCascadeOnFail(context, vertx)));
 	}
 
-	private CompletableFuture<Void> executeTestNoCascadeOnFail(VertxTestContext context, Vertx vertx) {
+	private Future<Void> executeTestNoCascadeOnFail(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		return getClient(vertx).get(port, "localhost", "/foo").sendP().thenAccept(r -> {
+		return getClient(vertx).get(port, "localhost", "/foo").send().map(r -> {
 			assertThat(r, isOK());
 			assertThat(r.bodyAsString(), equalTo("ok"));
 			assertThat(failedTests.get(), equalTo(0));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async))
+		.mapEmpty();
 	}
 	
 }

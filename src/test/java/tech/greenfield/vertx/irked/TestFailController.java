@@ -39,13 +39,14 @@ public class TestFailController extends TestBase {
 	@Test
 	public void testFail(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).get(port, "localhost", "/").sendP().thenAccept(res -> {
+		getClient(vertx).get(port, "localhost", "/").send().map(res -> {
 			assertThat(res, isOK());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), equalTo(Boolean.FALSE));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 }

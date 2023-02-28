@@ -44,12 +44,13 @@ public class TestTimeout extends TestBase {
 	private void executeOKTest(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		
-		getClient(vertx).get(port, "localhost", "/justintime").sendP().thenAccept(r -> {
+		getClient(vertx).get(port, "localhost", "/justintime").send().map(r -> {
 			assertThat(r, isOK());
 			assertThat(r, hasBody("OK"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
@@ -60,12 +61,13 @@ public class TestTimeout extends TestBase {
 	private void executeTimeoutTest(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		
-		getClient(vertx).get(port, "localhost", "/toolong").sendP().thenAccept(r -> {
+		getClient(vertx).get(port, "localhost", "/toolong").send().map(r -> {
 			assertThat(r, is(status(new ServiceUnavailable())));
 			assertThat(r, hasBody("Service Unavailable"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 }

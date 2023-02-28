@@ -62,64 +62,69 @@ public class TestMountController extends TestBase {
 	public void testParentIndex(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/")
-			.sendP().thenAccept(r -> {
+			.send().map(r -> {
 				assertThat(r, isOK());
 				assertThat(r, hasBody("index"));
+				return null;
 			})
-			.exceptionally(failureHandler(context))
-			.thenRun(async::flag);
+			.onFailure(context::failNow)
+			.onSuccess(flag(async));
 	}
 	
 	@Test
 	public void testChild(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/child")
-			.sendP()
-			.thenAccept(r -> {
+			.send()
+			.map(r -> {
 				assertThat(r, isOK());
 				assertThat(r, hasBody("child index"));
+				return null;
 			})
-			.exceptionally(failureHandler(context))
-			.thenRun(async::flag);
+			.onFailure(context::failNow)
+			.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testChildIndex(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/child/")
-		.sendP()
-		.thenAccept(r -> {
+		.send()
+		.map(r -> {
 			assertThat(r, isOK());
 			assertThat(r, hasBody("child index"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testChildTest(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/child/test")
-		.sendP()
-		.thenAccept(r -> {
+		.send()
+		.map(r -> {
 			assertThat(r, isOK());
 			assertThat(r, hasBody("child test"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testParamChild(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/value/paramChild")
-		.sendP()
-		.thenAccept(r -> {
+		.send()
+		.map(r -> {
 			assertThat(r, isOK());
 			assertThat(r, hasBody("param child index"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
@@ -127,26 +132,28 @@ public class TestMountController extends TestBase {
 	public void testParamChildIndex(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/value/paramChild/")
-		.sendP()
-		.thenAccept(r -> {
+		.send()
+		.map(r -> {
 			assertThat(r, isOK());
 			assertThat(r, hasBody("param child index"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testParamChildTest(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/value/paramChild/test")
-		.sendP()
-		.thenAccept(r -> {
+		.send()
+		.map(r -> {
 			assertThat(r, isOK());
 			assertThat(r, hasBody("param child test"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 }

@@ -82,13 +82,14 @@ public class TestInvalidMethod extends TestBase {
 	public void privateMethod(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new PrivateController(), vertx, context.succeeding(deploymentID -> {
-			getClient(vertx).get(port, "localhost", "/private").sendP().thenAccept(res -> {
+			getClient(vertx).get(port, "localhost", "/private").send().map(res -> {
 				assertThat(res, isOK());
 				assertThat(res.bodyAsString(), equalTo("OK"));
 				vertx.undeploy(deploymentID, context.succeedingThenComplete());
+				return null;
 			})
-			.exceptionally(failureHandler(context))
-			.thenRun(async::flag);
+			.onFailure(context::failNow)
+			.onSuccess(flag(async));
 		}));
 	}
 	
@@ -113,13 +114,14 @@ public class TestInvalidMethod extends TestBase {
 		Checkpoint async = context.checkpoint();
 		deployController(new InvalidTypeController(), vertx, context.succeeding(deploymentID -> {
 			
-			getClient(vertx).get(port, "localhost", "/invalid").sendP().thenAccept(res -> {
+			getClient(vertx).get(port, "localhost", "/invalid").send().map(res -> {
 				assertThat(res, is(status(new InternalServerError())));
 				assertThat(res.bodyAsJsonObject().getString("message"), startsWith("Invalid request handler"));
 				vertx.undeploy(deploymentID, context.succeedingThenComplete());
+				return null;
 			})
-			.exceptionally(failureHandler(context))
-			.thenRun(async::flag);
+			.onFailure(context::failNow)
+			.onSuccess(flag(async));
 		}));
 	}
 }

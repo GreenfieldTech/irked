@@ -101,104 +101,111 @@ public class TestAsyncSending extends TestBase {
 	public void testTextSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendtext")
-		.sendP()
-		.thenAccept(res -> {
+		.send()
+		.map(res -> {
 			assertThat(res.statusCode(), equalTo(OK.code));
 			assertThat(res.getHeader("Content-Type"), equalTo("text/plain"));
 			assertThat(res, hasBody("hello world"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testBinarySending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendbinary")
-		.sendP()
-		.thenAccept(res -> {
+		.send()
+		.map(res -> {
 			assertThat(res.statusCode(), equalTo(OK.code));
 			assertThat(res.getHeader("Content-Type"), equalTo("application/octet-stream"));
 			assertThat(res, hasBody(data));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testJsonObjectSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendjsono")
-		.sendP()
-		.thenAccept(res -> {
+		.send()
+		.map(res -> {
 			assertThat(res.statusCode(), equalTo(OK.code));
 			assertThat(res.getHeader("Content-Type"), equalTo("application/json"));
 			assertThat(res.bodyAsJsonObject(), notNullValue());
 			assertThat(res.bodyAsJsonObject().getString("foo"), equalTo("bar"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testJsonArraySending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendjsonl")
-		.sendP()
-		.thenAccept(res -> {
+		.send()
+		.map(res -> {
 			assertThat(res.statusCode(), equalTo(OK.code));
 			assertThat(res.getHeader("Content-Type"), equalTo("application/json"));
 			assertThat(res.bodyAsJsonArray(), notNullValue());
 			assertThat(res.bodyAsJsonArray().size(), equalTo(2));
 			assertThat(res.bodyAsJsonArray().getInteger(1), equalTo(2));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testMappedObjectSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendmapped")
-		.sendP()
-		.thenAccept(res -> {
+		.send()
+		.map(res -> {
 			assertThat(res.statusCode(), equalTo(OK.code));
 			assertThat(res.getHeader("Content-Type"), equalTo("application/json"));
 			assertThat(res.bodyAsJsonObject(), notNullValue());
 			assertThat(res.bodyAsJsonObject().mapTo(TestValue.class), notNullValue());
 			assertThat(res.bodyAsJsonObject().mapTo(TestValue.class).value, equalTo("OK"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testStatusSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendempty")
-		.sendP()
-		.thenAccept(res -> {
+		.send()
+		.map(res -> {
 			assertThat(res.statusCode(), equalTo(NoContent.code));
 			assertThat(res, is(bodyEmpty()));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testCustomStatusSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendcustomok")
-		.sendP()
-		.thenAccept(res -> {
+		.send()
+		.map(res -> {
 			assertThat(res.statusCode(), equalTo(OK.code));
 			assertThat(res.getHeader("X-Custom"), equalTo("custom"));
 			assertThat(res.bodyAsJsonObject(), notNullValue());
 			assertThat(res.bodyAsJsonObject().getBoolean("status"), equalTo(true));
 			assertThat(res.bodyAsJsonObject().getString("message"), equalTo("Still OK"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 }

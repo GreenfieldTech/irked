@@ -3,7 +3,6 @@ package tech.greenfield.vertx.irked.base;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import io.vertx.core.*;
@@ -391,37 +390,18 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 		return httpRequest.send();
 	}
 
-	public CompletableFuture<HttpResponse<T>> sendP() {
-		CompletableFuture<HttpResponse<T>> fut = new CompletableFuture<>();
-		send(res -> {
-			if (res.failed()) fut.completeExceptionally(res.cause());
-			else fut.complete(res.result());
-		});
-		return fut;
+	public Future<HttpResponse<T>> send(String body) {
+		return sendBuffer(Buffer.buffer(body));
 	}
 
-	public CompletableFuture<HttpResponse<T>> sendP(Buffer body) {
-		CompletableFuture<HttpResponse<T>> fut = new CompletableFuture<>();
-		httpRequest.sendBuffer(body, res -> {
-			if (res.failed()) fut.completeExceptionally(res.cause());
-			else fut.complete(res.result());
-		});
-		return fut;
+	public Future<HttpResponse<T>> send(Buffer body) {
+		return sendBuffer(body);
 	}
-
-	public CompletableFuture<HttpResponse<T>> sendP(String body) {
-		return sendP(Buffer.buffer(body));
+	
+	public Future<HttpResponse<T>> send(JsonObject body) {
+		return sendJsonObject(body);
 	}
-
-	public CompletableFuture<HttpResponse<T>> sendP(JsonObject body) {
-		CompletableFuture<HttpResponse<T>> fut = new CompletableFuture<>();
-		httpRequest.sendJsonObject(body, res -> {
-			if (res.failed()) fut.completeExceptionally(res.cause());
-			else fut.complete(res.result());
-		});
-		return fut;
-	}
-
+	
 	@Override
 	public HttpRequest<T> putHeader(String name, Iterable<String> value) {
 		httpRequest.putHeader(name, value);
