@@ -82,12 +82,36 @@ public abstract class RouteConfiguration {
 	public String toString() {
 		return impl.getClass() + "::" + getName();
 	}
-
+	
 	abstract protected String getName();
 
 	abstract Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
 	abstract Handler<? super WebSocketMessage> getMessageHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
 
+	private Handler<? super RoutingContext> getFailureHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
+		Handler<? super RoutingContext> userHandler = getHandler();
+		var failSpecs = getAnnotation(OnFail.class);
+		return ctx -> {
+			int statusCode = ctx.statusCode();
+			lookup: for (OnFail onfail : failSpecs) {
+				if (onfail.status() != -1 && statusCode != onfail.status()) {
+					ctx.next(); // no match;
+					return;
+				}
+				Class<?> ex = onfail.exception();
+				if (ex == Throwable.class)
+					continue;
+				for (Throwable t = ctx.failure(); t != null; t = t.getCause()) {
+					if (ex.isInstance(t))
+						continue lookup; // found a match
+				}
+				ctx.next(); // no match;
+				return;
+			}
+			userHandler.handle(ctx);
+		};
+	}
+	
 	boolean isBlocking() {
 		return getAnnotation(Blocking.class).length > 0;
 	}
@@ -121,17 +145,22 @@ public abstract class RouteConfiguration {
 		;
 	}
 
-	public <T extends Annotation> List<Route> buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method, RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
+	public <T extends Annotation> List<Route> buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method,
+			RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
 		List<Route> out = new LinkedList<>();
 		for (Route r : pathsForAnnotation(prefix, anot)
 				.flatMap(s -> getRoutes(method, s))
 				.collect(Collectors.toList())) {
-			if (anot.equals(WebSocket.class))
-				r.handler(getWebSocketHandler(requestWrapper));
-			else if (isFailHandler())
-				r.failureHandler(getHandler(requestWrapper));
-			else
-				r.handler(getHandler(requestWrapper));
+			try {
+				if (anot.equals(WebSocket.class))
+					r.handler(getWebSocketHandler(requestWrapper));
+				else if (isFailHandler())
+					r.failureHandler(wrapHandler(requestWrapper, getFailureHandler()));
+				else
+					r.handler(wrapHandler(requestWrapper, getHandler()));
+			} catch (IllegalAccessException e) {
+				throw new InvalidRouteConfiguration("Illegal access error while trying to configure " + this);
+			}
 			routes.add(r);
 			out.add(r);
 		}
@@ -153,13 +182,9 @@ public abstract class RouteConfiguration {
 		return consumes().map(c -> method.setRoute(s).consumes(c));
 	}
 
-	private Handler<RoutingContext> getHandler(RequestWrapper parent) throws IllegalArgumentException, InvalidRouteConfiguration {
-		Handler<RoutingContext> handler;
-		try {
-			handler = new RequestWrapper(Objects.requireNonNull(getHandler()), parent);
-		} catch (IllegalAccessException e) {
-			throw new InvalidRouteConfiguration("Illegal access error while trying to configure " + this);
-		}
+	private Handler<RoutingContext> wrapHandler(RequestWrapper parent, Handler<? super RoutingContext> userHandler)
+			throws IllegalArgumentException, InvalidRouteConfiguration {
+		Handler<RoutingContext> handler = new RequestWrapper(Objects.requireNonNull(userHandler), parent);
 		if (isBlocking())
 			handler = new BlockingHandlerDecorator(handler, true);
 		return handler;
@@ -198,10 +223,10 @@ public abstract class RouteConfiguration {
 			r.fail(HttpError.toHttpError(cause));
 		else if (invocationDescription.contains("io.vertx.ext.web") && cause instanceof IllegalStateException) {
 			// a Vert.x handler detected an invalid request
-			log.warn("Handler " + invocationDescription + " encountered an illegal state: " + cause.getMessage(),cause);
+			log.warn("Handler {} encountered an illegal state: {}", invocationDescription, cause.getMessage(), cause);
 			r.fail(new BadRequest("Illegal state in request", cause));
 		} else {
-			log.error("Handler " + invocationDescription + " threw an unexpected exception",cause);
+			log.error("Handler {} threw an unexpected exception", invocationDescription, cause);
 			r.fail(cause); // propagate exceptions thrown by the method to the Vert.x fail handler
 		}
 	}

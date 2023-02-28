@@ -60,46 +60,50 @@ public class TestSending extends TestBase {
 	@Test
 	public void testTextSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).get(port, "localhost", "/sendtext").sendP().thenAccept(res -> {
+		getClient(vertx).get(port, "localhost", "/sendtext").send().map(res -> {
 			assertThat(res, isOK());
 			assertThat(res.bodyAsString(), equalTo("hello world"));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testBinarySending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).get(port, "localhost", "/sendbinary").sendP("{}").thenAccept(res -> {
+		getClient(vertx).get(port, "localhost", "/sendbinary").send("{}").map(res -> {
 			assertThat(res, isOK());
 			assertThat(res.body().getBytes(), equalTo(data));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testListSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).get(port, "localhost", "/sendlist").sendP("{}").thenAccept(res -> {
+		getClient(vertx).get(port, "localhost", "/sendlist").send("{}").map(res -> {
 			assertThat(res, isOK());
 			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 
 	@Test
 	public void testStreamSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).get(port, "localhost", "/sendstream").sendP("{}").thenAccept(res -> {
+		getClient(vertx).get(port, "localhost", "/sendstream").send("{}").map(res -> {
 			assertThat(res, isOK());
 			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
+			return null;
 		})
-		.exceptionally(failureHandler(context))
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 }

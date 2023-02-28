@@ -81,40 +81,42 @@ public class TestAuthDigest extends TestBase {
 	@Test
 	public void testGetAuthed(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).get(port, "localhost", "/auth").sendP()
-		.thenCompose(res -> {
+		getClient(vertx).get(port, "localhost", "/auth").send()
+		.compose(res -> {
 			assertThat(res, is(status(Unauthorized.class)));
 			Map<String, String> auth = parseAuthHeader(res.getHeader("WWW-Authenticate"));
 			DigestAuthorizationToken tok = new DigestAuthorizationToken(auth.get("realm"), "GET", "/auth", userName, userPass, auth.get("nonce"));
 			return getClient(vertx).get(port, "localhost", "/auth").putHeader("Authorization", tok.generateAuthrizationHeader())
-					.sendP();
+					.send();
 		})
-		.thenAccept(res -> {
+		.map(res -> {
 			assertThat(res, isOK());
 			assertThat(res.body().toString(), is(equalTo("OK")));
+			return null;
 		})
-		.exceptionally(t -> { context.failNow(t); return null; })
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	@Test
 	public void testPostAuthed(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
-		getClient(vertx).post(port, "localhost", "/auth-int").putHeader("Content-Length", String.valueOf(postdata.length())).sendP(postdata)
-		.thenCompose(res -> {
+		getClient(vertx).post(port, "localhost", "/auth-int").putHeader("Content-Length", String.valueOf(postdata.length())).send(postdata)
+		.compose(res -> {
 			assertThat(res, is(status(new Unauthorized())));
 			Map<String, String> auth = parseAuthHeader(res.getHeader("WWW-Authenticate"));
 			DigestAuthorizationToken tok = new DigestAuthorizationToken(auth.get("realm"), "POST", "/auth-int", postdata, userName, userPass,
 					auth.get("nonce"), DigestAuthenticate.generateNonce("", 300));
 			return getClient(vertx).post(port, "localhost", "/auth-int").putHeader("Authorization", tok.generateAuthrizationHeader())
-					.putHeader("Content-Length", String.valueOf(postdata.length())).sendP(postdata);
+					.putHeader("Content-Length", String.valueOf(postdata.length())).send(postdata);
 		})
-		.thenAccept(res -> {
+		.map(res -> {
 			assertThat(res, isOK());
 			assertThat(res.body().toString(), is(equalTo("OK")));
+			return null;
 		})
-		.exceptionally(t -> { context.failNow(t); return null; })
-		.thenRun(async::flag);
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
 	}
 
 	private Map<String,String> parseAuthHeader(String authHeader) {
