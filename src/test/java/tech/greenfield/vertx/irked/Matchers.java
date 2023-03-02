@@ -56,8 +56,8 @@ public class Matchers {
 			public void describeMismatch(Object item, Description description) {
 				if (item instanceof HttpResponse) {
 					var resp = (HttpResponse<?>)item;
-					description.appendText("response has status HTTP ");
-					description.appendText("" + resp.statusCode());
+					description.appendText("response with status HTTP ");
+					description.appendValue(resp.statusCode());
 					description.appendText(" ");
 					description.appendText(resp.statusMessage());
 				} else
@@ -66,7 +66,7 @@ public class Matchers {
 
 			@Override
 			public void describeTo(Description description) {
-				description.appendText("response has status ");
+				description.appendText("response with status ");
 				description.appendText(status.toString());
 			}};
 	}
