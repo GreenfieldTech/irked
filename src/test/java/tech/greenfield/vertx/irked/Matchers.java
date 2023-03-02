@@ -14,17 +14,28 @@ import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.NotFound;
 
 public class Matchers {
-	public static Matcher<HttpResponse<?>> isOK() {
+	public static Matcher<HttpResponse<?>> isSuccess() {
 		return new BaseMatcher<HttpResponse<?>>() {
 			@Override
 			public boolean matches(Object actual) {
 				return actual instanceof HttpResponse ?
 						(((HttpResponse<?>)actual).statusCode() / 100 == 2) : false;
 			}
-	
+			
 			@Override
 			public void describeTo(Description description) {
 				description.appendText("is the response indicating success");
+			}
+			
+			@Override
+			public void describeMismatch(Object item, Description description) {
+				if (item instanceof HttpResponse) {
+					HttpResponse<?> res = (HttpResponse<?>)item;
+					description.appendText("was ").appendValue(res.statusCode()).appendText(" ")
+						.appendValue(res.statusMessage());
+				} else
+					description.appendText("was not an HTTP response (was ").appendText(item.getClass().getSimpleName())
+					.appendText(")");
 			}};
 	}
 	

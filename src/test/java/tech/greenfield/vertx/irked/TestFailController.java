@@ -40,7 +40,7 @@ public class TestFailController extends TestBase {
 	public void testFail(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/").send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), equalTo(Boolean.FALSE));
 			return null;

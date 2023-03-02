@@ -189,7 +189,7 @@ public class TestConsumes extends TestBase {
 	
 	private Function<HttpResponse<Buffer>, Void> compareBodyHandler(String message, VertxTestContext context) {
 		return r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, hasBody(message));
 			return null;
 		};

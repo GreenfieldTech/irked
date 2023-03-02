@@ -83,7 +83,7 @@ public class TestInvalidMethod extends TestBase {
 		Checkpoint async = context.checkpoint();
 		deployController(new PrivateController(), vertx, context.succeeding(deploymentID -> {
 			getClient(vertx).get(port, "localhost", "/private").send().map(res -> {
-				assertThat(res, isOK());
+				assertThat(res, isSuccess());
 				assertThat(res.bodyAsString(), equalTo("OK"));
 				vertx.undeploy(deploymentID, context.succeedingThenComplete());
 				return null;

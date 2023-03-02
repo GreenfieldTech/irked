@@ -64,7 +64,7 @@ public class TestExceptionFailController extends TestBase {
 	public void testToFail1(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/correctfail").send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), is(equalTo(Boolean.FALSE)));
 			return null;
@@ -77,7 +77,7 @@ public class TestExceptionFailController extends TestBase {
 	public void testToFail2(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/alsocorrectfail").send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), is(equalTo(Boolean.FALSE)));
 			return null;
@@ -90,7 +90,7 @@ public class TestExceptionFailController extends TestBase {
 	public void testToFail3(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/yetanothercorrectfail").send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), is(equalTo(Boolean.FALSE)));
 			return null;

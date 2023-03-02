@@ -61,7 +61,7 @@ public class TestSending extends TestBase {
 	public void testTextSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendtext").send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.bodyAsString(), equalTo("hello world"));
 			return null;
 		})
@@ -73,7 +73,7 @@ public class TestSending extends TestBase {
 	public void testBinarySending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendbinary").send("{}").map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.body().getBytes(), equalTo(data));
 			return null;
 		})
@@ -85,7 +85,7 @@ public class TestSending extends TestBase {
 	public void testListSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendlist").send("{}").map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
 			return null;
 		})
@@ -98,7 +98,7 @@ public class TestSending extends TestBase {
 	public void testStreamSending(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendstream").send("{}").map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
 			return null;
 		})

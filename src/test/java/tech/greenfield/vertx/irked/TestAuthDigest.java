@@ -3,7 +3,7 @@ package tech.greenfield.vertx.irked;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static tech.greenfield.vertx.irked.Matchers.isOK;
+import static tech.greenfield.vertx.irked.Matchers.isSuccess;
 import static tech.greenfield.vertx.irked.Matchers.status;
 
 import java.util.Map;
@@ -90,7 +90,7 @@ public class TestAuthDigest extends TestBase {
 					.send();
 		})
 		.map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.body().toString(), is(equalTo("OK")));
 			return null;
 		})
@@ -111,7 +111,7 @@ public class TestAuthDigest extends TestBase {
 					.putHeader("Content-Length", String.valueOf(postdata.length())).send(postdata);
 		})
 		.map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.body().toString(), is(equalTo("OK")));
 			return null;
 		})

@@ -32,7 +32,7 @@ public class TestMultipleEndpoints extends TestBase {
 		Checkpoint asyncBlue = context.checkpoint();
 		
 		getClient(vertx).get(port, "localhost", "/red").send().map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, bodyContains("red"));
 			return null;
 		})
@@ -40,7 +40,7 @@ public class TestMultipleEndpoints extends TestBase {
 		.onSuccess(flag(asyncRed));
 		
 		getClient(vertx).get(port, "localhost", "/blue").send().map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, bodyContains("blue"));
 			return null;
 		})

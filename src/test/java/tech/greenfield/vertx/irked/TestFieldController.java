@@ -54,7 +54,7 @@ public class TestFieldController extends TestBase {
 	public void testGet(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/get").send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), equalTo(Boolean.TRUE));
 			return null;
@@ -80,7 +80,7 @@ public class TestFieldController extends TestBase {
 	public void testPut(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).put(port, "localhost", "/put").send("{}").map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.bodyAsString(), equalTo("success"));
 			return null;
 		})

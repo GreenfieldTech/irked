@@ -63,7 +63,7 @@ public class TestHead extends TestBase {
 	@Test
 	public void testHandleGet(VertxTestContext context, Vertx vertx) {
 		getClient(vertx).get(port, "localhost", "/sendtext").send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.headers().get("content-type"), is(equalTo("text/plain")));
 			assertThat(res.bodyAsString(), is(equalTo("hello world")));
 			return null;
@@ -74,7 +74,7 @@ public class TestHead extends TestBase {
 	@Test
 	public void testHandleHead(VertxTestContext context, Vertx vertx) {
 		getClient(vertx).head(port, "localhost", "/sendtext").send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			assertThat(res.headers().get("content-type"), is(equalTo("text/plain")));
 			assertThat(res.body(), is(nullValue()));
 			return null;
