@@ -93,9 +93,9 @@ public abstract class RouteConfiguration {
 		var failSpecs = getAnnotation(OnFail.class);
 		return ctx -> {
 			int statusCode = ctx.statusCode();
-			lookup: for (OnFail onfail : failSpecs) {
-				if (onfail.status() != -1 && statusCode != onfail.status()) {
-					ctx.next(); // no match;
+			for (OnFail onfail : failSpecs) {
+				if (onfail.status() != -1 && statusCode == onfail.status()) {
+					userHandler.handle(ctx);
 					return;
 				}
 				Class<?> ex = onfail.exception();
@@ -105,13 +105,12 @@ public abstract class RouteConfiguration {
 					if (ex.isInstance(t)) {
 						if (ctx instanceof Request)
 							((Request)ctx).setSpecificFailure(t);
-						continue lookup; // found a match
+						userHandler.handle(ctx);
+						return;
 					}
 				}
-				ctx.next(); // no match;
-				return;
 			}
-			userHandler.handle(ctx);
+			ctx.next(); // no match;
 		};
 	}
 	
