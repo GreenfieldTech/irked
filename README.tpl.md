@@ -55,7 +55,14 @@ on that controller will be parsed relative to the root of the host.
 
 To publish routes to the server's "Request Handler", create your controller class by extending the
 irked `Controller` class, define fields or methods to handle HTTP requests and annotate them with
-the relevant method annotations and URIs that those handlers should receive requests for.
+the route matching logic that you want Irked to configure for each handler.
+
+- Most often you'd want to just match on HTTP method and URI, for which Irked offers 
+annotations of the form `@Method("/path")`, such as `@Get("/foo")`.
+- You can also use the annotation `@Endpoint("/path")` to match on all methods
+(this very is useful to mount sub-controllers, as detailed below).
+- The path argument for the both method-specific and `@Endpoint` annotations is optional 
+and omitting it will match requests for all URIs.
 
 #### An Example Controller
 
@@ -237,7 +244,7 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Root extends Controller {
 
-    @Endpoint("/*") // set up body reading middle-ware (see more below)
+    @Endpoint // set up body reading middle-ware for all requests (see more below)
     BodyHandler bodyHandler = BodyHandler.create();
 
     @Put("/:id")
@@ -276,9 +283,10 @@ It is often useful to move failure handling away from the request handler - to k
 and unify error handling which is often very repetitive. Irked supports 
 [Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign to a request handler, which makes it so that the handler is only called for requests for which `fail()` has been called. 
 
-Note: the request failure handler still needs to be configured properly for a URI and HTTP method -
-so we often find it useful to use the catch all `@Endpoint` annotation with a wild card URI to
-configure a main failure handler, though multiple and specific failure handlers would work fine.
+Note: the request failure handler still needs to be configured properly for a URI and HTTP method. 
+We often find it useful to use the default (no path) `@Endpoint` annotation to configure a default
+failure handler (this is equivalent to using the Vert.x web `Router.route()` API to create an any-method/any-path
+handler) - though multiple and specific failure handlers would work fine.
 
 #### A Failure Handler Example
 
@@ -302,7 +310,7 @@ class Root extends Controller {
     };
 
     @OnFail
-    @Endpoint("/*")
+    @Endpoint // catch all failures that haven't been dealt with yet
     void failureHandler(Request r) {
         r.sendError(new InternalServerError(r.failure()));
     }
@@ -495,7 +503,7 @@ very similar to how you set it up using the Vert.x web's `Router` implementation
 controller, add a field - at the top of the class definition - like this:
 
 ```java
-@Endpoint("/*")
+@Endpoint // match all methods and all paths
 BodyHandler bodyHandler = BodyHandler.create();
 ```
 
@@ -533,7 +541,7 @@ Then the `@OnFail` handler can be configured to automatically forward this statu
 
 ```java
 @OnFail
-@Endpoint("/*")
+@Endpoint
 Handler<Request> failureHandler = r -> {
     r.sendError(HttpError.toHttpError(r));
 };
@@ -548,7 +556,7 @@ Because this use case is so useful, there's even a short-hand for this:
 
 ```
 @OnFail
-@Endpoint("/*")
+@Endpoint
 WebHandler failureHandler = Request.failureHandler();
 ```
 
