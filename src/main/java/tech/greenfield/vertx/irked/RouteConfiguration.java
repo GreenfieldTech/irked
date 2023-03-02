@@ -93,21 +93,19 @@ public abstract class RouteConfiguration {
 		var failSpecs = getAnnotation(OnFail.class);
 		return ctx -> {
 			int statusCode = ctx.statusCode();
+			Request req = (Request)ctx;
 			for (OnFail onfail : failSpecs) {
-				if (onfail.status() != -1 && statusCode == onfail.status()) {
+				Class<? extends Throwable> ex = onfail.exception();
+				Throwable foundException = null;
+				if (
+						(onfail.status() == -1 || statusCode == onfail.status())
+						&&
+						(Objects.equals(ex, Throwable.class) || (foundException = req.findFailure(ex)) != null)
+						) {
+					if (foundException != null)
+						req.setSpecificFailure(foundException);
 					userHandler.handle(ctx);
 					return;
-				}
-				Class<?> ex = onfail.exception();
-				if (ex == Throwable.class)
-					continue;
-				for (Throwable t = ctx.failure(); t != null; t = t.getCause()) {
-					if (ex.isInstance(t)) {
-						if (ctx instanceof Request)
-							((Request)ctx).setSpecificFailure(t);
-						userHandler.handle(ctx);
-						return;
-					}
 				}
 			}
 			ctx.next(); // no match;
