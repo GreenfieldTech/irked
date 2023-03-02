@@ -58,7 +58,7 @@ public abstract class RouteConfiguration {
 			return Arrays.stream(spec)
 					.map(s -> annotationToValue(s))
 					.filter(s -> Objects.nonNull(s))
-					.toArray(size -> { return new String[size]; });
+					.toArray(String[]::new);
 		} catch (RuntimeException e) {
 			return null; // I don't know what it failed on, but it means it doesn't fit
 		}
@@ -174,12 +174,12 @@ public abstract class RouteConfiguration {
 	private Stream<Route> getRoutes(RoutingMethod method, String s, boolean withTimeout) {
 		if (withTimeout) {
 			Timeout t = trygetTimeout();
-			if (Objects.nonNull(t))
+			if (t != null)
 				return getRoutes(method, s, false).map(r -> r.handler(TimeoutHandler.create(t.value())));
 		}
 		if (!hasConsumes())
-			return Stream.of(method.setRoute(s));
-		return consumes().map(c -> method.setRoute(s).consumes(c));
+			return Stream.of(method.getRoute(s));
+		return consumes().map(c -> method.getRoute(s).consumes(c));
 	}
 
 	private Handler<RoutingContext> wrapHandler(RequestWrapper parent, Handler<? super RoutingContext> userHandler)
