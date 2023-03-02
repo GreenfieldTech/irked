@@ -33,6 +33,11 @@ public class WebClientExt extends WebClientBase {
 	}
 
 	@Override
+	public HttpRequestExt<Buffer> patch(int port, String host, String requestURI) {
+		return new HttpRequestExt<Buffer>(super.patch(port, host, requestURI));
+	}
+
+	@Override
 	public HttpRequestExt<Buffer> delete(int port, String host, String requestURI) {
 		return new HttpRequestExt<Buffer>(super.delete(port, host, requestURI));
 	}
