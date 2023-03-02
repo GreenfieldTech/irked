@@ -510,4 +510,47 @@ public class Request extends RoutingContextDecorator {
 		return request().method() == HttpMethod.HEAD;
 	}
 
+	private static final String SPECIFIC_FAILURE_FLD = String.format("%1$s.specific-failure", Request.class);
+
+	/**
+	 * When looking at a failed routing context, try to find a specific type of exception from the
+	 * failure and cause chain. This helper makes the {@code @OnFail(exception)} annotation useful
+	 * by allowing the user to quickly extract the specific exception instance they are looking for.
+	 * @param <G> Type of exception to extract
+	 * @param failureType the class of the exception to extract
+	 * @return The top-most exception of the specified type from the failure and cause chain, or {@code null}
+	 *   if this request has not failed yet or the specified type isn't found in the failure chain
+	 */
+	public <G extends Throwable> G findFailure(Class<G> failureType) {
+		if (!failed())
+			return null;
+		Throwable specificFailure = get(SPECIFIC_FAILURE_FLD);
+		if (failureType.isInstance(specificFailure)) {
+			@SuppressWarnings("unchecked")
+			G actual = (G) specificFailure;
+			return actual;
+		}
+		// else...
+		for (Throwable f = failure(); f != null; f = f.getCause())
+			if (failureType.isInstance(f)) {
+				@SuppressWarnings("unchecked")
+				G actual = (G) f;
+				return actual;
+			}
+		// else...
+		return null;
+	}
+	
+	/**
+	 * Store a specific exception type, supposedly that was found by am {@code @OnFail(exception)} processor
+	 * so it can be efficiently retrieved by {@link #findFailure(Class)}.
+	 * @param failure specific failure found by the {@code @OnFail(exception)} processor
+	 * @return itself, for fleunt access
+	 */
+	public Request setSpecificFailure(Throwable failure) {
+		if (failed())
+			put(SPECIFIC_FAILURE_FLD, failure);
+		return this;
+	}
+	
 }

@@ -102,8 +102,11 @@ public abstract class RouteConfiguration {
 				if (ex == Throwable.class)
 					continue;
 				for (Throwable t = ctx.failure(); t != null; t = t.getCause()) {
-					if (ex.isInstance(t))
+					if (ex.isInstance(t)) {
+						if (ctx instanceof Request)
+							((Request)ctx).setSpecificFailure(t);
 						continue lookup; // found a match
+					}
 				}
 				ctx.next(); // no match;
 				return;
