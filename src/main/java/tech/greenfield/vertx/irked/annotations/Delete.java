@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Annotation to configure a route to handle DELETE requests
+ * Set the value to configure for a specific (possibly wild-card) path, or leave empty to handle all
+ * DELETE requests.
  * @author odeda
  */
 @Repeatable(Deletes.class)
@@ -16,6 +18,6 @@ public @interface Delete {
 	 * Path on which to accept the DELETE request
 	 * @return path
 	 */
-	String value();
+	String value() default "/*";
 
 }

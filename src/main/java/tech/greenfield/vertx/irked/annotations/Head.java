@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Annotation to configure a route to handle HEAD requests
+ * Set the value to configure for a specific (possibly wild-card) path, or leave empty to handle all
+ * HEAD requests.
  * @author odeda
  */
 @Repeatable(Heads.class)
@@ -16,6 +18,6 @@ public @interface Head {
 	 * Path on which to handle HEAD requests
 	 * @return path
 	 */
-	String value();
+	String value() default "/*";
 
 }
