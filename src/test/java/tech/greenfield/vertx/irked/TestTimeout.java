@@ -45,7 +45,7 @@ public class TestTimeout extends TestBase {
 		Checkpoint async = context.checkpoint();
 		
 		getClient(vertx).get(port, "localhost", "/justintime").send().map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, hasBody("OK"));
 			return null;
 		})

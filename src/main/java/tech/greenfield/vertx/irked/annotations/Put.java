@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Annotation to configure a route to handle PUT requests
+ * Set the value to configure for a specific (possibly wild-card) path, or leave empty to handle all
+ * PUT requests.
  * @author odeda
  */
 @Repeatable(Puts.class)
@@ -16,6 +18,6 @@ public @interface Put {
 	 * Path on which to accept the PUT request
 	 * @return path
 	 */
-	String value();
+	String value() default "/*";
 
 }

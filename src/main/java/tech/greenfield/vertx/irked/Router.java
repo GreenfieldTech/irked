@@ -142,7 +142,7 @@ public class Router implements io.vertx.ext.web.Router {
 	 */
 	@FunctionalInterface
 	interface RoutingMethod {
-		public io.vertx.ext.web.Route setRoute(String route);
+		public io.vertx.ext.web.Route getRoute(String route);
 	}
 
 	@Override

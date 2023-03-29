@@ -63,7 +63,7 @@ public class TestMountController extends TestBase {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/")
 			.send().map(r -> {
-				assertThat(r, isOK());
+				assertThat(r, isSuccess());
 				assertThat(r, hasBody("index"));
 				return null;
 			})
@@ -77,7 +77,7 @@ public class TestMountController extends TestBase {
 		getClient(vertx).get(port, "localhost", "/child")
 			.send()
 			.map(r -> {
-				assertThat(r, isOK());
+				assertThat(r, isSuccess());
 				assertThat(r, hasBody("child index"));
 				return null;
 			})
@@ -91,7 +91,7 @@ public class TestMountController extends TestBase {
 		getClient(vertx).get(port, "localhost", "/child/")
 		.send()
 		.map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, hasBody("child index"));
 			return null;
 		})
@@ -105,7 +105,7 @@ public class TestMountController extends TestBase {
 		getClient(vertx).get(port, "localhost", "/child/test")
 		.send()
 		.map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, hasBody("child test"));
 			return null;
 		})
@@ -119,7 +119,7 @@ public class TestMountController extends TestBase {
 		getClient(vertx).get(port, "localhost", "/value/paramChild")
 		.send()
 		.map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, hasBody("param child index"));
 			return null;
 		})
@@ -134,7 +134,7 @@ public class TestMountController extends TestBase {
 		getClient(vertx).get(port, "localhost", "/value/paramChild/")
 		.send()
 		.map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, hasBody("param child index"));
 			return null;
 		})
@@ -148,7 +148,7 @@ public class TestMountController extends TestBase {
 		getClient(vertx).get(port, "localhost", "/value/paramChild/test")
 		.send()
 		.map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r, hasBody("param child test"));
 			return null;
 		})

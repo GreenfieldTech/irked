@@ -100,7 +100,7 @@ public class TestRouteCascade extends TestBase {
 		int newVal = 5;
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).put(port, "localhost", "/").send(new JsonObject().put(fieldName, newVal)).map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r.bodyAsJsonObject().getInteger(fieldName), equalTo(newVal));
 			return null;
 		})
@@ -116,7 +116,7 @@ public class TestRouteCascade extends TestBase {
 	private Future<Void> executeTestNoCascade(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		return getClient(vertx).get(port, "localhost", "/foo").send().map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r.bodyAsString(), equalTo("ok"));
 			assertThat(failedTests.get(), equalTo(0));
 			return null;
@@ -135,7 +135,7 @@ public class TestRouteCascade extends TestBase {
 	private Future<Void> executeTestNoCascadeOnFail(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		return getClient(vertx).get(port, "localhost", "/foo").send().map(r -> {
-			assertThat(r, isOK());
+			assertThat(r, isSuccess());
 			assertThat(r.bodyAsString(), equalTo("ok"));
 			assertThat(failedTests.get(), equalTo(0));
 			return null;

@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Annotation to configure a route to handle POST requests
+ * Set the value to configure for a specific (possibly wild-card) path, or leave empty to handle all
+ * POST requests.
  * @author odeda
  */
 @Repeatable(Posts.class)
@@ -16,6 +18,6 @@ public @interface Post {
 	 * Path on which to accept the POST request
 	 * @return path
 	 */
-	String value();
+	String value() default "/*";
 
 }

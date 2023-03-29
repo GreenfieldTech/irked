@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Annotation to configure a route to handle GET requests
+ * Set the value to configure for a specific (possibly wild-card) path, or leave empty to handle all
+ * GET requests.
  * @author odeda
  */
 @Repeatable(Gets.class)
@@ -16,6 +18,6 @@ public @interface Get {
 	 * Path on which to handle GET request
 	 * @return path
 	 */
-	String value();
+	String value() default "/*";
 
 }

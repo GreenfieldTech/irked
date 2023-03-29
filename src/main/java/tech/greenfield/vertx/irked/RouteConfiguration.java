@@ -58,7 +58,7 @@ public abstract class RouteConfiguration {
 			return Arrays.stream(spec)
 					.map(s -> annotationToValue(s))
 					.filter(s -> Objects.nonNull(s))
-					.toArray(size -> { return new String[size]; });
+					.toArray(String[]::new);
 		} catch (RuntimeException e) {
 			return null; // I don't know what it failed on, but it means it doesn't fit
 		}
@@ -93,22 +93,22 @@ public abstract class RouteConfiguration {
 		var failSpecs = getAnnotation(OnFail.class);
 		return ctx -> {
 			int statusCode = ctx.statusCode();
-			lookup: for (OnFail onfail : failSpecs) {
-				if (onfail.status() != -1 && statusCode != onfail.status()) {
-					ctx.next(); // no match;
+			Request req = (Request)ctx;
+			for (OnFail onfail : failSpecs) {
+				Class<? extends Throwable> ex = onfail.exception();
+				Throwable foundException = null;
+				if (
+						(onfail.status() == -1 || statusCode == onfail.status())
+						&&
+						(Objects.equals(ex, Throwable.class) || (foundException = req.findFailure(ex)) != null)
+						) {
+					if (foundException != null)
+						req.setSpecificFailure(foundException);
+					userHandler.handle(ctx);
 					return;
 				}
-				Class<?> ex = onfail.exception();
-				if (ex == Throwable.class)
-					continue;
-				for (Throwable t = ctx.failure(); t != null; t = t.getCause()) {
-					if (ex.isInstance(t))
-						continue lookup; // found a match
-				}
-				ctx.next(); // no match;
-				return;
 			}
-			userHandler.handle(ctx);
+			ctx.next(); // no match;
 		};
 	}
 	
@@ -174,12 +174,12 @@ public abstract class RouteConfiguration {
 	private Stream<Route> getRoutes(RoutingMethod method, String s, boolean withTimeout) {
 		if (withTimeout) {
 			Timeout t = trygetTimeout();
-			if (Objects.nonNull(t))
+			if (t != null)
 				return getRoutes(method, s, false).map(r -> r.handler(TimeoutHandler.create(t.value())));
 		}
 		if (!hasConsumes())
-			return Stream.of(method.setRoute(s));
-		return consumes().map(c -> method.setRoute(s).consumes(c));
+			return Stream.of(method.getRoute(s));
+		return consumes().map(c -> method.getRoute(s).consumes(c));
 	}
 
 	private Handler<RoutingContext> wrapHandler(RequestWrapper parent, Handler<? super RoutingContext> userHandler)

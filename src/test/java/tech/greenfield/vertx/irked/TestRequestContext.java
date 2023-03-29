@@ -67,7 +67,7 @@ public class TestRequestContext extends TestBase {
 		Checkpoint async = context.checkpoint();
 		String id = "item-name";
 		getClient(vertx).get(port, "localhost", "/" + id).send().map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getString("id"), equalTo(id));
 			return null;
@@ -81,7 +81,7 @@ public class TestRequestContext extends TestBase {
 		Checkpoint async = context.checkpoint();
 		String id = "item-name";
 		getClient(vertx).put(port, "localhost", "/" + id).send("{}").map(res -> {
-			assertThat(res, isOK());
+			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getString("id"), equalTo(id));
 			return null;
