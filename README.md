@@ -15,7 +15,7 @@ ported to all releases.
 
 ## Installation
 
-Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.4.1).
+Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.4.2).
 
 In your `pom.xml` file, add Irked as a dependency:
 
@@ -23,7 +23,7 @@ In your `pom.xml` file, add Irked as a dependency:
 <dependency>
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.4.1</version>
+	<version>4.4.2</version>
 </dependency>
 ```
 
@@ -31,7 +31,7 @@ In your `pom.xml` file, add Irked as a dependency:
 
 You may want to take a look at the example application at [`src/example/java/tech/greenfield/vertx/irked/example/App.java`](src/example/java/tech/greenfield/vertx/irked/example/App.java) which shows how to create a new Vert.x Verticle using an Irked `Router` and a few very simple APIs. Then you may want to read the rest of this document for explanations, rationale and more complex API examples.
 
-To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.4.1 installation:
+To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.4.2 installation:
 
 ```
 vertx run -cp target/classes/ tech.greenfield.vertx.irked.example.App
