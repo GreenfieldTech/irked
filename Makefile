@@ -40,9 +40,9 @@ release:
 	perl -pi -e 's,<version>$(CURRENT_VERSION)</version>,<version>'"$(VERSION)"'</version>,' pom.xml
 	$(MAKE) update-readme IRKED_VER=$(VERSION)
 	read -p 'Please verify that README.md was updated correctly [ENTER to continue]'
-	git commit pom.xml -m "bump release to $(VERSION)"
+	git commit pom.xml README.md -m "bump release to $(VERSION)"
 	$(MVNCMD) package
-	git flow release finish -m "release $(VERSION)" </dev/null
+	git flow release finish -m "Release $(VERSION)" </dev/null
 	perl -pi -e 'BEGIN{sub bump{@v=split(/\./,$$_[0]);join(".",@v[0..1]).".".($$v[-1]+1);}}s,<version>($(VERSION))</version>,"<version>".(bump($$1))."-SNAPSHOT</version>",e' pom.xml
 	git commit pom.xml -m "develop back to snapshot mode"
 

@@ -1,13 +1,13 @@
-# Irked Vert.X Web Framework 4.x
+# Irked Vert.x Web Framework 4.x
 
-Irked is a very opinionated framework for configuring Vert.X-web routing and call dispatch.
+Irked is a very opinionated framework for configuring Vert.x-web routing and call dispatch.
 
 It allows you to write your REST API code without writing routing boiler plate by leveraging
 annotations, auto-discovery through reflection and optionally (if you're into that as well)
 dependency injection.
 
-This version supports Vert.X 4. To use with earlier Vert.X versions, try Irked 2 for Vert.x 3.9
-support or Irked 1 for earlier versions (Vert.X 3.9 has changed its API in a non-backward compatible
+This version supports Vert.x 4. To use with earlier Vert.x versions, try Irked 2 for Vert.x 3.9
+support or Irked 1 for earlier versions (Vert.x 3.9 has changed its API in a non-backward compatible
 way - method return types were changed - which required that 1 + 2 split).
 
 Other than different backward compatibility, Irked versions are essentially the same with bug fixes
@@ -144,7 +144,7 @@ class BlockApi extends Controller {
 
 ### Request Context Re-programming
 
-As hinted above, irked supports path parameters using Vert.X web, but 
+As hinted above, irked supports path parameters using Vert.x web, but 
 [unlike Vert.x web's sub-router](https://github.com/vert-x3/vertx-web/blob/b778f450bc4e0e928f8b6c761a376b5ab9f24151/vertx-web/src/main/java/io/vertx/ext/web/impl/RouteImpl.java#L156),
 irked controllers support path parameters everywhere, including as base paths for mounting sub-controllers.
 
@@ -229,7 +229,7 @@ URI to retrieve such data. Supposed the response to the PUT request looks identi
 for a GET request - it just shows how the data looks after the update - so wouldn't it be better
 if the same handler that handles the GET request also handles the output for the PUT request?
 
-This is not an irked feature, but irked allows you to use all the power of Vert.X web, though there
+This is not an irked feature, but irked allows you to use all the power of Vert.x web, though there
 is a small "gotcha" here that we should note - the order of the handlers definition is important,
 and is the order they will be called:
 
@@ -281,7 +281,7 @@ does keep the order for fields. Trying to cascade between methods will execute h
 
 It is often useful to move failure handling away from the request handler - to keep the code clean
 and unify error handling which is often very repetitive. Irked supports 
-[Vert.X web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign to a request handler, which makes it so that the handler is only called for requests for which `fail()` has been called. 
+[Vert.x web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign to a request handler, which makes it so that the handler is only called for requests for which `fail()` has been called. 
 
 Note: the request failure handler still needs to be configured properly for a URI and HTTP method. 
 We often find it useful to use the default (no path) `@Endpoint` annotation to configure a default
@@ -614,7 +614,7 @@ where you expected them to.
 If you still want to order your requests logically (which is useful, for example, as detailed
 under "Cascading Request Handling"), but you really want to write your complex business logic
 using classic Java methods, it is simple to separate the logic and the registration order, in
-a similar fashion to how it can be done with the Vert.X Web Router, except using Irked
+a similar fashion to how it can be done with the Vert.x Web Router, except using Irked
 annotations. A simple example might look like this:
 
 ```java
