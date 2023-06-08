@@ -17,7 +17,7 @@ ported to all releases.
 
 Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/{{IRKED_VERSION}}).
 
-In your `pom.xml` file, add Irked as a dependency:
+If using Maven, add Irked as a dependency in your `pom.xml` file:
 
 ```xml
 <dependency>
@@ -26,6 +26,9 @@ In your `pom.xml` file, add Irked as a dependency:
 	<version>{{IRKED_VERSION}}</version>
 </dependency>
 ```
+
+For other build tools, see the Maven Central website for the syntax, but it generally
+boils down to just using `tech.greenfield:irked-vertx:{{IRKED_VERSION}}` as the dependency string.
 
 ## Quick Start
 
