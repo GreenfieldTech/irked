@@ -26,8 +26,11 @@ public class TestBase {
 	// client max message
 	private static final int MAX_WEBSOCKET_MESSAGE_SIZE = 1024 * 1024 * 1024; // 1G. Frame size is 64K
 
+	static {
+		System.setProperty("vertx.parameter.filename", "vertx-test-options.json");
+	}
 	@RegisterExtension
-	static VertxExtension vertxExtension = new VertxExtension();
+	private static VertxExtension vertxExtension = new VertxExtension();
 	protected final Integer port = new Random().nextInt(30000)+10000;
 
 	protected static WebClientExt getClient(Vertx vertx) {
@@ -35,7 +38,7 @@ public class TestBase {
 				.setIdleTimeout(0)
 				.setMaxWebSocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
 	}
-
+	
 	protected void deployController(Controller controller, Vertx vertx, Handler<AsyncResult<String>> handler) {
 		Server server = new Server(controller);
 
