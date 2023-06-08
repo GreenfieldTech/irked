@@ -150,7 +150,7 @@ irked controllers support path parameters everywhere, including as base paths fo
 
 As a result, a sub-controller might be interested in reading data from a path parameter defined in
 a parent controller, such that the sub-controller has no control over the definition. To promote
-object oriented programming and with good encapsulation, irked allows parent controllers to provide
+object oriented programming with good encapsulation, irked allows parent controllers to provide
 access to parameter (and other) data by "re-programming" the routing context that is passed to
 sub-controllers.
 
