@@ -304,7 +304,7 @@ Please keep in mind the following limitations:
    report parse failures. If an unsupported parameter type is found during configuration, it is an error and Irked will
    throw an `InvalidRouteConfiguration` exception.
  - Handlers can be annotated with multiple annotations with different paths and path parameters (it is not recommended,
-   but is allowed), and as such the parameters can match to any path parameter on any path annotation set on the method.
+   but is supported), and as such the parameters can match to any path parameter on any path annotation set on the method.
    Irked will pass `null` for any parameter that can't be matched on the current active route. If during configuration
    Irked cannot locate the requested parameter in any of the configured path annotations, it is an error and Irked will
    throw an `InvalidRouteConfiguration` exception.
