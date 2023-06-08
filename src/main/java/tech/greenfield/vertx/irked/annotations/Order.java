@@ -19,8 +19,8 @@ import io.vertx.ext.web.Route;
  * or to set negative numbers to make sure explicitly ordered handlers are executed before
  * all implicitly ordered handlers. 
  * 
- * @see https://vertx.io/docs/vertx-web/java/#_route_order
- * @author odeda
+ * @see <a href="https://vertx.io/docs/vertx-web/java/#_route_order">Vert.x-web ordering documentation</a>
+ * @author Oded Arbel <oded@geek.co.il>
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Order {
