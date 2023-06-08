@@ -36,12 +36,12 @@ public class Controller {
 	 * @return list of fields that are routing endpoints
 	 * @throws InvalidRouteConfiguration If one of the declared and annotated routes is invalid
 	 */
-	List<RouteConfiguration> getRoutes() throws InvalidRouteConfiguration {
+	List<RouteConfiguration> getRoutes(Router router) throws InvalidRouteConfiguration {
 		ArrayList<RouteConfiguration> out = new ArrayList<>();
 		for (Field f : getClass().getDeclaredFields())
-			out.add(RouteConfiguration.wrap(this, f));
+			out.add(RouteConfiguration.wrap(this, router, f));
 		for (Method m : getClass().getDeclaredMethods())
-			out.add(RouteConfiguration.wrap(this, m));
+			out.add(RouteConfiguration.wrap(this, router, m));
 		return routes = out.stream().filter(RouteConfiguration::isValid).collect(Collectors.toList());
 	}
 

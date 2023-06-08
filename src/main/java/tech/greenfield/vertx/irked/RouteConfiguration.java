@@ -1,5 +1,7 @@
 package tech.greenfield.vertx.irked;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -22,32 +24,45 @@ import tech.greenfield.vertx.irked.Router.RoutingMethod;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.status.BadRequest;
+import tech.greenfield.vertx.irked.status.InternalServerError;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
 public abstract class RouteConfiguration {
-	static Package annotationPackage = Endpoint.class.getPackage();
-
+	static final Package annotationPackage = Endpoint.class.getPackage();
+	static final Class<Annotation>[] routeAnnotations = findRouteAnnotations();
+	
 	protected Annotation[] annotations;
-
+	protected Router router;
 	protected Controller impl;
 
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
-	protected RouteConfiguration(Controller impl, Annotation[] annotations) {
+	protected RouteConfiguration(Controller impl, Router router, Annotation[] annotations) {
 		this.annotations = annotations;
+		this.router = router;
 		this.impl = impl;
 	}
 
-	static RouteConfiguration wrap(Controller impl, Field f) {
-		return new RouteConfigurationField(impl, f);
+	static RouteConfiguration wrap(Controller impl, Router router, Field f) {
+		return new RouteConfigurationField(impl, router, f);
 	}
 
-	static RouteConfiguration wrap(Controller impl, Method m) throws InvalidRouteConfiguration {
-		return new RouteConfigurationMethod(impl, m);
+	static RouteConfiguration wrap(Controller impl, Router router, Method m) throws InvalidRouteConfiguration {
+		return new RouteConfigurationMethod(impl, router, m);
 	}
 
 	boolean isValid() {
 		return Arrays.stream(annotations).map(a -> a.annotationType().getPackage()).anyMatch(p -> p.equals(annotationPackage));
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected String[] uriForAnnotations(Class<?> ...anot) {
+		if (anot.length == 0)
+			anot = routeAnnotations;
+		ArrayList<String> uris = new ArrayList<>();
+		for (var a : anot)
+			uris.addAll(Arrays.asList(uriForAnnotation((Class<Annotation>) a)));
+		return uris.toArray(String[]::new);
 	}
 
 	<T extends Annotation> String[] uriForAnnotation(Class<T> anot) {
@@ -85,30 +100,27 @@ public abstract class RouteConfiguration {
 	
 	abstract protected String getName();
 
-	abstract Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
+	abstract Handler<? super Request> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
 	abstract Handler<? super WebSocketMessage> getMessageHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
 
-	private Handler<? super RoutingContext> getFailureHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
-		Handler<? super RoutingContext> userHandler = getHandler();
+	private Handler<? super Request> getFailureHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
+		Handler<? super Request> userHandler = getHandler();
 		var failSpecs = getAnnotation(OnFail.class);
-		return ctx -> {
-			int statusCode = ctx.statusCode();
-			Request req = (Request)ctx;
+		return (Request req) -> {
+			int statusCode = req.statusCode();
 			for (OnFail onfail : failSpecs) {
 				Class<? extends Throwable> ex = onfail.exception();
 				Throwable foundException = null;
-				if (
-						(onfail.status() == -1 || statusCode == onfail.status())
-						&&
-						(Objects.equals(ex, Throwable.class) || (foundException = req.findFailure(ex)) != null)
-						) {
+				boolean statusMatchOrUnknown = onfail.status() == -1 || statusCode == onfail.status();
+				boolean failureMatchOrUnknown = (Objects.equals(ex, Throwable.class) || (foundException = req.findFailure(ex)) != null);
+				if (statusMatchOrUnknown && failureMatchOrUnknown) {
 					if (foundException != null)
 						req.setSpecificFailure(foundException);
-					userHandler.handle(ctx);
+					userHandler.handle(req);
 					return;
 				}
 			}
-			ctx.next(); // no match;
+			req.next(); // no match;
 		};
 	}
 	
@@ -190,7 +202,7 @@ public abstract class RouteConfiguration {
 		return consumes().map(c -> method.getRoute(s).consumes(c));
 	}
 	
-	private Handler<RoutingContext> wrapHandler(RequestWrapper parent, Handler<? super RoutingContext> userHandler)
+	private Handler<RoutingContext> wrapHandler(RequestWrapper parent, Handler<? super Request> userHandler)
 			throws IllegalArgumentException, InvalidRouteConfiguration {
 		Handler<RoutingContext> handler = new RequestWrapper(Objects.requireNonNull(userHandler), parent);
 		if (isBlocking())
@@ -222,10 +234,15 @@ public abstract class RouteConfiguration {
 	 * @param cause User exception thrown from the handler
 	 * @param invocationDescription Description of the invocation endpoint for logging
 	 */
-	protected void handleUserException(RoutingContext r, Throwable cause, String invocationDescription) {
+	protected void handleUserException(Request r, Throwable cause, String invocationDescription) {
 		if (r.failed()) {
-			log.warn("Exception occured on a fail route '{}', ignoring", r.normalizedPath(), cause);
-			return;
+			if (r.response().headWritten()) {
+				log.error("Exception in user fail route '{}', after response started - ignoring", r.normalizedPath(), cause);
+				if (!r.response().ended()) r.response().end(); // at least let the client have some closure
+				return;
+			}
+			log.warn("Exception in user fail route '{}', issuing ISE!", r.normalizedPath(), cause);
+			r.send(new InternalServerError());
 		}
 		if (HttpError.unwrap(cause) instanceof HttpError)
 			r.fail(HttpError.toHttpError(cause));
@@ -271,6 +288,25 @@ public abstract class RouteConfiguration {
 			log.error("Handler " + invocationDescription + " threw an unexpected exception",cause);
 			m.socket().close((short)1011, cause.getMessage());
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<Annotation>[] findRouteAnnotations() {
+		String packageName = annotationPackage.getName();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(Endpoint.class.getClassLoader().getResourceAsStream(packageName.replaceAll("[.]", "/"))));
+		return reader.lines().filter(line -> line.endsWith(".class"))
+				.map(className -> {
+					try {
+						return Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.')));
+					} catch (ClassNotFoundException e) {
+						return null;
+					}
+				})
+				.filter(Objects::nonNull)
+				.filter(c -> c.isAnnotation())
+				.filter(c -> c.getAnnotation(RouteSpec.class) != null)
+				.map(c -> (Class<Annotation>)c)
+				.collect(Collectors.toSet()).toArray(Class[]::new);
 	}
 
 }

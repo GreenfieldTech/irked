@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 import io.vertx.core.Handler;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.OrderListener;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
@@ -13,8 +12,8 @@ public class RouteConfigurationField extends RouteConfiguration {
 
 	private Field field;
 
-	public RouteConfigurationField(Controller impl, Field f) {
-		super(impl, f.getAnnotations());
+	public RouteConfigurationField(Controller impl, Router router, Field f) {
+		super(impl, router, f.getAnnotations());
 		field = f;
 	}
 
@@ -40,11 +39,11 @@ public class RouteConfigurationField extends RouteConfiguration {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	Handler<? super RoutingContext> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
+	Handler<? super Request> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
 		if (!Handler.class.isAssignableFrom(field.getType()))
 			throw new InvalidRouteConfiguration(this + " is not a valid handler or controller");
 		field.setAccessible(true);
-		final Handler<RoutingContext> handler = (Handler<RoutingContext>)field.get(impl);
+		final Handler<Request> handler = (Handler<Request>) field.get(impl);
 		if (handler instanceof OrderListener)
 			return new FieldHandlerWithOrderListener(handler);
 		return new FieldHandler(handler);
@@ -73,13 +72,13 @@ public class RouteConfigurationField extends RouteConfiguration {
 		};
 	}
 
-	private class FieldHandler implements Handler<RoutingContext> {
-		protected Handler<RoutingContext> handler;
-		public FieldHandler(Handler<RoutingContext> handler) {
+	private class FieldHandler implements Handler<Request> {
+		protected Handler<Request> handler;
+		public FieldHandler(Handler<Request> handler) {
 			this.handler = handler;
 		}
 		@Override
-		public void handle(RoutingContext r) {
+		public void handle(Request r) {
 			try {
 				handler.handle(r);
 			} catch (Throwable cause) {
@@ -94,7 +93,7 @@ public class RouteConfigurationField extends RouteConfiguration {
 	
 	private class FieldHandlerWithOrderListener extends FieldHandler implements OrderListener {
 
-		public FieldHandlerWithOrderListener(Handler<RoutingContext> handler) {
+		public FieldHandlerWithOrderListener(Handler<Request> handler) {
 			super(handler);
 		}
 

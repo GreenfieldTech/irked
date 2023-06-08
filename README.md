@@ -279,6 +279,41 @@ but this naive "definition order" doesn't work for controller methods due to lim
 of Java reflection. For explicit ordering, useful for both methods and fields, see
 [Explicit handler ordering](#explicit-handler-ordering) below.
 
+### Routing methods with dynamic parameters
+
+When using methods for routing handling, Irked offers automatic conversion of path parameters into method parameters:
+by creating handler methods that accept - in addition to the request context - a set of trivially text convertible
+paramaters, Irked will locate appropriately labeled path parameters, converted them to the desired Java types and provide
+the values in the method invocation:
+
+```java
+@Get("/catalog/:producer/:id")
+public void getCatalogItem(Request r, @Name("producer") String producer, @Name("id") Integer id) {
+    dao.findCatalog(producer).compose(cat -> cat.findItem(id))
+            .onSuccess(r::send)
+            .onFailure(err ->> r.sendError(new InternalServerError(err)));
+}
+```
+
+Please keep in mind the following limitations:
+
+ - Irked knows how to convert the following parameter types: `Boolean`, `String`, `Integer`, `Long`, `Float`, `Double`,
+   `BigDecimal` and `Instant`. If the value cannot be parsed correctly to the required type, Irked will set that
+   parameter value to `null`. In any case, the raw value can be retrieved using the regular path parameter lookup methods.
+ - Primitive parameter types are not supported - i.e. `Integer` is supported but `int` is not, otherwise Irked cannot
+   report parse failures. If an unsupported parameter type is found during configuration, it is an error and Irked will
+   throw an `InvalidRouteConfiguration` exception.
+ - Handlers can be annotated with multiple annotations with different paths and path parameters (it is not recommended,
+   but is allowed), and as such the parameters can match to any path parameter on any path annotation set on the method.
+   Irked will pass `null` for any parameter that can't be matched on the current active route. If during configuration
+   Irked cannot locate the requested parameter in any of the configured path annotations, it is an error and Irked will
+   throw an `InvalidRouteConfiguration` exception.
+ - Irked has two main strategies for matching parameters - either by matching the parameter name as reported by Java
+   reflection, or by matching a parameter annotation called `Name` or `Named`. Irked is not bound to a specific annotation
+   implementation, it will use whatever annotation type you are already using, or you can use Irked own
+   `tech.greenfield.vertx.irked.annotations.Name`. The first strategy only works if the Java class is compiled with debugging
+   symbols, so it should not be relied upon.
+
 ### Handle Failures
 
 It is often useful to move failure handling away from the request handler - to keep the code clean
@@ -333,20 +368,48 @@ The `@OnFail` annotation allows customizing the failure handler to only handle s
 class Root extends Controller {
     @Post("/foo")
     WebHandler fooAPI = r -> {
-        database.store(r.body().asJsonObject(4096));
+        if (database == null)
+            throw new ConfigurationException("Database is not ready");
+        database.store(r.body().asJsonObject());
     };
 
-    @OnFail(exception = DecodeException.class)
+    @OnFail(exception = ConfigurationException.class)
     @Post("/foo")
-    WebHandler fooDecodeError = r -> r.sendContent("/foo requires a valid JSON document to be sent!",new BadRequest());
+    WebHandler fooDecodeError = r -> r.sendContent("Please wait until the database is ready", new BadRequest());
 
-    @OnFail(exception = IllegalStateException.class)
+    @OnFail(exception = DataAccessException.class)
     @Post("/foo")
-    WebHandler fooDecodeError = r -> r.sendContent("Request body is too big!",new BadRequest());
+    WebHandler fooDecodeError = r -> r.sendContent("Error storing data: " + r.failure().getMessage(), new InternalServerError());
 }
 ```
 
+It is also possible to extract the caught exception instance in the handler using Irked
+`Request.findFailure()` method:
 
+```java
+@OnFail(exception = DataAccessException.class)
+@Endpoint
+WebHandler blobDaoError = r -> r.sendContent("Failed to insert blob into " +
+        r.findFailure(DataAccessException.class).getColumn(), new BadRequest());
+```
+
+Another useful way to get access to the caught failure is by using a method with dynamic parameters (see
+[Routing methods with dynamic parameters](#routing-methods-with-dynamic-parameters) above):
+
+```java
+@OnFail(exception = DataAccessException.class)
+@Endpoint
+public blobDaoError(Request r, DataAccessException err) {
+    r.sendContent("Failed to insert blob into " + err.getColumn(), new BadRequest());
+}
+```
+
+The exception type can be any of the exception types specified for the `@OnFail(exception)` annotations on the method - there can
+be more than one and there can be more exception parameters, or you can request a super type of several registered
+`@OnFail(exception)` annotations - Irked will delivery the handled exception to the correct parameter and null to all
+other exception type parameters, if the method has more than one. It is a configuration error to request a dynamic
+parameter with an exception type that is not a registered `@OnFail(exception)` or a super class of one - and Irked
+will throw an `InvalidRouteConfiguration` exception during router setup, if this situation occurs.
 
 ### Request Content-Type Specific Handlers
 
