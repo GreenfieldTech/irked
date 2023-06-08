@@ -20,7 +20,7 @@ import io.vertx.ext.web.Route;
  * all implicitly ordered handlers. 
  * 
  * @see <a href="https://vertx.io/docs/vertx-web/java/#_route_order">Vert.x-web ordering documentation</a>
- * @author Oded Arbel <oded@geek.co.il>
+ * @author odeda
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Order {
