@@ -49,7 +49,7 @@ mvn exec:exec -Dexec.executable=java -Dexec.args="-cp %classpath io.vertx.core.L
 ## Usage
 
 Under Irked we use the concept of a "Controller" - a class whose fields and methods are used as
-handlers for routes and that will handle incoming HTTP requests from `vertx-web`.
+handlers for routes and that will handle incoming HTTP requests from Vert.x-web.
 
 A "master controller" is created to define the root of the URI hierarchy - all configured routes
 on that controller will be parsed relative to the root of the host.
@@ -96,7 +96,7 @@ class Root extends Controller {
 #### Initializing
 
 After creating your set of `Controller` implementations, deploy them to Vert.x by setting up
-a `Verticle` like you would do for a [`vertx-web` Router](https://vertx.io/docs/vertx-web/java/#_basic_vert_x_web_concepts),
+a `Verticle` like you would do for a [Vert.x-web Router](https://vertx.io/docs/vertx-web/java/#_basic_vert_x_web_concepts),
 but use Irked to create a router from your root controller - and set that as the request handler.
 
 #### A Vert.x Web HTTP Server Example
@@ -139,7 +139,7 @@ class BlockApi extends Controller {
 
     @Get("/:id") // handle requests like "GET /blocks/identifier"
     Handler<Request> retrieve = r -> {
-        // irked supports vertx-web path parameters 
+        // irked supports Vert.x-web path parameters 
         r.send(loadBlock(r.pathParam("id")));
     };
 }
@@ -147,8 +147,8 @@ class BlockApi extends Controller {
 
 ### Request Context Re-programming
 
-As hinted above, irked supports path parameters using Vert.x web, but 
-[unlike Vert.x web's sub-router](https://github.com/vert-x3/vertx-web/blob/b778f450bc4e0e928f8b6c761a376b5ab9f24151/vertx-web/src/main/java/io/vertx/ext/web/impl/RouteImpl.java#L156),
+As hinted above, irked supports path parameters using Vert.x-web, but 
+[unlike Vert.x-web's sub-router](https://github.com/vert-x3/vertx-web/blob/b778f450bc4e0e928f8b6c761a376b5ab9f24151/vertx-web/src/main/java/io/vertx/ext/web/impl/RouteImpl.java#L156),
 irked controllers support path parameters everywhere, including as base paths for mounting sub-controllers.
 
 As a result, a sub-controller might be interested in reading data from a path parameter defined in
@@ -232,11 +232,7 @@ URI to retrieve such data. Supposed the response to the PUT request looks identi
 for a GET request - it just shows how the data looks after the update - so wouldn't it be better
 if the same handler that handles the GET request also handles the output for the PUT request?
 
-This is not an irked feature, but irked allows you to use all the power of Vert.x web, though there
-is a small "gotcha" here that we should note - the order of the handlers definition is important,
-and is the order they will be called:
-
-#### Cascading Request Handlers Example
+For example:
 
 ```java
 package com.example.api;
@@ -273,25 +269,25 @@ class Root extends Controller {
 }
 ```
 
-You can of course pass data between handlers using the `RoutingContext`'s `put()`, `get()` and
+You can, of course, pass data between handlers using the `RoutingContext`'s `put()`, `get()` and
 `data()` methods as you can normally do with Vert.x-web.
 
-This way works well when setting routing using fields - Java reflection (that Irked uses)
-guarantees that Irked configures the handlers in the order in which they were defined
-in the code and takes advantage of implicit Vert.x-web ordering - but this naive "definition
-order" doesn't work for handler methods due to the limitations of Java reflection.
-For explicit ordering, see [Explicit handler ordering](#explicit-handler-ordering)
-below.
+This way works well when configuring routing using controller fields - Irked uses Java
+reflection to read the order the fields are defined in the source code and configure
+the handlers in the correct order taking, advantage of implicit Vert.x-web route order -
+but this naive "definition order" doesn't work for controller methods due to limitations
+of Java reflection. For explicit ordering, useful for both methods and fields, see
+[Explicit handler ordering](#explicit-handler-ordering) below.
 
 ### Handle Failures
 
 It is often useful to move failure handling away from the request handler - to keep the code clean
 and unify error handling which is often very repetitive. Irked supports 
-[Vert.x web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign to a request handler, which makes it so that the handler is only called for requests for which `fail()` has been called. 
+[Vert.x-web's error handling](http://vertx.io/docs/vertx-web/js/#_error_handling) using the `@OnFail` annotation that you can assign to a request handler, which makes it so that the handler is only called for requests for which `fail()` has been called. 
 
 Note: the request failure handler still needs to be configured properly for a URI and HTTP method. 
 We often find it useful to use the default (no path) `@Endpoint` annotation to configure a default
-failure handler (this is equivalent to using the Vert.x web `Router.route()` API to create an any-method/any-path
+failure handler (this is equivalent to using the Vert.x-web `Router.route()` API to create an any-method/any-path
 handler) - though multiple and specific failure handlers would work fine.
 
 #### A Failure Handler Example
@@ -354,7 +350,7 @@ class Root extends Controller {
 
 ### Request Content-Type Specific Handlers
 
-Irked supports the Vert.x Web `consumes()` filter to specify request handlers
+Irked supports the Vert.x-web `consumes()` filter to specify request handlers
 that only handle specific request content-types, using the `@Consumes`
 annotation. Specify it like URI annotations with the expected request content type. Like the `consumes()` method, it supports wild cards.
 
@@ -400,7 +396,7 @@ You can review the Irked unit test [`TestAsyncSending.java`](src/test/java/tech/
 
 There are several implementation strategies to handle WebSockets under Irked controllers. Irked offers an "opinionated" API that gets out of the way of the developer and allows them to leverage other Irked facilities, such as cascading requests and custom request contexts - as detailed below.
 
-In the case that the developer would prefer lower level access to the WebSocket upgrade protocol, or use the more complex Sock.JS implementation offered by Vert.x Web - this document includes examples on how to achieve both.
+In the case that the developer would prefer lower level access to the WebSocket upgrade protocol, or use the more complex Sock.JS implementation offered by Vert.x-web - this document includes examples on how to achieve both.
 
 #### Handle individual WebSocket messages
 
@@ -437,7 +433,7 @@ void messageHandler(UserContextRequest req, WebSocketMessage msg) {
 
 #### SockJS service
 
-If you are interested in a [Sock.JS](http://sockjs.org) server implementation, Vert.x Web offers `SockJSHandler` that
+If you are interested in a [Sock.JS](http://sockjs.org) server implementation, Vert.x-web offers `SockJSHandler` that
 can be mounted directly in an Irked controller as any other Vert.x middle-ware (see below for more about middle-ware):
 
 ```java
@@ -496,7 +492,7 @@ private handleErrors(ServerWebSocket ws, Throwable error) {
 #### Mounting Middle-Ware
 
 Under Vert.x its often useful to have a "middle-ware" that processes requests before passing
-control back to your application, such as the Vert.x Web [`BodyHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/BodyHandler.html)
+control back to your application, such as the Vert.x-web [`BodyHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/BodyHandler.html)
 that reads the HTTP request body and handles all kinds of body formats for you, the
 [`LoggerHandler`](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/LoggerHandler.html)
 that automatically logs web requests to an Apache style log,
@@ -505,7 +501,7 @@ that lets you easily configure [CORS](https://fetch.spec.whatwg.org/#http-cors-p
 [and many others](https://vertx.io/docs/apidocs/io/vertx/ext/web/handler/package-summary.html).
 
 This type of middle-ware can be easily used in irked by registering it on a catch all end-point,
-very similar to how you set it up using the Vert.x web's `Router` implementation. In your root
+very similar to how you set it up using the Vert.x-web's `Router` implementation. In your root
 controller, add a field - at the top of the class definition - like this:
 
 ```java
@@ -524,7 +520,7 @@ the HTTP semantics by returning a response with some standard non-OK HTTP status
 
 In such cases, instead of hand crafting a response and doing a collection of `if...else`s to
 make sure processing doesn't continue, irked allows you to take advantage of Java exception 
-handling and built-in Vert.x web failure handling functionality to make this a breeze:
+handling and built-in Vert.x-web failure handling functionality to make this a breeze:
 
 For example a handler might want to to signal that the expected content isn't there by returning
 a 404 Not Found error:
