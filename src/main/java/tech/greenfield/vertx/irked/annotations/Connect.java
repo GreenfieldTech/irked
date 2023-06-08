@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  * CONNECT requests.
  * @author odeda
  */
+@RouteSpec
 @Repeatable(ConnectSpecs.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Connect {

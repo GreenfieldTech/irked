@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
  * Annotation to configure a route to handle OPTIONS requests
  * @author odeda
  */
+@RouteSpec
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Options {
 

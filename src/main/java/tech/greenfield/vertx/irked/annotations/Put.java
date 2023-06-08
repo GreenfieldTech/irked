@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  * PUT requests.
  * @author odeda
  */
+@RouteSpec
 @Repeatable(Puts.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Put {
