@@ -271,11 +271,14 @@ class Root extends Controller {
 ```
 
 You can of course pass data between handlers using the `RoutingContext`'s `put()`, `get()` and
-`data()` methods as you do normally in Vert.x.
+`data()` methods as you can normally do with Vert.x-web.
 
-**Important note**: request cascading only works when defining handlers as handler _fields_. Using
-methods is not supported because the JVM reflection API doesn't keep the order of methods, while it
-does keep the order for fields. Trying to cascade between methods will execute handlers in undefined order.
+This way works well when setting routing using fields - Java reflection (that Irked uses)
+guarantees that Irked configures the handlers in the order in which they were defined
+in the code and takes advantage of implicit Vert.x-web ordering - but this naive "definition
+order" doesn't work for handler methods due to the limitations of Java reflection.
+For explicit ordering, see [Explicit handler ordering](#explicit-handler-ordering)
+below.
 
 ### Handle Failures
 
@@ -604,18 +607,15 @@ example is equivalent to:
 throw new Redirect("https://example.com");
 ```
 
-#### Using classic Java methods for handlers, while keeping handler order
+#### Explicit handler ordering
 
 As discussed above, while Irked supports both using fields to route requests to, as well as
-methods, when annotating methods to handle incoming requests - the order of registration in the
-Vert.x Web router is not guaranteed and as a result the `Request.next()` calls may not go
-where you expected them to.
-
-If you still want to order your requests logically (which is useful, for example, as detailed
-under "Cascading Request Handling"), but you really want to write your complex business logic
-using classic Java methods, it is simple to separate the logic and the registration order, in
-a similar fashion to how it can be done with the Vert.x Web Router, except using Irked
-annotations. A simple example might look like this:
+methods, when annotating methods to handle incoming requests - due to the limitations
+of Java reflection, Irked cannot identify the correct order to setup the Vert.x-web
+routes. You can use the Irked `@Order` annotation to specify an explicit order for
+handler methods (Using the [Route.order() method](https://vertx.io/docs/vertx-web/java/#_route_order))
+so that Irked can guarantee that when you call `RoutingContext.next()`, the correct handler
+will be called:
 
 ```java
 package com.example.api;
@@ -626,6 +626,7 @@ import tech.greenfield.vertx.irked.annotations.*;
 
 class Example extends Controller {
 
+    @Order(1000) // make sure sending the response is the last thing that happens
     public void helloWorld(Request r) {
         r.sendContent(r.get("message"), new OK());
     }
@@ -634,9 +635,5 @@ class Example extends Controller {
         r.put("message","Hello World!");
         r.next();
     }
-
-    @Get("/") WebHandler messageMiddleware = this::thisComesFirst;
-    @Get("/") WebHandler helloHandler = this::helloWorld;
 }
 ```
-

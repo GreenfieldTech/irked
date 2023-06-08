@@ -123,14 +123,22 @@ public abstract class RouteConfiguration {
 	boolean hasConsumes() {
 		return getAnnotation(Consumes.class).length > 0;
 	}
+	
+	boolean hasOrder() {
+		return getAnnotation(Order.class).length > 0;
+	}
 
 	Timeout trygetTimeout() {
 		Timeout[] ts = getAnnotation(Timeout.class);
 		return ts.length > 0 ? ts[0] : null;
 	}
 
-	Stream<String> consumes() {
+	private Stream<String> consumes() {
 		return Arrays.stream(getAnnotation(Consumes.class)).map(a -> a.value());
+	}
+	
+	private int order() {
+		return Arrays.stream(getAnnotation(Order.class)).findAny().map(Order::value).orElse(0);
 	}
 
 	Pattern trailingSlashRemover = Pattern.compile("./$");
@@ -168,7 +176,7 @@ public abstract class RouteConfiguration {
 	}
 
 	private Stream<Route> getRoutes(RoutingMethod method, String s) {
-		return getRoutes(method, s, true);
+		return getRoutes(method, s, true).map(r -> hasOrder() ? r.order(order()) : r);
 	}
 
 	private Stream<Route> getRoutes(RoutingMethod method, String s, boolean withTimeout) {
@@ -181,7 +189,7 @@ public abstract class RouteConfiguration {
 			return Stream.of(method.getRoute(s));
 		return consumes().map(c -> method.getRoute(s).consumes(c));
 	}
-
+	
 	private Handler<RoutingContext> wrapHandler(RequestWrapper parent, Handler<? super RoutingContext> userHandler)
 			throws IllegalArgumentException, InvalidRouteConfiguration {
 		Handler<RoutingContext> handler = new RequestWrapper(Objects.requireNonNull(userHandler), parent);
