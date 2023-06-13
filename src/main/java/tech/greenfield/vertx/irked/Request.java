@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -20,7 +21,7 @@ import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.auth.AuthorizationToken;
 import tech.greenfield.vertx.irked.exceptions.MissingBodyException;
 import tech.greenfield.vertx.irked.status.BadRequest;
-import tech.greenfield.vertx.irked.status.OK;
+import tech.greenfield.vertx.irked.status.HttpStatuses;
 
 /**
  * Request handling wrapper which adds some useful routines for
@@ -226,7 +227,7 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> sendJSON(JsonObject json) {
-		return sendJSON(json, new OK());
+		return sendJSON(json, statusFromResponseCode());
 	}
 	
 	/**
@@ -246,7 +247,7 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> sendJSON(JsonArray json) {
-		return sendJSON(json, new OK());
+		return sendJSON(json, statusFromResponseCode());
 	}
 	
 	/**
@@ -319,7 +320,7 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> sendContent(String content, String contentType) {
-		return sendContent(content, new OK(), contentType);
+		return sendContent(content, statusFromResponseCode(), contentType);
 	}
 	
 	/**
@@ -340,7 +341,7 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> sendContent(String content) {
-		return sendContent(content, new OK(), "text/plain");
+		return sendContent(content, statusFromResponseCode(), "text/plain");
 	}
 	
 	/**
@@ -388,7 +389,7 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> send(Buffer buffer) {
-		return sendContent(buffer, new OK(), "application/octet-stream");
+		return sendContent(buffer, statusFromResponseCode(), "application/octet-stream");
 	}
 	
 	/**
@@ -552,5 +553,20 @@ public class Request extends RoutingContextDecorator {
 			put(SPECIFIC_FAILURE_FLD, failure);
 		return this;
 	}
+
+	public HttpError statusFromResponseCode() {
+		return statusFromResponseCode(response().getStatusCode(), response().getStatusMessage());
+	}
+
+	public HttpError statusFromResponseCode(int statusCode) {
+		return statusFromResponseCode(statusCode, HttpResponseStatus.valueOf(statusCode).reasonPhrase());
+	}
 	
+	public HttpError statusFromResponseCode(int statusCode, String statusMessage) {
+		try {
+			return HttpStatuses.create(statusCode).setStatusText(statusMessage);
+		} catch (InstantiationException e) {
+			return new HttpError(statusCode, statusMessage);
+		}
+	}
 }
