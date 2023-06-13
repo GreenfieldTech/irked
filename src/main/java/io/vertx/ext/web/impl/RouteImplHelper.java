@@ -44,7 +44,7 @@ public class RouteImplHelper {
 
 	/**
 	 * Expose the parsed {@link RouteState} result.
-	 * This is the method that Vert.x-web {@RouteImpl} is so protective of, and that we had to replace.
+	 * This is the method that Vert.x-web {@code RouteImpl} is so protective of, and that we had to replace.
 	 * @return a {@code RouteState} instance containing the result of parsing the path that was submitted.
 	 */
 	public RouteState getState() {
