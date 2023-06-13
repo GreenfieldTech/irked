@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  * requests.
  * @author odeda
  */
+@RouteSpec
 @Repeatable(Endpoints.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Endpoint {

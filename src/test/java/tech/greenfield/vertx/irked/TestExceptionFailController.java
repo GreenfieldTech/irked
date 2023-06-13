@@ -19,9 +19,10 @@ import tech.greenfield.vertx.irked.annotations.OnFail;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.Imateapot;
 import tech.greenfield.vertx.irked.status.InternalServerError;
+import tech.greenfield.vertx.irked.status.PayloadTooLarge;
 
 public class TestExceptionFailController extends TestBase {
-
+	
 	public class SubFailController extends Controller {
 		@Get("/throw-illegal")
 		WebHandler throwIllegal = r -> {
@@ -37,7 +38,10 @@ public class TestExceptionFailController extends TestBase {
 		@OnFail(exception = DecodeException.class)
 		@Endpoint
 		WebHandler multiFailure = r -> {
-			r.send(new Imateapot());
+			if (r.findFailure(DecodeException.class) != null)
+				r.send(new Imateapot());
+			else
+				r.send(new PayloadTooLarge());
 		};
 	}
 	public class TestController extends Controller {
@@ -139,7 +143,7 @@ public class TestExceptionFailController extends TestBase {
 	public void testSubMultiFail(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sub/throw-illegal").send().map(res -> {
-			assertThat(res, is(status(new Imateapot())));
+			assertThat(res, is(status(new PayloadTooLarge())));
 			return null;
 		})
 		.compose(__ -> getClient(vertx).get(port, "localhost", "/sub/throw-decode").send())

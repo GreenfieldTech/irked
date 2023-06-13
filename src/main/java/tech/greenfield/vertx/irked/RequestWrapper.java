@@ -14,7 +14,7 @@ public class RequestWrapper implements Function<RoutingContext, Request>, Handle
 	private Type type;
 	private Controller ctr;
 	protected Function<RoutingContext, Request> wrapper;
-	private Handler<? super RoutingContext> handler;
+	private Handler<? super Request> handler;
 	
 	public RequestWrapper(Controller ctr) {
 		this(ctr, Request::new);
@@ -27,7 +27,7 @@ public class RequestWrapper implements Function<RoutingContext, Request>, Handle
 		type = Type.Controller;
 	}
 	
-	public RequestWrapper(Handler<? super RoutingContext> handler, Function<RoutingContext, Request> requestWrapper) {
+	public RequestWrapper(Handler<? super Request> handler, Function<RoutingContext, Request> requestWrapper) {
 		this.handler = Objects.requireNonNull(handler, "Handler instance is not set!");
 		this.wrapper = requestWrapper;
 		type = Type.Handler;

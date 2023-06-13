@@ -1,4 +1,6 @@
 MVNCMD := mvn -B ${MVNARGS}
+CURRENT_VERSION := $(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)
+IRKED_VER ?= $(CURRENT_VERSION)
 
 TAG := latest
 
@@ -32,9 +34,11 @@ update-readme:
 	$(eval VERTX_VER := $(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="properties"]/*[local-name()="vertx.version"]/text()' pom.xml))
 	perl -pe 'use v5.16;use experimental "switch";BEGIN{sub get($$){my$$t=shift;for($$t){return"$(IRKED_VER)"when/IRKED/;return"$(VERTX_VER)"when/VERTX/;}}}s/\{\{([A-Z_]+)\}\}/get($$1)/eg' < README.tpl.md > README.md
 
+current-version:
+	@echo $(CURRENT_VERSION)
+
 release:
 	$(eval SHELL := /bin/bash)
-	$(eval CURRENT_VERSION := $(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml))
 	$(eval VERSION := $(if $(RELEASE_ARGS),$(RELEASE_ARGS),$(subst -SNAPSHOT,,$(CURRENT_VERSION))))
 	git flow release start "$(VERSION)"
 	perl -pi -e 's,<version>$(CURRENT_VERSION)</version>,<version>'"$(VERSION)"'</version>,' pom.xml
@@ -45,5 +49,7 @@ release:
 	git flow release finish -m "Release $(VERSION)" </dev/null
 	perl -pi -e 'BEGIN{sub bump{@v=split(/\./,$$_[0]);join(".",@v[0..1]).".".($$v[-1]+1);}}s,<version>($(VERSION))</version>,"<version>".(bump($$1))."-SNAPSHOT</version>",e' pom.xml
 	git commit pom.xml -m "develop back to snapshot mode"
+	@echo "-------"
+	@echo "If all seems OK, you still need to push the release by running 'make push'"
 
-.PHONY: release push clean compile test all check-updates update-readme
+.PHONY: release push clean compile test all check-updates update-readme current-version

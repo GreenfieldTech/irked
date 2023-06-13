@@ -48,6 +48,14 @@ public class Router implements io.vertx.ext.web.Router {
 		api.remove();
 		return this;
 	}
+	
+	public Vertx vertx() {
+		return vertx;
+	}
+	
+	public io.vertx.ext.web.Router vertxWebRouter() {
+		return router;
+	}
 
 	public Router configReport() {
 		return configReport(System.err);
@@ -107,7 +115,7 @@ public class Router implements io.vertx.ext.web.Router {
 		if (prefix.endsWith("/"))
 			prefix = prefix.substring(0, prefix.length() - 1);
 
-		for (RouteConfiguration f : api.getRoutes()) {
+		for (RouteConfiguration f : api.getRoutes(this)) {
 			tryConfigureRoute(router::route, prefix, f, Endpoint.class, requestWrapper);
 			tryConfigureRoute(router::post, prefix, f, Post.class, requestWrapper);
 			tryConfigureRoute(router::get, prefix, f, Get.class, requestWrapper);
@@ -361,7 +369,7 @@ public class Router implements io.vertx.ext.web.Router {
 
 	@Override
 	public Map<String, Object> metadata() {
-		return metadata();
+		return router.metadata();
 	}
 
 }

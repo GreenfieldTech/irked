@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  * DELETE requests.
  * @author odeda
  */
+@RouteSpec
 @Repeatable(Deletes.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Delete {

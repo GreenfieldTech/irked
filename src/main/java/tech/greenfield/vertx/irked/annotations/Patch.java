@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  * PATCH requests.
  * @author odeda
  */
+@RouteSpec
 @Repeatable(Patches.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Patch {

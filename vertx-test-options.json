@@ -1,0 +1,7 @@
+{
+ "blockedThreadCheckInterval" : 5,
+ "blockedThreadCheckIntervalUnit" : "HOURS",
+ "warningExceptionTimeUnit": "HOURS",
+ "maxEventLoopExecuteTime" : 3600,
+ "maxEventLoopExecuteTimeUnit" : "SECONDS"
+}
