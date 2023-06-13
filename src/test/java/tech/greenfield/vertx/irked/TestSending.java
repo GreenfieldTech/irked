@@ -19,6 +19,7 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.base.TestBase;
+import tech.greenfield.vertx.irked.status.Created;
 import tech.greenfield.vertx.irked.status.OK;
 
 public class TestSending extends TestBase {
@@ -50,6 +51,11 @@ public class TestSending extends TestBase {
 			r.send(Stream.of("hello", "world"));
 		}
 		
+		@Get("/send-created")
+		public void created(Request r) {
+			r.response().setStatusCode(Created.code);
+			r.send("Created");
+		}
 	}
 
 	@BeforeEach
@@ -100,6 +106,19 @@ public class TestSending extends TestBase {
 		getClient(vertx).get(port, "localhost", "/sendstream").send("{}").map(res -> {
 			assertThat(res, isSuccess());
 			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
+			return null;
+		})
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
+	}
+	
+	@Test
+	public void testSendHonorsResponseStatusCode(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).get(port, "localhost", "/send-created").send().map(res -> {
+			assertThat(res, isSuccess());
+			assertThat(res.statusCode(), is(equalTo(Created.code)));
+			assertThat(res.bodyAsString(), is(equalTo("Created")));
 			return null;
 		})
 		.onFailure(context::failNow)
