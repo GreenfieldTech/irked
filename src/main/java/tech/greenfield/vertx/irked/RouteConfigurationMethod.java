@@ -27,6 +27,10 @@ import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
+/**
+ * An implementation of {@link RouteConfiguration} used to configure Vert.x-web for Controller methods
+ * @author odeda
+ */
 public class RouteConfigurationMethod extends RouteConfiguration {
 	private final Method method;
 	private final Parameter[] params;

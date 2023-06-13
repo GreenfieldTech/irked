@@ -8,6 +8,10 @@ import io.vertx.ext.web.impl.OrderListener;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
+/**
+ * An implementation of {@link RouteConfiguration} used to configure Vert.x-web for Controller fields
+ * @author odeda
+ */
 public class RouteConfigurationField extends RouteConfiguration {
 
 	private Field field;
@@ -28,7 +32,7 @@ public class RouteConfigurationField extends RouteConfiguration {
 	}
 
 	@Override
-	Controller getController() {
+	public Controller getController() {
 		return impl.getController(field);
 	}
 
