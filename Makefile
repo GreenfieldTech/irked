@@ -43,7 +43,7 @@ release:
 	git flow release start "$(VERSION)"
 	perl -pi -e 's,<version>$(CURRENT_VERSION)</version>,<version>'"$(VERSION)"'</version>,' pom.xml
 	$(MAKE) update-readme IRKED_VER=$(VERSION)
-	read -p 'Please verify that README.md was updated correctly [ENTER to continue]'
+	@read -p 'Please verify that README.md was updated correctly [ENTER to continue]'
 	git commit pom.xml README.md -m "bump release to $(VERSION)"
 	$(MVNCMD) package
 	git flow release finish -m "Release $(VERSION)" </dev/null
