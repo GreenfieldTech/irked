@@ -15,6 +15,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketBase;
 import io.vertx.core.http.WebSocketFrame;
+import io.vertx.core.net.HostAndPort;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.streams.Pipe;
 import io.vertx.core.streams.WriteStream;
@@ -507,6 +508,11 @@ public class WebSocketConnection implements ServerWebSocket {
 	@Override
 	public List<Certificate> peerCertificates() throws SSLPeerUnverifiedException {
 		return socket.peerCertificates();
+	}
+
+	@Override
+	public HostAndPort authority() {
+		return socket.authority();
 	}
 
 }
