@@ -981,6 +981,7 @@ public class WebSocketMessage implements Buffer {
 	 * This method is meant for internal use only.<p>
 	 * @return a Netty {@code ByteBuf}
 	 * @see io.vertx.core.buffer.Buffer#getByteBuf()
+	 * @deprecated removed from public API in Vert.x 5
 	 */
 	public ByteBuf getByteBuf() {
 		return buffer.getByteBuf();
