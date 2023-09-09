@@ -265,7 +265,7 @@ class Root extends Controller {
         .onSuccess(v -> { // Instead of sending the response
             r.next(); // let the next handler do it
         })
-        .onFailure(err -> { // if storing failed
+        .recover(err -> { // if storing failed
             r.sendError(new InternalServerError(err)); // send an 500 error
         });
     };
@@ -274,8 +274,8 @@ class Root extends Controller {
     @Get("/:id")
     WebHandler retrieve = r -> {
         load(r.pathParam("id"))
-        .onSuccess(data -> r.send(data))
-        .onFailure(err -> r.sendError(new InternalServerError(err)))
+        .compose(data -> r.send(data))
+        .recover(err -> r.sendError(new InternalServerError(err)))
     };
 
 }
@@ -302,8 +302,8 @@ the values in the method invocation:
 @Get("/catalog/:producer/:id")
 public void getCatalogItem(Request r, @Name("producer") String producer, @Name("id") Integer id) {
     dao.findCatalog(producer).compose(cat -> cat.findItem(id))
-            .onSuccess(r::send)
-            .onFailure(err ->> r.sendError(new InternalServerError(err)));
+            .compose(r::send)
+            .recover(err -> r.sendError(new InternalServerError(err)));
 }
 ```
 
@@ -350,7 +350,7 @@ class Root extends Controller {
 
     @Get("/foo")
     WebHandler fooAPI = r -> {
-        loadFoo().onSuccess(r::send).onFailure(r::fail);
+        loadFoo().compose(r::send).onFailure(r::fail);
     };
 
     @Post("/foo")
@@ -448,11 +448,28 @@ Irked contains a few helpers for using Promise-style APIs, such as Vert.x `Promi
 Exceptions to the failure handlers, or `Request.next()` which makes it easier to attach `RoutingContext.next()`
 to `Future.onSuccess()` handlers.
 
+Please note that helper methods that can fail will return a `Future` (for example, `Request.send()` uses
+`io.vertx.core.json` to encode JSON responses and that can call into user code that can fail). These should be used
+in a Vert.x Future chain, in a `Future.compose()` step, so that if there was a failure - it will becaught by a downstream
+error handler. For example:
+
+```java
+@Get("/")
+WebHandler getSomething = r -> loadSomething()
+    .compose(r::send)
+    .onFailure(r::handleFailure);
+```
+
+In this case, `Request.send()` may return a failed future (if `loadSomething()` loaded an object that cannot be safely
+serialized to JSON) that will be handled by `Request.handleFailure()`. On the other hand, `Reqeuest.handleFailure()`
+does not return a `Future` as it cannot fail (or at least, it internally calls `RoutingContext.fail()` to handle the
+failure, and it can also do that to handle its own internal failures).
+
 #### An Asynchronous Processing Example
 
 ```java
 Future<List<PojoType>> loadSomeRecords() {
-    // ... access a database asynchronously to load some POJOs
+    // … access a database asynchronously to load some POJOs
 }
 
 @Get("/")
@@ -461,7 +478,7 @@ WebHandler catalog = r -> // we don't even need curly braces
     .map(l -> l.stream() // stream loaded records as POJOs
             .map(JsonObject::mapFrom) // bean map each record to a JSON object
             .collect(JsonArray::new, JsonArray::add, JsonArray::addAll)) // collect everything to a JSON array
-    .onSuccess(r::send) // send the list to the client
+    .compose(r::send) // send the list to the client
     .onFailure(r::handleFailure); // capture any exceptions and forward to the failure handler
 ```
 

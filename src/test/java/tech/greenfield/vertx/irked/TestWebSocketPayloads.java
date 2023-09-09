@@ -59,7 +59,8 @@ public class TestWebSocketPayloads extends TestBase {
 		@WebSocket("/msg-handler")
 		MessageHandler handler = m -> {
 			log.info("Started handling payload request of " + m.length() + " bytes");
-			m.request().vertx().executeBlocking(f -> f.complete(checksumPayload(m)), res -> {
+			m.request().vertx().executeBlocking(() -> checksumPayload(m))
+			.onComplete(res -> {
 				log.info("Completed log checksum");
 				if (res.succeeded() && checksumIn.equals(res.result()))
 					m.reply(response);

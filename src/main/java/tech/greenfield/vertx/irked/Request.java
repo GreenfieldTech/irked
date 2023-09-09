@@ -237,7 +237,11 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> sendObject(Object data) {
-		return sendJSON(JsonObject.mapFrom(data));
+		try {
+			return sendJSON(JsonObject.mapFrom(data));
+		} catch (Throwable t) { // JsonObject.mapFrom run user's code that may throw by mistake
+			return Future.failedFuture(t);
+		}
 	}
 	
 	/**
@@ -269,7 +273,11 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> sendObject(Object data, HttpError status) {
-		return sendJSON(JsonObject.mapFrom(data), status);
+		try {
+			return sendJSON(JsonObject.mapFrom(data), status);
+		} catch (Throwable t) { // JsonObject.mapFrom run user's code that may throw by mistake
+			return Future.failedFuture(t);
+		}
 	}
 	
 	/**
@@ -422,7 +430,11 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public <G> Future<Void> sendStream(Stream<G> stream) {
-		return sendJSON(stream.map(this::encodeToJsonType).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+		try {
+			return sendJSON(stream.map(this::encodeToJsonType).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+		} catch (Throwable t) { // JsonObject.mapFrom run user's code that may throw by mistake
+			return Future.failedFuture(t);
+		}
 	}
 	
 	/**
