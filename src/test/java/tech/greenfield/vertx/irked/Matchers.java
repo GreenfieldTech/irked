@@ -164,14 +164,26 @@ public class Matchers {
 			@SuppressWarnings("unchecked")
 			@Override
 			public boolean matches(Object actual) {
-				return actual instanceof HttpResponse ?
-						((HttpResponse<Buffer>)actual).bodyAsString().equals(text) : false;
+				if (actual instanceof HttpResponse)
+					return ((HttpResponse<Buffer>)actual).bodyAsString().equals(text);
+				return false;
 			}
 	
 			@Override
 			public void describeTo(Description description) {
-				description.appendText("is the response body empty");
-			}};
+				description.appendText("The response body should be '").appendText(text).appendText("'");
+			}
+			
+			@Override
+			public void describeMismatch(Object actual, Description description) {
+				if (actual instanceof HttpResponse) {
+					@SuppressWarnings("unchecked")
+					HttpResponse<Buffer> response = (HttpResponse<Buffer>) actual;
+					description.appendText("was '").appendText(response.bodyAsString()).appendText("'");
+				} else
+					description.appendValue(actual);
+			}
+		};
 	}
 	
 	public static Matcher<HttpResponse<Buffer>> hasBody(byte[] data) {
