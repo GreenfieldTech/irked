@@ -3,7 +3,6 @@ package tech.greenfield.vertx.irked.websocket;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import io.netty.buffer.ByteBuf;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
@@ -65,16 +64,18 @@ public class WebSocketMessage implements Buffer {
 	 * Send back a text reply to the other end
 	 * @param text Text message to send
 	 */
-	public void reply(String text) {
+	public WebSocketMessage reply(String text) {
 		socket.writeTextMessage(text);
+		return this;
 	}
 	
 	/**
 	 * Send back a binary reply to the other end
 	 * @param buffer Binary data to send
 	 */
-	public void reply(Buffer buffer) {
+	public WebSocketMessage reply(Buffer buffer) {
 		socket.writeBinaryMessage(buffer);
+		return this;
 	}
 	
 	/**
@@ -89,6 +90,7 @@ public class WebSocketMessage implements Buffer {
 	 * @param buffer Buffer to marshal into
 	 * @see io.vertx.core.shareddata.impl.ClusterSerializable#writeToBuffer(io.vertx.core.buffer.Buffer)
 	 */
+	@Override
 	public void writeToBuffer(Buffer buffer) {
 		buffer.writeToBuffer(buffer);
 	}
@@ -99,6 +101,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return amount of bytes read from the buffer
 	 * @see io.vertx.core.shareddata.impl.ClusterSerializable#readFromBuffer(int, io.vertx.core.buffer.Buffer)
 	 */
+	@Override
 	public int readFromBuffer(int pos, Buffer buffer) {
 		return buffer.readFromBuffer(pos, buffer);
 	}
@@ -107,6 +110,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a {@code String} representation of the Buffer with the {@code UTF-8 }encoding
 	 * @see io.vertx.core.buffer.Buffer#toString()
 	 */
+	@Override
 	public String toString() {
 		return buffer.toString();
 	}
@@ -116,6 +120,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a {@code String} representation of the Buffer with the encoding specified by {@code enc}
 	 * @see io.vertx.core.buffer.Buffer#toString(java.lang.String)
 	 */
+	@Override
 	public String toString(String enc) {
 		return buffer.toString(enc);
 	}
@@ -125,6 +130,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a {@code String} representation of the Buffer with the encoding specified by {@code enc}
 	 * @see io.vertx.core.buffer.Buffer#toString(java.nio.charset.Charset)
 	 */
+	@Override
 	public String toString(Charset enc) {
 		return buffer.toString(enc);
 	}
@@ -133,6 +139,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a {@code String} representation of the Buffer with the encoding specified by {@code enc}
 	 * @see io.vertx.core.buffer.Buffer#toJsonObject()
 	 */
+	@Override
 	public JsonObject toJsonObject() {
 		return buffer.toJsonObject();
 	}
@@ -141,6 +148,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a Json array representation of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#toJsonArray()
 	 */
+	@Override
 	public JsonArray toJsonArray() {
 		return buffer.toJsonArray();
 	}
@@ -151,6 +159,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 1} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getByte(int)
 	 */
+	@Override
 	public byte getByte(int pos) {
 		return buffer.getByte(pos);
 	}
@@ -161,6 +170,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 1} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getUnsignedByte(int)
 	 */
+	@Override
 	public short getUnsignedByte(int pos) {
 		return buffer.getUnsignedByte(pos);
 	}
@@ -171,6 +181,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 4} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getInt(int)
 	 */
+	@Override
 	public int getInt(int pos) {
 		return buffer.getInt(pos);
 	}
@@ -181,6 +192,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code index} is less than {@code 0} or {@code index + 4} is greater than {@code this.capacity}
 	 * @see io.vertx.core.buffer.Buffer#getIntLE(int)
 	 */
+	@Override
 	public int getIntLE(int pos) {
 		return buffer.getIntLE(pos);
 	}
@@ -191,6 +203,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 4} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getUnsignedInt(int)
 	 */
+	@Override
 	public long getUnsignedInt(int pos) {
 		return buffer.getUnsignedInt(pos);
 	}
@@ -201,6 +214,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 4} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getUnsignedIntLE(int)
 	 */
+	@Override
 	public long getUnsignedIntLE(int pos) {
 		return buffer.getUnsignedIntLE(pos);
 	}
@@ -211,6 +225,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 8} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getLong(int)
 	 */
+	@Override
 	public long getLong(int pos) {
 		return buffer.getLong(pos);
 	}
@@ -221,6 +236,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code index} is less than {@code 0} or {@code index + 8} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getLongLE(int)
 	 */
+	@Override
 	public long getLongLE(int pos) {
 		return buffer.getLongLE(pos);
 	}
@@ -231,6 +247,7 @@ public class WebSocketMessage implements Buffer {
   	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 8} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getDouble(int)
 	 */
+	@Override
 	public double getDouble(int pos) {
 		return buffer.getDouble(pos);
 	}
@@ -241,6 +258,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 4} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getFloat(int)
 	 */
+	@Override
 	public float getFloat(int pos) {
 		return buffer.getFloat(pos);
 	}
@@ -251,6 +269,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 2} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getShort(int)
 	 */
+	@Override
 	public short getShort(int pos) {
 		return buffer.getShort(pos);
 	}
@@ -261,6 +280,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code index} is less than {@code 0} or {@code index + 2} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getShortLE(int)
 	 */
+	@Override
 	public short getShortLE(int pos) {
 		return buffer.getShortLE(pos);
 	}
@@ -271,6 +291,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code pos} is less than {@code 0} or {@code pos + 2} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getUnsignedShort(int)
 	 */
+	@Override
 	public int getUnsignedShort(int pos) {
 		return buffer.getUnsignedShort(pos);
 	}
@@ -281,6 +302,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code index} is less than {@code 0} or {@code index + 2} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getUnsignedShortLE(int)
 	 */
+	@Override
 	public int getUnsignedShortLE(int pos) {
 		return buffer.getUnsignedShortLE(pos);
 	}
@@ -291,6 +313,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code index} is less than {@code 0} or {@code index + 3} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getMedium(int)
 	 */
+	@Override
 	public int getMedium(int pos) {
 		return buffer.getMedium(pos);
 	}
@@ -301,6 +324,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code index} is less than {@code 0} or {@code index + 3} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getMediumLE(int)
 	 */
+	@Override
 	public int getMediumLE(int pos) {
 		return buffer.getMediumLE(pos);
 	}
@@ -311,6 +335,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code index} is less than {@code 0} or {@code index + 3} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getUnsignedMedium(int)
 	 */
+	@Override
 	public int getUnsignedMedium(int pos) {
 		return buffer.getUnsignedMedium(pos);
 	}
@@ -321,6 +346,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the specified {@code index} is less than {@code 0} or {@code index + 3} is greater than the length of the Buffer.
 	 * @see io.vertx.core.buffer.Buffer#getUnsignedMediumLE(int)
 	 */
+	@Override
 	public int getUnsignedMediumLE(int pos) {
 		return buffer.getUnsignedMediumLE(pos);
 	}
@@ -329,6 +355,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a copy of the entire Buffer as a {@code byte[]}
 	 * @see io.vertx.core.buffer.Buffer#getBytes()
 	 */
+	@Override
 	public byte[] getBytes() {
 		return buffer.getBytes();
 	}
@@ -340,6 +367,7 @@ public class WebSocketMessage implements Buffer {
 	 * 	and ending at position {@code end - 1}
 	 * @see io.vertx.core.buffer.Buffer#getBytes(int, int)
 	 */
+	@Override
 	public byte[] getBytes(int start, int end) {
 		return buffer.getBytes(start, end);
 	}
@@ -352,6 +380,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the content of the Buffer cannot fit into the destination byte array
 	 * @see io.vertx.core.buffer.Buffer#getBytes(byte[])
 	 */
+	@Override
 	public Buffer getBytes(byte[] dst) {
 		buffer.getBytes(dst);
 		return this;
@@ -366,6 +395,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the content of the Buffer cannot fit into the destination byte array
 	 * @see io.vertx.core.buffer.Buffer#getBytes(byte[], int)
 	 */
+	@Override
 	public Buffer getBytes(byte[] dst, int dstIndex) {
 		buffer.getBytes(dst, dstIndex);
 		return this;
@@ -382,6 +412,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the content of the Buffer cannot fit into the destination byte array
 	 * @see io.vertx.core.buffer.Buffer#getBytes(int, int, byte[])
 	 */
+	@Override
 	public Buffer getBytes(int start, int end, byte[] dst) {
 		buffer.getBytes(start, end, dst);
 		return this;
@@ -399,6 +430,7 @@ public class WebSocketMessage implements Buffer {
 	 * @throws IndexOutOfBoundsException if the content of the Buffer cannot fit into the destination byte array
 	 * @see io.vertx.core.buffer.Buffer#getBytes(int, int, byte[], int)
 	 */
+	@Override
 	public Buffer getBytes(int start, int end, byte[] dst, int dstIndex) {
 		buffer.getBytes(start, end, dst, dstIndex);
 		return this;
@@ -411,6 +443,7 @@ public class WebSocketMessage implements Buffer {
 	 * and ending at position {@code end - 1}
 	 * @see io.vertx.core.buffer.Buffer#getBuffer(int, int)
 	 */
+	@Override
 	public Buffer getBuffer(int start, int end) {
 		return buffer.getBuffer(start, end);
 	}
@@ -423,6 +456,7 @@ public class WebSocketMessage implements Buffer {
 	 * and ending at position {@code end - 1} interpreted as a String in the specified encoding
 	 * @see io.vertx.core.buffer.Buffer#getString(int, int, java.lang.String)
 	 */
+	@Override
 	public String getString(int start, int end, String enc) {
 		return buffer.getString(start, end, enc);
 	}
@@ -434,6 +468,7 @@ public class WebSocketMessage implements Buffer {
 	 * and ending at position {@code end - 1} interpreted as a String in UTF-8 encoding
 	 * @see io.vertx.core.buffer.Buffer#getString(int, int)
 	 */
+	@Override
 	public String getString(int start, int end) {
 		return buffer.getString(start, end);
 	}
@@ -445,6 +480,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendBuffer(io.vertx.core.buffer.Buffer)
 	 */
+	@Override
 	public Buffer appendBuffer(Buffer buff) {
 		buffer.appendBuffer(buff);
 		return this;
@@ -459,6 +495,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendBuffer(io.vertx.core.buffer.Buffer, int, int)
 	 */
+	@Override
 	public Buffer appendBuffer(Buffer buff, int offset, int len) {
 		buffer.appendBuffer(buff, offset, len);
 		return this;
@@ -470,6 +507,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendBytes(byte[])
 	 */
+	@Override
 	public Buffer appendBytes(byte[] bytes) {
 		buffer.appendBytes(bytes);
 		return this;
@@ -484,6 +522,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendBytes(byte[], int, int)
 	 */
+	@Override
 	public Buffer appendBytes(byte[] bytes, int offset, int len) {
 		buffer.appendBytes(bytes, offset, len);
 		return this;
@@ -495,6 +534,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendByte(byte)
 	 */
+	@Override
 	public Buffer appendByte(byte b) {
 		buffer.appendByte(b);
 		return this;
@@ -506,6 +546,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendUnsignedByte(short)
 	 */
+	@Override
 	public Buffer appendUnsignedByte(short b) {
 		buffer.appendUnsignedByte(b);
 		return this;
@@ -517,6 +558,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendInt(int)
 	 */
+	@Override
 	public Buffer appendInt(int i) {
 		buffer.appendInt(i);
 		return this;
@@ -527,6 +569,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendIntLE(int)
 	 */
+	@Override
 	public Buffer appendIntLE(int i) {
 		buffer.appendIntLE(i);
 		return this;
@@ -537,6 +580,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendUnsignedInt(long)
 	 */
+	@Override
 	public Buffer appendUnsignedInt(long i) {
 		buffer.appendUnsignedInt(i);
 		return this;
@@ -547,6 +591,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendUnsignedIntLE(long)
 	 */
+	@Override
 	public Buffer appendUnsignedIntLE(long i) {
 		buffer.appendUnsignedIntLE(i);
 		return this;
@@ -557,6 +602,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendMedium(int)
 	 */
+	@Override
 	public Buffer appendMedium(int i) {
 		buffer.appendMedium(i);
 		return this;
@@ -567,6 +613,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendMediumLE(int)
 	 */
+	@Override
 	public Buffer appendMediumLE(int i) {
 		buffer.appendMediumLE(i);
 		return this;
@@ -577,6 +624,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendLong(long)
 	 */
+	@Override
 	public Buffer appendLong(long l) {
 		buffer.appendLong(l);
 		return this;
@@ -587,6 +635,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendLongLE(long)
 	 */
+	@Override
 	public Buffer appendLongLE(long l) {
 		buffer.appendLongLE(l);
 		return this;
@@ -597,6 +646,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendShort(short)
 	 */
+	@Override
 	public Buffer appendShort(short s) {
 		buffer.appendShort(s);
 		return this;
@@ -607,6 +657,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendShortLE(short)
 	 */
+	@Override
 	public Buffer appendShortLE(short s) {
 		buffer.appendShortLE(s);
 		return this;
@@ -617,6 +668,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendUnsignedShort(int)
 	 */
+	@Override
 	public Buffer appendUnsignedShort(int s) {
 		buffer.appendUnsignedShort(s);
 		return this;
@@ -627,6 +679,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendUnsignedShortLE(int)
 	 */
+	@Override
 	public Buffer appendUnsignedShortLE(int s) {
 		buffer.appendUnsignedShortLE(s);
 		return this;
@@ -637,6 +690,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendFloat(float)
 	 */
+	@Override
 	public Buffer appendFloat(float f) {
 		buffer.appendFloat(f);
 		return this;
@@ -647,6 +701,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendDouble(double)
 	 */
+	@Override
 	public Buffer appendDouble(double d) {
 		buffer.appendDouble(d);
 		return this;
@@ -658,6 +713,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendString(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public Buffer appendString(String str, String enc) {
 		buffer.appendString(str, enc);
 		return this;
@@ -668,6 +724,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendString(java.lang.String)
 	 */
+	@Override
 	public Buffer appendString(String str) {
 		buffer.appendString(str);
 		return this;
@@ -679,6 +736,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setByte(int, byte)
 	 */
+	@Override
 	public Buffer setByte(int pos, byte b) {
 		buffer.setByte(pos, b);
 		return this;
@@ -690,6 +748,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setUnsignedByte(int, short)
 	 */
+	@Override
 	public Buffer setUnsignedByte(int pos, short b) {
 		buffer.setUnsignedByte(pos, b);
 		return this;
@@ -701,6 +760,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setInt(int, int)
 	 */
+	@Override
 	public Buffer setInt(int pos, int i) {
 		buffer.setInt(pos, i);
 		return this;
@@ -712,6 +772,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setIntLE(int, int)
 	 */
+	@Override
 	public Buffer setIntLE(int pos, int i) {
 		buffer.setIntLE(pos, i);
 		return this;
@@ -723,6 +784,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setUnsignedInt(int, long)
 	 */
+	@Override
 	public Buffer setUnsignedInt(int pos, long i) {
 		buffer.setUnsignedInt(pos, i);
 		return this;
@@ -734,6 +796,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setUnsignedIntLE(int, long)
 	 */
+	@Override
 	public Buffer setUnsignedIntLE(int pos, long i) {
 		buffer.setUnsignedIntLE(pos, i);
 		return this;
@@ -745,6 +808,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setMedium(int, int)
 	 */
+	@Override
 	public Buffer setMedium(int pos, int i) {
 		buffer.setMedium(pos, i);
 		return this;
@@ -756,6 +820,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setMediumLE(int, int)
 	 */
+	@Override
 	public Buffer setMediumLE(int pos, int i) {
 		buffer.setMediumLE(pos, i);
 		return this;
@@ -767,6 +832,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setLong(int, long)
 	 */
+	@Override
 	public Buffer setLong(int pos, long l) {
 		buffer.setLong(pos, l);
 		return this;
@@ -778,6 +844,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setLongLE(int, long)
 	 */
+	@Override
 	public Buffer setLongLE(int pos, long l) {
 		buffer.setLongLE(pos, l);
 		return this;
@@ -789,6 +856,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setDouble(int, double)
 	 */
+	@Override
 	public Buffer setDouble(int pos, double d) {
 		buffer.setDouble(pos, d);
 		return this;
@@ -800,6 +868,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setFloat(int, float)
 	 */
+	@Override
 	public Buffer setFloat(int pos, float f) {
 		buffer.setFloat(pos, f);
 		return this;
@@ -811,6 +880,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setShort(int, short)
 	 */
+	@Override
 	public Buffer setShort(int pos, short s) {
 		buffer.setShort(pos, s);
 		return this;
@@ -822,6 +892,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setShortLE(int, short)
 	 */
+	@Override
 	public Buffer setShortLE(int pos, short s) {
 		buffer.setShortLE(pos, s);
 		return this;
@@ -833,6 +904,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setUnsignedShort(int, int)
 	 */
+	@Override
 	public Buffer setUnsignedShort(int pos, int s) {
 		buffer.setUnsignedShort(pos, s);
 		return this;
@@ -844,6 +916,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setUnsignedShortLE(int, int)
 	 */
+	@Override
 	public Buffer setUnsignedShortLE(int pos, int s) {
 		buffer.setUnsignedShortLE(pos, s);
 		return this;
@@ -855,6 +928,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setBuffer(int, io.vertx.core.buffer.Buffer)
 	 */
+	@Override
 	public Buffer setBuffer(int pos, Buffer b) {
 		buffer.setBuffer(pos, b);
 		return this;
@@ -868,6 +942,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setBuffer(int, io.vertx.core.buffer.Buffer, int, int)
 	 */
+	@Override
 	public Buffer setBuffer(int pos, Buffer b, int offset, int len) {
 		buffer.setBuffer(pos, b, offset, len);
 		return this;
@@ -879,6 +954,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setBytes(int, java.nio.ByteBuffer)
 	 */
+	@Override
 	public Buffer setBytes(int pos, ByteBuffer b) {
 		buffer.setBytes(pos, b);
 		return this;
@@ -890,6 +966,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setBytes(int, byte[])
 	 */
+	@Override
 	public Buffer setBytes(int pos, byte[] b) {
 		buffer.setBytes(pos, b);
 		return this;
@@ -903,6 +980,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setBytes(int, byte[], int, int)
 	 */
+	@Override
 	public Buffer setBytes(int pos, byte[] b, int offset, int len) {
 		buffer.setBytes(pos, b, offset, len);
 		return this;
@@ -914,6 +992,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setString(int, java.lang.String)
 	 */
+	@Override
 	public Buffer setString(int pos, String str) {
 		buffer.setString(pos, str);
 		return this;
@@ -928,6 +1007,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#setString(int, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public Buffer setString(int pos, String str, String enc) {
 		buffer.setString(pos, str, enc);
 		return this;
@@ -938,6 +1018,7 @@ public class WebSocketMessage implements Buffer {
 	 * All positions are indexed from zero.
 	 * @see io.vertx.core.buffer.Buffer#length()
 	 */
+	@Override
 	public int length() {
 		return buffer.length();
 	}
@@ -946,6 +1027,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a copy of the entire Buffer.
 	 * @see io.vertx.core.buffer.Buffer#copy()
 	 */
+	@Override
 	public Buffer copy() {
 		return buffer.copy();
 	}
@@ -957,6 +1039,7 @@ public class WebSocketMessage implements Buffer {
 	 * @return a slice of this buffer
 	 * @see io.vertx.core.buffer.Buffer#slice()
 	 */
+	@Override
 	public Buffer slice() {
 		return buffer.slice();
 	}
@@ -970,21 +1053,58 @@ public class WebSocketMessage implements Buffer {
 	 * @return  a slice of this buffer
 	 * @see io.vertx.core.buffer.Buffer#slice(int, int)
 	 */
+	@Override
 	public Buffer slice(int start, int end) {
 		return buffer.slice(start, end);
 	}
 
 	/**
-	 * Returns the Buffer as a Netty {@code ByteBuf}.<p>
-	 * The returned buffer is a duplicate.<p>
-	 * The returned {@code ByteBuf} might have its {@code readerIndex > 0}
-	 * This method is meant for internal use only.<p>
-	 * @return a Netty {@code ByteBuf}
-	 * @see io.vertx.core.buffer.Buffer#getByteBuf()
-	 * @deprecated removed from public API in Vert.x 5
+	 * @see io.vertx.core.buffer.Buffer#toJson()
 	 */
-	public ByteBuf getByteBuf() {
-		return buffer.getByteBuf();
+	public Object toJson() {
+		return buffer.toJson();
+	}
+
+	/**
+	 * @see io.vertx.core.buffer.Buffer#getDoubleLE(int)
+	 */
+	public double getDoubleLE(int pos) {
+		return buffer.getDoubleLE(pos);
+	}
+
+	/**
+	 * @see io.vertx.core.buffer.Buffer#getFloatLE(int)
+	 */
+	public float getFloatLE(int pos) {
+		return buffer.getFloatLE(pos);
+	}
+
+	/**
+	 * @see io.vertx.core.buffer.Buffer#appendFloatLE(float)
+	 */
+	public Buffer appendFloatLE(float f) {
+		return buffer.appendFloatLE(f);
+	}
+
+	/**
+	 * @see io.vertx.core.buffer.Buffer#appendDoubleLE(double)
+	 */
+	public Buffer appendDoubleLE(double d) {
+		return buffer.appendDoubleLE(d);
+	}
+
+	/**
+	 * @see io.vertx.core.buffer.Buffer#setDoubleLE(int, double)
+	 */
+	public Buffer setDoubleLE(int pos, double d) {
+		return buffer.setDoubleLE(pos, d);
+	}
+
+	/**
+	 * @see io.vertx.core.buffer.Buffer#setFloatLE(int, float)
+	 */
+	public Buffer setFloatLE(int pos, float f) {
+		return buffer.setFloatLE(pos, f);
 	}
 
 }
