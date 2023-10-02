@@ -254,32 +254,12 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 
 	/**
 	 * @param body
-	 * @param handler
-	 * @see io.vertx.ext.web.client.HttpRequest#sendStream(io.vertx.core.streams.ReadStream, io.vertx.core.Handler)
-	 */
-	@Override
-	public void sendStream(ReadStream<Buffer> body, Handler<AsyncResult<HttpResponse<T>>> handler) {
-		httpRequest.sendStream(body, handler);
-	}
-
-	/**
-	 * @param body
 	 * @return
 	 * @see io.vertx.ext.web.client.HttpRequest#sendStream(io.vertx.core.streams.ReadStream)
 	 */
 	@Override
 	public Future<HttpResponse<T>> sendStream(ReadStream<Buffer> body) {
 		return httpRequest.sendStream(body);
-	}
-
-	/**
-	 * @param body
-	 * @param handler
-	 * @see io.vertx.ext.web.client.HttpRequest#sendBuffer(io.vertx.core.buffer.Buffer, io.vertx.core.Handler)
-	 */
-	@Override
-	public void sendBuffer(Buffer body, Handler<AsyncResult<HttpResponse<T>>> handler) {
-		httpRequest.sendBuffer(body, handler);
 	}
 
 	/**
@@ -294,32 +274,12 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 
 	/**
 	 * @param body
-	 * @param handler
-	 * @see io.vertx.ext.web.client.HttpRequest#sendJsonObject(io.vertx.core.json.JsonObject, io.vertx.core.Handler)
-	 */
-	@Override
-	public void sendJsonObject(JsonObject body, Handler<AsyncResult<HttpResponse<T>>> handler) {
-		httpRequest.sendJsonObject(body, handler);
-	}
-
-	/**
-	 * @param body
 	 * @return
 	 * @see io.vertx.ext.web.client.HttpRequest#sendJsonObject(io.vertx.core.json.JsonObject)
 	 */
 	@Override
 	public Future<HttpResponse<T>> sendJsonObject(JsonObject body) {
 		return httpRequest.sendJsonObject(body);
-	}
-
-	/**
-	 * @param body
-	 * @param handler
-	 * @see io.vertx.ext.web.client.HttpRequest#sendJson(java.lang.Object, io.vertx.core.Handler)
-	 */
-	@Override
-	public void sendJson(Object body, Handler<AsyncResult<HttpResponse<T>>> handler) {
-		httpRequest.sendJson(body, handler);
 	}
 
 	/**
@@ -334,16 +294,6 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 
 	/**
 	 * @param body
-	 * @param handler
-	 * @see io.vertx.ext.web.client.HttpRequest#sendForm(io.vertx.core.MultiMap, io.vertx.core.Handler)
-	 */
-	@Override
-	public void sendForm(MultiMap body, Handler<AsyncResult<HttpResponse<T>>> handler) {
-		httpRequest.sendForm(body, handler);
-	}
-
-	/**
-	 * @param body
 	 * @return
 	 * @see io.vertx.ext.web.client.HttpRequest#sendForm(io.vertx.core.MultiMap)
 	 */
@@ -354,31 +304,12 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 
 	/**
 	 * @param body
-	 * @param handler
-	 * @see io.vertx.ext.web.client.HttpRequest#sendMultipartForm(io.vertx.ext.web.multipart.MultipartForm, io.vertx.core.Handler)
-	 */
-	@Override
-	public void sendMultipartForm(MultipartForm body, Handler<AsyncResult<HttpResponse<T>>> handler) {
-		httpRequest.sendMultipartForm(body, handler);
-	}
-
-	/**
-	 * @param body
 	 * @return
 	 * @see io.vertx.ext.web.client.HttpRequest#sendMultipartForm(io.vertx.ext.web.multipart.MultipartForm)
 	 */
 	@Override
 	public Future<HttpResponse<T>> sendMultipartForm(MultipartForm body) {
 		return httpRequest.sendMultipartForm(body);
-	}
-
-	/**
-	 * @param handler
-	 * @see io.vertx.ext.web.client.HttpRequest#send(io.vertx.core.Handler)
-	 */
-	@Override
-	public void send(Handler<AsyncResult<HttpResponse<T>>> handler) {
-		httpRequest.send(handler);
 	}
 
 	/**
@@ -412,11 +343,6 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 	public HttpRequest<T> authentication(Credentials credentials) {
 		httpRequest.authentication(credentials);
 		return this;
-	}
-
-	@Override
-	public void sendForm(MultiMap body, String charset, Handler<AsyncResult<HttpResponse<T>>> handler) {
-		httpRequest.sendForm(body, charset, handler);
 	}
 
 	@Override

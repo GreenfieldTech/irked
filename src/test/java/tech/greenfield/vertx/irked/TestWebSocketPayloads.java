@@ -152,7 +152,7 @@ public class TestWebSocketPayloads extends TestBase {
 		Promise<Void> res = Promise.promise();
 		log.info("Starting websocket");
 		getClient(vertx).websocket(port, "localhost", wsmsg ? "/msg-handler" : "/web-handler")
-				.thenAccept(ws -> {
+				.onSuccess(ws -> {
 					log.info("Socket open, sending request");
 					ws.binaryMessageHandler(resp -> {
 						log.info("Got a reply");
@@ -167,10 +167,7 @@ public class TestWebSocketPayloads extends TestBase {
 					.writeBinaryMessage(ctr.request)
 					.onFailure(e -> log.error("Failed sending message",e));
 					log.info("Waiting for reply");
-				}).exceptionally(t -> {
-					res.fail(t);
-					return null;
-				});
+				}).onFailure(res::fail);
 		return res.future();
 	}
 

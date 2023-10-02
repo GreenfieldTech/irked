@@ -1,7 +1,6 @@
 package tech.greenfield.vertx.irked.base;
 
-import java.util.concurrent.CompletableFuture;
-
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
@@ -11,10 +10,11 @@ import io.vertx.ext.web.client.impl.WebClientBase;
 
 public class WebClientExt extends WebClientBase {
 
-	private static HttpClient client;
+	private WebSocketClient webSocketClient;
 
-	public WebClientExt(Vertx vertx, WebClientOptions options) {
-		super(client = vertx.createHttpClient(), options);
+	public WebClientExt(Vertx vertx, WebClientOptions options, WebSocketClientOptions wsOptions) {
+		super(vertx.createHttpClient(), options);
+		webSocketClient = vertx.createWebSocketClient(wsOptions);
 	}
 	
 	@Override
@@ -42,25 +42,15 @@ public class WebClientExt extends WebClientBase {
 		return new HttpRequestExt<Buffer>(super.delete(port, host, requestURI));
 	}
 	
-	public CompletableFuture<WebSocket> websocket(int port, String host, String requestURI) {
-		CompletableFuture<WebSocket> fut = new CompletableFuture<>();
-		client.webSocket(port, host, requestURI, res -> {
-			if (res.failed()) fut.completeExceptionally(res.cause());
-			else fut.complete(res.result());
-		});
-		return fut;
+	public Future<WebSocket> websocket(int port, String host, String requestURI) {
+		return webSocketClient.connect(port, host, requestURI);
 	}
 
-	public CompletableFuture<WebSocket> websocket(int port, String host, String requestURI, HeadersMultiMap headers) {
-		CompletableFuture<WebSocket> fut = new CompletableFuture<>();
-		client.webSocket(new WebSocketConnectOptions()
+	public Future<WebSocket> websocket(int port, String host, String requestURI, HeadersMultiMap headers) {
+		return webSocketClient.connect(new WebSocketConnectOptions()
 				.setPort(port)
 				.setHost(host)
 				.setURI(requestURI)
-				.setHeaders(headers), res -> {
-			if (res.failed()) fut.completeExceptionally(res.cause());
-			else fut.complete(res.result());
-		});
-		return fut;
+				.setHeaders(headers));
 	}
 }

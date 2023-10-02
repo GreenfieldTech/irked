@@ -85,7 +85,7 @@ public class TestInvalidMethod extends TestBase {
 			getClient(vertx).get(port, "localhost", "/private").send().map(res -> {
 				assertThat(res, isSuccess());
 				assertThat(res.bodyAsString(), equalTo("OK"));
-				vertx.undeploy(deploymentID, context.succeedingThenComplete());
+				vertx.undeploy(deploymentID).andThen(context.succeedingThenComplete());
 				return null;
 			})
 			.onFailure(context::failNow)
@@ -117,7 +117,7 @@ public class TestInvalidMethod extends TestBase {
 			getClient(vertx).get(port, "localhost", "/invalid").send().map(res -> {
 				assertThat(res, is(status(new InternalServerError())));
 				assertThat(res.bodyAsJsonObject().getString("message"), startsWith("Invalid request handler"));
-				vertx.undeploy(deploymentID, context.succeedingThenComplete());
+				vertx.undeploy(deploymentID).andThen(context.succeedingThenComplete());
 				return null;
 			})
 			.onFailure(context::failNow)

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.WebSocketClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -34,16 +35,15 @@ public class TestBase {
 	protected final Integer port = new Random().nextInt(30000)+10000;
 
 	protected static WebClientExt getClient(Vertx vertx) {
-		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions()
-				.setIdleTimeout(0)
-				.setMaxWebSocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
+		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions().setIdleTimeout(0)),
+				new WebSocketClientOptions().setMaxMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE));
 	}
 	
 	protected void deployController(Controller controller, Vertx vertx, Handler<AsyncResult<String>> handler) {
 		Server server = new Server(controller);
 
 		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("port", port));
-		vertx.deployVerticle(server, options, handler);
+		vertx.deployVerticle(server, options).andThen(handler);
 	}
 
 	protected static Function<Throwable, Void> failureHandler(VertxTestContext context) {
