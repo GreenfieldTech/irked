@@ -30,7 +30,7 @@
 	</developers>
 
 	<properties>
-		<vertx.version>4.4.6</vertx.version>
+		<vertx.version>5.0.0-SNAPSHOT</vertx.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<maven.compiler.release>11</maven.compiler.release>
@@ -49,6 +49,16 @@
 	<scm>
 		<url>https://github.com/GreenfieldTech/irked</url>
 	</scm>
+	
+	<repositories>
+		<repository>
+			<id>sonatype-s01-snapshots</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<distributionManagement>
 		<!--
@@ -65,6 +75,7 @@
 			<id>ossrh</id>
 			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
+		<!-- Vert.x Snapshots -->
 	</distributionManagement>
 
 	<dependencies>
