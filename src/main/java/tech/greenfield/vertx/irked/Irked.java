@@ -13,6 +13,10 @@ import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 public class Irked {
 
 	private Vertx vertx;
+	
+	private Irked(Vertx vertx) {
+		this.vertx = vertx;
+	}
 
 	/**
 	 * Vert.x-styled Irked factory method.
@@ -23,15 +27,6 @@ public class Irked {
 		return new Irked(vertx);
 	}
 	
-	/**
-	 * Create new Irked instance that can generate request handlers
-	 * @deprecated please use {@link Irked#irked(Vertx)} instead
-	 * @param vertx Vert.x instance in which to generate routers
-	 */
-	public Irked(Vertx vertx) {
-		this.vertx = vertx;
-	}
-
 	/**
 	 * Create an HTTP request handler, that can be used in {@link HttpServer#requestHandler()},
 	 * with the provided set of APIs configured
