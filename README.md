@@ -6,15 +6,16 @@ It allows you to write your REST API code without writing routing boiler plate b
 annotations, auto-discovery through reflection and optionally (if you're into that as well)
 dependency injection.
 
-This version supports Vert.x 4. To use with earlier Vert.x versions, try Irked 2 for Vert.x 3.9
-support or Irked 1 for earlier versions (Vert.x 3.9 has changed its API in a non-backward compatible
-way - method return types were changed - which required that 1 + 2 split).
+This version supports Vert.x 5. To use with earlier Vert.x versions, try Irked 4 for Vert.x 4.x support,
+Irked 2 for Vert.x 3.9 support, or Irked 1 for earlier versions (Vert.x 3.9 has changed its API in a
+non-backward compatible way - method return types were changed - which required that 1 + 2 split).
 
-Other than different backward compatibility, Irked versions are essentially the same with bug fixes
-ported to all releases.
+Other than different backward compatibility, Irked versions are essentially the same with bug fixes and
+features ported to all releases.
 
 ## Installation
 
+<!--
 Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.4.6).
 
 If using Maven, add Irked as a dependency in your `pom.xml` file:
@@ -29,12 +30,18 @@ If using Maven, add Irked as a dependency in your `pom.xml` file:
 
 For other build tools, see the Maven Central website for the syntax, but it generally
 boils down to just using `tech.greenfield:irked-vertx:4.4.6` as the dependency string.
+-->
+
+This branch tracks development of the future Vert.x 5.0 release and is not recommended for usage, except
+for testing a future Irked 5 upgrade.
+
+The recommended way to test this branch is to use [the Jitpack distribution](https://jitpack.io/#GreenfieldTech/irked/feature~vertx-5-SNAPSHOT).
 
 ## Quick Start
 
 You may want to take a look at the example application at [`src/example/java/tech/greenfield/vertx/irked/example/App.java`](src/example/java/tech/greenfield/vertx/irked/example/App.java) which shows how to create a new Vert.x Verticle using an Irked `Router` and a few very simple APIs. Then you may want to read the rest of this document for explanations, rationale and more complex API examples.
 
-To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.4.6 installation:
+To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 5.0.0-SNAPSHOT installation:
 
 ```
 vertx run -cp target/classes/ tech.greenfield.vertx.irked.example.App

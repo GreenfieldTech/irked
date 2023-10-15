@@ -6,15 +6,16 @@ It allows you to write your REST API code without writing routing boiler plate b
 annotations, auto-discovery through reflection and optionally (if you're into that as well)
 dependency injection.
 
-This version supports Vert.x 4. To use with earlier Vert.x versions, try Irked 2 for Vert.x 3.9
-support or Irked 1 for earlier versions (Vert.x 3.9 has changed its API in a non-backward compatible
-way - method return types were changed - which required that 1 + 2 split).
+This version supports Vert.x 5. To use with earlier Vert.x versions, try Irked 4 for Vert.x 4.x support,
+Irked 2 for Vert.x 3.9 support, or Irked 1 for earlier versions (Vert.x 3.9 has changed its API in a
+non-backward compatible way - method return types were changed - which required that 1 + 2 split).
 
-Other than different backward compatibility, Irked versions are essentially the same with bug fixes
-ported to all releases.
+Other than different backward compatibility, Irked versions are essentially the same with bug fixes and
+features ported to all releases.
 
 ## Installation
 
+<!--
 Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/{{IRKED_VERSION}}).
 
 If using Maven, add Irked as a dependency in your `pom.xml` file:
@@ -29,6 +30,12 @@ If using Maven, add Irked as a dependency in your `pom.xml` file:
 
 For other build tools, see the Maven Central website for the syntax, but it generally
 boils down to just using `tech.greenfield:irked-vertx:{{IRKED_VERSION}}` as the dependency string.
+-->
+
+This branch tracks development of the future Vert.x 5.0 release and is not recommended for usage, except
+for testing a future Irked 5 upgrade.
+
+The recommended way to test this branch is to use [the Jitpack distribution](https://jitpack.io/#GreenfieldTech/irked/feature~vertx-5-SNAPSHOT).
 
 ## Quick Start
 
