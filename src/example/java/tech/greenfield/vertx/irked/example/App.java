@@ -21,9 +21,9 @@ public class App extends AbstractVerticle {
 		System.out.println("Starting Irked example app listening on port " + config().getInteger("port", 8000));
 		vertx.createHttpServer(new HttpServerOptions())
 				.requestHandler(Irked.irked(vertx).router()
-						.configure(new ExampleAPIv1(), "/v1")
-						.configure(new ExampleAPIv2(), "/v2")
-						.configure(new Controller() {
+						.with(new ExampleAPIv1(), "/v1")
+						.with(new ExampleAPIv2(), "/v2")
+						.with(new Controller() {
 							@Endpoint("/")
 							WebHandler latest = r -> {
 								throw new Redirect("/v2" + r.request().uri()).unchecked();

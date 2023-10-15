@@ -37,7 +37,7 @@ public class Irked {
 	public Handler<HttpServerRequest> setupRequestHandler(Controller... apis) throws InvalidRouteConfiguration {
 		Router router = new Router(vertx);
 		for (Controller api : apis)
-			router.configure(api);
+			router.with(api);
 		return router;
 	}
 	

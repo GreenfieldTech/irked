@@ -21,6 +21,16 @@ import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 
+/**
+ * Irked router implementation
+ * To use Irked for routing logic in a Vert.x HTTP server, use the Irked router as the request handler instead of
+ * the Vertx-web {@link io.vertx.ext.web.Router}.
+ * 
+ * Example:
+ * {@code
+ * vertx.createHttpServer(new HttpServerOptions()).requestHandler(Irked.router(vertx).with(API.class));
+ * }
+ */
 public class Router implements io.vertx.ext.web.Router {
 
 	static Logger log = LoggerFactory.getLogger(Router.class);
@@ -30,37 +40,83 @@ public class Router implements io.vertx.ext.web.Router {
 
 	private Set<Route> routePaths = new HashSet<>(); // used for debugging only
 
+	/**
+	 * Create a new Irked router for the specified Vert.x instance.
+	 * @apiNote Don't call this method directly, instead use {@code Irked.router(vertx)}
+	 * @param vertx Vert.x instance to use
+	 */
 	public Router(Vertx vertx) {
 		this.vertx = vertx;
 		this.router = io.vertx.ext.web.Router.router(this.vertx);
 	}
 
+	/**
+	 * Mount the specified controller at the root of the router
+	 * @param api controller implementation with route handlers
+	 * @return itself for fluent calls
+	 * @throws InvalidRouteConfiguration if the specified controller has invalid configurations
+	 */
 	public Router with(Controller api) throws InvalidRouteConfiguration {
 		return with(api, "/");
 	}
 
+	/**
+	 * Mount the specified controller at the specified path
+	 * @apiNote This configuration is not recommended and is supported for backward compatibility. It is recommended
+	 * to mount "sub-controllers" as fields on the parent controllers, annotated with {@code @Endpoint("path")}, instead
+	 * @param api controller implementation with route handlers
+	 * @param path path under which the route handlers in the controllers will be available
+	 * @return itself for fluent calls
+	 * @throws InvalidRouteConfiguration if the specified controller has invalid configurations
+	 */
 	public Router with(Controller api, String path) throws InvalidRouteConfiguration {
 		configure(api, path);
 		return this;
 	}
 
+	/**
+	 * Deconfigure and already configured controller
+	 * This call removes all route handlers defined on the specified controller from the Irked router. Calls to those routes
+	 * after this method complete should return a 404 Not Found status
+	 * @param api controller implementation whose route handlers should be removed
+	 * @return itself for fluent calls
+	 */
 	public Router remove(Controller api) {
 		api.remove();
 		return this;
 	}
-	
+
+	/**
+	 * Retrieve the Vert.x instance used by this router
+	 * @return Vert.x instance
+	 */
 	public Vertx vertx() {
 		return vertx;
 	}
 	
+	/**
+	 * Retrieve the internal Vertx-web router implementation
+	 * @return Vertx-web router
+	 */
 	public io.vertx.ext.web.Router vertxWebRouter() {
 		return router;
 	}
 
+	/**
+	 * Output the current router configuration status (list of routes and handlers) to the standard error stream
+	 * This is useful for debugging.
+	 * @return itself for fluent calls
+	 */
 	public Router configReport() {
 		return configReport(System.err);
 	}
 
+	/**
+	 * Output the current router configuration status (list of routes and handlers) to the specified stream
+	 * This is useful for debugging.
+	 * @param reportStream print stream where to output the report
+	 * @return itself for fluent calls
+	 */
 	public Router configReport(PrintStream reportStream) {
 		reportStream.println("Configured routes:");
 		routePaths.stream().sorted(this::routeComparator).forEach(r -> reportStream.println(
@@ -100,11 +156,7 @@ public class Router implements io.vertx.ext.web.Router {
 		}
 	}
 
-	public Router configure(Controller api) throws InvalidRouteConfiguration {
-		return configure(api, "/");
-	}
-
-	public Router configure(Controller api, String path) throws InvalidRouteConfiguration {
+	private Router configure(Controller api, String path) throws InvalidRouteConfiguration {
 		configure(api, path, new RequestWrapper(api));
 		return this;
 	}

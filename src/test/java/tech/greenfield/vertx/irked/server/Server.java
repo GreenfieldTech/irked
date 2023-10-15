@@ -20,7 +20,7 @@ public class Server extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> startFuture) throws Exception {
 		(server = vertx.createHttpServer(getHttpServerOptions())).requestHandler(
-				Irked.router(vertx).configure(test).configReport(System.out))
+				Irked.router(vertx).with(test).configReport(System.out))
 				.listen(config().getInteger("port")).<Void>mapEmpty().andThen(startFuture);
 	}
 
