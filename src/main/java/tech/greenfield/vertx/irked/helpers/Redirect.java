@@ -2,6 +2,9 @@ package tech.greenfield.vertx.irked.helpers;
 
 import tech.greenfield.vertx.irked.status.Found;
 
+/**
+ * A 302 Found response that encodes the destination location
+ */
 @SuppressWarnings("serial")
 public class Redirect extends Found {
 

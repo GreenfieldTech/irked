@@ -20,6 +20,9 @@ import io.vertx.core.streams.Pipe;
 import io.vertx.core.streams.WriteStream;
 import tech.greenfield.vertx.irked.Request;
 
+/**
+ * Irked WebSocket connection wrapper that gives access to the Irked HTTP request object that was used to start the connection
+ */
 @SuppressWarnings("deprecation")
 public class WebSocketConnection implements ServerWebSocket {
 
@@ -27,6 +30,13 @@ public class WebSocketConnection implements ServerWebSocket {
 	private Request request;
 	private static Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
 
+	/**
+	 * Create a new WebSocket connection object from the specified Irked request with the specified WebSocket message
+	 * handler
+	 * The WebSocket event handlers will be connected asyncrhonously, once the internal WebSocket implementation is ready
+	 * @param request Irked request that originated this socket
+	 * @param handler message handler for this socket
+	 */
 	public WebSocketConnection(Request request, Handler<? super WebSocketMessage> handler) {
 		(this.request = request).request().toWebSocket().onSuccess(s -> {
 			socket = s;

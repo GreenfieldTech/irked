@@ -31,6 +31,10 @@ public class HOBAAuthorizationToken extends ParameterEncodedAuthorizationToken {
 		return "HOBA".equalsIgnoreCase(type);
 	}
 	
+	/**
+	 * Retrieve HOBA parameters
+	 * @return a the HOBA parameter text sent by the client
+	 */
 	public String getResult() {
 		return getParameter("result");
 	}

@@ -34,8 +34,11 @@ public class HttpError extends Exception {
 
 	private static final long serialVersionUID = -7084405660609573926L;
 	
+	/** HTTP status code */
 	private int statusCode;
+	/** HTTP status message text */
 	private String statusText;
+	/** Optional additional headers for the HTTP response */
 	private HeadersMultiMap headers = HeadersMultiMap.httpHeaders();
 	
 	/**

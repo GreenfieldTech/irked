@@ -24,8 +24,7 @@ import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.HttpStatuses;
 
 /**
- * Request handling wrapper which adds some useful routines for
- * API writers.
+ * Irked Request handling wrapper which adds some useful routines for API writers
  * 
  * Can serve as a basis for local context parsers that API writers
  * can use to expose path arguments from parent prefixes
@@ -167,7 +166,7 @@ public class Request extends RoutingContextDecorator {
 	 * Convert request body to an instance of the specified POJO
 	 * 
 	 * Currently the followed request body content types are supported:
-	 *  * <code>application/json</code> - the body is read using {@link RoutingContext#getBodyAsJson()} then
+	 *  * <code>application/json</code> - the body is read using {@link RequestBody#asJsonObject()} then
 	 *    mapped to the bean type using {@link JsonObject#mapTo(Class)}
 	 *  * <code>application/x-www-form-urlencoded</code> - the body is read using {@link HttpServerRequest#formAttributes()}
 	 *   into a {@link JsonObject} as keys with string values, then mapped to the bean type using {@link JsonObject#mapTo(Class)}.
@@ -566,15 +565,30 @@ public class Request extends RoutingContextDecorator {
 		return this;
 	}
 
+	/**
+	 * Create the appropriate {@code HttpError} instance according to the current set (or default) response status code
+	 * @return An {@code HttpError} instance whose code matches the current response status code
+	 */
 	public HttpError statusFromResponseCode() {
 		return statusFromResponseCode(response().getStatusCode(), response().getStatusMessage());
 	}
 
-	public HttpError statusFromResponseCode(int statusCode) {
+	/**
+	 * Utility method to create {@code HttpError} instance according to the specified HTTP status code
+	 * @param statusCode HTTP status code for which to generate an {@code HttpError} implementation
+	 * @return An {@code HttpError} instance for the specified HTTP status code
+	 */
+	public static HttpError statusFromResponseCode(int statusCode) {
 		return statusFromResponseCode(statusCode, HttpResponseStatus.valueOf(statusCode).reasonPhrase());
 	}
 	
-	public HttpError statusFromResponseCode(int statusCode, String statusMessage) {
+	/**
+	 * Utility method to create {@code HttpError} instance according to the specified HTTP status code with a non-default status message
+	 * @param statusCode HTTP status code for which to generate an {@code HttpError} implementation
+	 * @param statusMessage The custom status message
+	 * @return An {@code HttpError} instance for the specified HTTP status code and message
+	 */
+	public static HttpError statusFromResponseCode(int statusCode, String statusMessage) {
 		try {
 			return HttpStatuses.create(statusCode).setStatusText(statusMessage);
 		} catch (InstantiationException e) {

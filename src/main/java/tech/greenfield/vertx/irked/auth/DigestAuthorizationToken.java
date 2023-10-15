@@ -41,21 +41,64 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 		update("Digest", token);
 	}
 
+	/**
+	 * Helper constructor to compute a new Digest authorization header, using MD5 digest and without a nonce or an
+	 * opaque value
+	 * @param realm Realm received in the Unauthorized response
+	 * @param method HTTP method to authorize
+	 * @param uri URI of the request
+	 * @param username Username to authenticate with
+	 * @param password password to authentication with
+	 * @param nonce Nonce received in the Unauthorized response
+	 */
 	public DigestAuthorizationToken(String realm, String method, String uri, String username, String password,
 			String nonce) {
 		this(realm, method, uri, null, username, password, nonce, null, null, "MD5");
 	}
 
+	/**
+	 * Helper constructor to compute a new Digest authorization header without a cnonce and opaque value
+	 * @param realm Realm received in the Unauthorized response
+	 * @param method HTTP method to authorize
+	 * @param uri URI of the request
+	 * @param username Username to authenticate with
+	 * @param password password to authentication with
+	 * @param nonce Nonce received in the Unauthorized response
+	 * @param algorithm Algorithm to use
+	 */
 	public DigestAuthorizationToken(String realm, String method, String uri, String username, String password,
 			String nonce, String algorithm) {
 		this(realm, method, uri, null, username, password, nonce, null, null, algorithm);
 	}
 
+	/**
+	 * Helper constructor to compute a new Digest authorization header, using MD5 digest and without an opaque value
+	 * @param realm Realm received in the Unauthorized response
+	 * @param method HTTP method to authorize
+	 * @param uri URI of the request
+	 * @param entityBody HTTP body content to authorize
+	 * @param username Username to authenticate with
+	 * @param password password to authentication with
+	 * @param nonce Nonce received in the Unauthorized response
+	 * @param cnonce cnonce received in the unauthorized response
+	 */
 	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password,
 			String nonce, String cnonce) {
 		this(realm, method, uri, entityBody, username, password, nonce, cnonce, null, "MD5");
 	}
 
+	/**
+	 * Helper constructor to compute a new Digest authorization header, without an opaque value
+	 * @param realm Realm received in the Unauthorized response
+	 * @param method HTTP method to authorize
+	 * @param uri URI of the request
+	 * @param entityBody HTTP body content to authorize
+	 * @param username Username to authenticate with
+	 * @param password password to authentication with
+	 * @param nonce Nonce received in the Unauthorized response
+	 * @param cnonce cnonce received in the unauthorized response
+	 * @param algorithm Algorithm to use
+	 */
 	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password,
 			String nonce, String cnonce, String algorithm) {
 		this(realm, method, uri, entityBody, username, password, nonce, cnonce, null, algorithm);
@@ -71,7 +114,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 	 * @param password password to authentication with
 	 * @param nonce Nonce received in the Unauthorized response
 	 * @param cnonce cnonce received in the unauthorized response
-	 * @param opaque whether the authorized content is opaque (as per the RFC)
+	 * @param opaque the opaque value returned by the client(as per the RFC)
 	 * @param algorithm Algorithm to use
 	 */
 	public DigestAuthorizationToken(String realm, String method, String uri, Buffer entityBody, String username, String password,
@@ -100,6 +143,10 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 		parameters.put("response", computeResponse(password, method, entityBody));
 	}
 
+	/**
+	 * Generate the specific "Authorization" header for this token.
+	 * @return the content of an Authorization header to complete Digest authentication
+	 */
 	public String generateAuthrizationHeader() {
 		return "Digest " + parameters.entrySet().stream()
 				.map(e -> e.getKey() + "=\"" + e.getValue() + "\"")

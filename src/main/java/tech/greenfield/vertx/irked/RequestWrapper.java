@@ -13,6 +13,9 @@ class RequestWrapper implements Function<RoutingContext, Request>, Handler<Routi
 
 	private Type type;
 	private Controller ctr;
+	/**
+	 * Request context reprogramming implementation
+	 */
 	protected Function<RoutingContext, Request> wrapper;
 	private Handler<? super Request> handler;
 	

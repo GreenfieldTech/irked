@@ -4,6 +4,9 @@ import io.vertx.core.json.JsonObject;
 import tech.greenfield.vertx.irked.Controller;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 
+/**
+ * Example controller for Irked example application
+ */
 public class ExampleAPIv2 extends Controller {
 
 	@Endpoint("/")

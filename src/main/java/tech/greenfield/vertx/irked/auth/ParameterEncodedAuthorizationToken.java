@@ -24,6 +24,11 @@ public class ParameterEncodedAuthorizationToken extends AuthorizationToken {
 		return this;
 	}
 	
+	/**
+	 * Utility method to parse a list of parameters
+	 * @param text parameters text
+	 * @return a list of parsed parameters
+	 */
 	public static Iterable<Map.Entry<String,String>> parseParameters(String text) {
 		StringTokenizer t = new StringTokenizer(text, " \t\r\n,");
 		return new Iterable<Map.Entry<String,String>>() {
@@ -53,10 +58,20 @@ public class ParameterEncodedAuthorizationToken extends AuthorizationToken {
 		};
 	}
 
+	/**
+	 * Retrieve a specific parameter's value
+	 * @param param name of the parameter to retrieve
+	 * @return parameter value, if available, {@code null} otherwise.
+	 */
 	public String getParameter(String param) {
 		return parameters.get(param);
 	}
 	
+	/**
+	 * Utility method to encode binary data in hexadecimal text encoding
+	 * @param data binary data to encode
+	 * @return a hexadecimal string representation of the binary data
+	 */
 	public static String toHex(byte[] data) {
 		StringBuilder sb = new StringBuilder(data.length * 2);
 		for(byte b: data)

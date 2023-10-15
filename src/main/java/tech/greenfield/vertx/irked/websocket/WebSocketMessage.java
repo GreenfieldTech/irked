@@ -7,8 +7,12 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.ClusterSerializable;
 import tech.greenfield.vertx.irked.Request;
 
+/**
+ * Irked WebSocket message handling wrapper which adds some useful routines for API writers.
+ */
 public class WebSocketMessage implements Buffer {
 
 	private Buffer buffer;
@@ -63,6 +67,7 @@ public class WebSocketMessage implements Buffer {
 	/**
 	 * Send back a text reply to the other end
 	 * @param text Text message to send
+	 * @return itself for fluent calls
 	 */
 	public WebSocketMessage reply(String text) {
 		socket.writeTextMessage(text);
@@ -72,6 +77,7 @@ public class WebSocketMessage implements Buffer {
 	/**
 	 * Send back a binary reply to the other end
 	 * @param buffer Binary data to send
+	 * @return itself for fluent calls
 	 */
 	public WebSocketMessage reply(Buffer buffer) {
 		socket.writeBinaryMessage(buffer);
@@ -88,7 +94,7 @@ public class WebSocketMessage implements Buffer {
 
 	/**
 	 * @param buffer Buffer to marshal into
-	 * @see io.vertx.core.shareddata.impl.ClusterSerializable#writeToBuffer(io.vertx.core.buffer.Buffer)
+	 * @see ClusterSerializable#writeToBuffer(Buffer)
 	 */
 	@Override
 	public void writeToBuffer(Buffer buffer) {
@@ -99,7 +105,7 @@ public class WebSocketMessage implements Buffer {
 	 * @param pos Position in the buffer to start unmarshaling from
 	 * @param buffer Buffer to unmarshal from
 	 * @return amount of bytes read from the buffer
-	 * @see io.vertx.core.shareddata.impl.ClusterSerializable#readFromBuffer(int, io.vertx.core.buffer.Buffer)
+	 * @see ClusterSerializable#readFromBuffer(int, Buffer)
 	 */
 	@Override
 	public int readFromBuffer(int pos, Buffer buffer) {
@@ -474,8 +480,8 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code Buffer} to the end of this Buffer. The buffer will expand as necessary to accommodate
-	 * any bytes written.<p>
+	 * Appends the specified {@code Buffer} to the end of this Buffer
+	 * The buffer will expand as necessary to accommodate any bytes written.
 	 * @param buff buffer to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendBuffer(io.vertx.core.buffer.Buffer)
@@ -487,8 +493,8 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code Buffer} starting at the {@code offset} using {@code len} to the end of this Buffer. The buffer will expand as necessary to accommodate
-	 * any bytes written.<p>
+	 * Appends the specified {@code Buffer} starting at the {@code offset} using {@code len} to the end of this Buffer
+	 * The buffer will expand as necessary to accommodate any bytes written.
 	 * @param buff buffer to append
 	 * @param offset offset where to start appending 
 	 * @param len length of the buffer to append
@@ -502,7 +508,8 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code byte[]} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified {@code byte[]} to the end of the Buffer
+	 * The buffer will expand as necessary to accommodate any bytes written.
 	 * @param bytes bytes to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendBytes(byte[])
@@ -514,8 +521,8 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified number of bytes from {@code byte[]} to the end of the Buffer, starting at the given offset.
-	 * The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified number of bytes from {@code byte[]} to the end of the Buffer, starting at the given offset
+	 * The buffer will expand as necessary to accommodate any bytes written.
 	 * @param bytes bytes to append
 	 * @param offset offset where to start appending 
 	 * @param len length of the buffer to append
@@ -529,7 +536,8 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code byte} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified {@code byte} to the end of the Buffer
+	 * The buffer will expand as necessary to accommodate any bytes written.
 	 * @param b byte to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendByte(byte)
@@ -541,7 +549,8 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code byte} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified {@code byte} to the end of the Buffer
+	 * The buffer will expand as necessary to accommodate any bytes written.
 	 * @param b byte to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendUnsignedByte(short)
@@ -553,7 +562,8 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code int} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified {@code int} to the end of the Buffer
+	 * The buffer will expand as necessary to accommodate any bytes written.
 	 * @param i integer to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendInt(int)
@@ -999,7 +1009,7 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Sets the bytes at position {@code pos} in the Buffer to the value of {@code str} encoded in encoding {@code enc}.<p>
+	 * Sets the bytes at position {@code pos} in the Buffer to the value of {@code str} encoded in encoding {@code enc}
 	 * The buffer will expand as necessary to accommodate any value written.
 	 * @param pos position to start modifying the buffer
 	 * @param str value to write in the buffer

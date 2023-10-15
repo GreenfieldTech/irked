@@ -23,6 +23,12 @@ public class StatusClassGenerator {
 	private String packageName;
 	private String destDir;
 	
+	/**
+	 * Generate HTTP status code implementations
+	 * @param destDir destination source directory 
+	 * @param destinationPackage destination package name
+	 * @throws IOException thrown in case of IO errors while creating the files
+	 */
 	public void generate(String destDir, String destinationPackage) throws IOException {
 		this.packageName = destinationPackage;
 		this.destDir = destDir;
@@ -68,14 +74,21 @@ public class StatusClassGenerator {
 		}) {
 			writer.format("import %s;\n", imp);
 		}
+		writer.format("/**\n * Generated list of HTTP status codes to help find the Irked implementation for each HTTP status code.\n */\n");
 		writer.format("public class %s {\n\n", className);
+		writer.format("/**\n * Map of HTTP status codes to Irked {@code HttpError} implementations\n */\n");
 		writer.format("public static Map<Integer, Class<? extends HttpError>> HTTP_STATUS_CODES = new TreeMap<Integer, Class<? extends HttpError>>();\n");
 		writer.format("static {\n");
 		statusClasses.entrySet().stream().sorted((a,b) -> Integer.compare(a.getKey(), b.getKey())).forEach(e -> {
 			writer.format("HTTP_STATUS_CODES.put(%d,%s.class);\n", e.getKey(), e.getValue());
 		});
-		writer.format("};\n"+
-				"public static HttpError create(int statusCode) throws InstantiationException {\n"+
+		writer.format("};\n");
+		writer.format("/**\n * Helper to instantiate an {@code HttpError} implementation by HTTP status code\n" +
+				" * @param statusCode the HTTP status code to lookup\n" +
+				" * @return an {@code HttpError} implementation\n" +
+				" * @throws InstantiationException in case there is no matching implementation for the specified code.\n" +
+				" */\n");
+		writer.format("public static HttpError create(int statusCode) throws InstantiationException {\n"+
 				"try {\n"+
 				"return HTTP_STATUS_CODES.get(statusCode).getConstructor().newInstance();\n"+
 				"} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException\n"+
@@ -142,6 +155,11 @@ public class StatusClassGenerator {
 		};
 	}
 
+	/**
+	 * Program entry point when running the HTTP status class generator manually from the command line
+	 * @param args command line arguments: destination-directory destination-package
+	 * @throws IOException in case of file creation errors
+	 */
 	public static void main(String...args) throws IOException {
 		if (args.length != 2)
 			return;

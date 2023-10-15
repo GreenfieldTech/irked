@@ -11,11 +11,55 @@ import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
+/**
+ * Irked Controller Base Class
+ * 
+ * This class is at the heart of the Irked request routing logic. To expose your APIs through
+ * Irked, extends this class and define your routes as fields and methods of the {@code Controller}
+ * child class. You may also want to take advantage of {@code RoutingContext} ({@code Request})
+ * reprogramming logic by overriding the {@link #getRequestContext(Request)} method.
+ * Then you can either mount your controller directly into an Irked router using {@link Router#with(Controller, String)},
+ * or - better yet - create a hierarchy of Controllers by creating a top-level {@code Controller}
+ * implementation that mounts sub-cotrollers using {@code Controller} fields, and just mount
+ * the top level controller using {@link Router#with(Controller)}.
+ */
 public class Controller {
 
-	protected interface RawVertxHandler extends Handler<RoutingContext> {}
+	/**
+	 * Helper interface to make it easier to define simple route
+	 * handlers that use the Irked {@link Request} API.
+	 * 
+	 * Example:
+	 * <pre>{@code
+	 * @Get("/example")
+	 * WebHandler exampleHandler = r -> r.send("Hello World");
+	 * }</pre>
+	 */
 	protected interface WebHandler extends Handler<Request> {}
+
+	/**
+	 * Helper interface to make it easier to define simple WebSocket
+	 * message handlers that use the Irked {@link WebSocketMessage} API.
+	 * 
+	 * Example:
+	 * <pre>{@code
+	 * @WebSocket("/socket")
+	 * MessageHandler handler = m -> m.reply("Hello World");
+	 * }</pre>
+	 */
 	protected interface MessageHandler extends Handler<WebSocketMessage> {}
+
+	/**
+	 * Helper interface to make it easier to define simple route
+	 * handlers that use the Vert.x {@link RoutingContext} API.
+	 * 
+	 * Example:
+	 * <pre>{@code
+	 * @Get("/example")
+	 * RawVertxHandler exampleHandler = r -> r.response().end("Hello World");
+	 * }</pre>
+	 */
+	protected interface RawVertxHandler extends Handler<RoutingContext> {}
 
 	private List<RouteConfiguration> routes;
 	
@@ -83,7 +127,7 @@ public class Controller {
 		}
 	}
 	
-	public void remove() {
+	void remove() {
 		routes.forEach(RouteConfiguration::remove);
 	}
 	
