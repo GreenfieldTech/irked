@@ -6,6 +6,9 @@ package tech.greenfield.vertx.irked.auth;
  */
 public class NullAuthorizationToken extends AuthorizationToken {
 
+	/**
+	 * Create a new empty token for parsing incoming requests
+	 */
 	public NullAuthorizationToken() {
 		update(null, null);
 	}

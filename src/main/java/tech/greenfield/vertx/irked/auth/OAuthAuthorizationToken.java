@@ -11,13 +11,13 @@ package tech.greenfield.vertx.irked.auth;
 public class OAuthAuthorizationToken extends ParameterEncodedAuthorizationToken {
 
 	/**
-	 * C'tor for unmarshaling for a headerless request
+	 * Create a new empty token for parsing incoming requests
 	 */
 	public OAuthAuthorizationToken() {}
 
 	/**
-	 * C'tor for unmarshaling from an authorization header
-	 * @param token The OAuth 1.0 token for this authorization
+	 * Create a new token with the provided content
+	 * @param token the authorization token text
 	 */
 	public OAuthAuthorizationToken(String token) {
 		update("OAuth", token);

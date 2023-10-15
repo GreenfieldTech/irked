@@ -10,8 +10,15 @@ package tech.greenfield.vertx.irked.auth;
  */
 public class BearerAuthorizationToken extends AuthorizationToken {
 	
+	/**
+	 * Create a new empty token for parsing incoming requests
+	 */
 	public BearerAuthorizationToken() {}
 	
+	/**
+	 * Create a new token with the provided content
+	 * @param token the authorization token text
+	 */
 	public BearerAuthorizationToken(String token) {
 		update("Bearer", token);
 	}

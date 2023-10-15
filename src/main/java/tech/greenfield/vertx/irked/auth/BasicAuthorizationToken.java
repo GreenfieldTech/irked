@@ -15,8 +15,15 @@ public class BasicAuthorizationToken extends AuthorizationToken {
 	private String username;
 	private String password;
 	
+	/**
+	 * Create a new empty token for parsing incoming requests
+	 */
 	public BasicAuthorizationToken() {}
 
+	/**
+	 * Create a new token with the provided content
+	 * @param token the authorization token text
+	 */
 	public BasicAuthorizationToken(String token) {
 		update("Basic", token);
 	}
@@ -44,10 +51,18 @@ public class BasicAuthorizationToken extends AuthorizationToken {
 		return this;
 	}
 	
+	/**
+	 * Retrieve the parsed user name from the authorization token
+	 * @return authorizing user name
+	 */
 	public String getUsername() {
 		return username;
 	}
 	
+	/**
+	 * Retrieve the parsed password from the authorization token
+	 * @return authorizing user's password
+	 */
 	public String getPassword() {
 		return password;
 	}

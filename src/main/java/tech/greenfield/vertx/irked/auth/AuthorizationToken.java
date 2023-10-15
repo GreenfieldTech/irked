@@ -13,6 +13,18 @@ public class AuthorizationToken {
 	private String token;
 	private String type;
 	
+	/**
+	 * The list of supported authorization methods, including:
+	 * - No authorization
+	 * - Non standard token (API key)
+	 * - HTTP Basic
+	 * - HTTP Digest
+	 * - OAuth (RFC 5849)
+	 * - Bearer (RFC 6750)
+	 * - HOBA (RFC 7486)
+	 * - SPNEGO Kerberos Negotiate (RFC 4559)
+	 * - Mutual (RFC 8120)
+	 */
 	public enum TokenTypes {
 		// not actually a type - just a base implementation:
 		// PARAMETER(ParameterEncodedAuthorizationToken.class)
@@ -33,6 +45,12 @@ public class AuthorizationToken {
 			this.clz = clz;
 		}
 
+		/**
+		 * Iterate over the supported authorization token schemes and create
+		 * empty instances that can be used to parse incoming authorization
+		 * requests.
+		 * @return an iterable over available authorization token types
+		 */
 		public static Iterable<AuthorizationToken> instances() {
 			return new Iterable<>() {
 				private TokenTypes[] types = values();

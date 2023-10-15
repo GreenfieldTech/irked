@@ -1,7 +1,7 @@
 package tech.greenfield.vertx.irked.auth;
 
 /**
- * Implementation of the standard RFC 7486 Mututal authentication scheme token
+ * Implementation of the standard RFC 7486 Mutual authentication scheme token
  * 
  * The token parameters are available from the {@link ParameterEncodedAuthorizationToken#getParameter(String)}
  * method, though currently no validation is performed to make sure that all required fields are present.
@@ -10,8 +10,15 @@ package tech.greenfield.vertx.irked.auth;
  */
 public class HOBAAuthorizationToken extends ParameterEncodedAuthorizationToken {
 
+	/**
+	 * Create a new empty token for parsing incoming requests
+	 */
 	public HOBAAuthorizationToken() {}
 	
+	/**
+	 * Create a new token with the provided content
+	 * @param token the authorization token text
+	 */
 	public HOBAAuthorizationToken(String token) {
 		update("HOBA", token);
 	}

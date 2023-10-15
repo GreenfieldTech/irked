@@ -28,8 +28,15 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 
 	private MessageDigest digestAlgorithm;
 
+	/**
+	 * Create a new empty token for parsing incoming requests
+	 */
 	public DigestAuthorizationToken() {}
 
+	/**
+	 * Create a new token with the provided content
+	 * @param token the authorization token text
+	 */
 	public DigestAuthorizationToken(String token) {
 		update("Digest", token);
 	}

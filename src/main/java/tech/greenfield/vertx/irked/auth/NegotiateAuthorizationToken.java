@@ -10,8 +10,15 @@ package tech.greenfield.vertx.irked.auth;
  */
 public class NegotiateAuthorizationToken extends AuthorizationToken {
 
+	/**
+	 * Create a new empty token for parsing incoming requests
+	 */
 	public NegotiateAuthorizationToken() {}
 	
+	/**
+	 * Create a new token with the provided content
+	 * @param token the authorization token text
+	 */
 	public NegotiateAuthorizationToken(String token) {
 		update("Negotiate", token);
 	}
