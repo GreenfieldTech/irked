@@ -6,11 +6,11 @@ import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.websocket.WebSocketConnection;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
-public class WebSocketUpgradeRequestWrapper extends RequestWrapper {
+class WebSocketUpgradeRequestWrapper extends RequestWrapper {
 
 	private Handler<? super WebSocketMessage> msghandler;
 
-	public WebSocketUpgradeRequestWrapper(Handler<? super WebSocketMessage> handler, RequestWrapper parent) {
+	WebSocketUpgradeRequestWrapper(Handler<? super WebSocketMessage> handler, RequestWrapper parent) {
 		super(parent);
 		this.msghandler = handler;
 	}
