@@ -31,12 +31,12 @@ import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
  * An implementation of {@link RouteConfiguration} used to configure Vert.x-web for Controller methods
  * @author odeda
  */
-public class RouteConfigurationMethod extends RouteConfiguration {
+class RouteConfigurationMethod extends RouteConfiguration {
 	private final Method method;
 	private final Parameter[] params;
 	private final Map<String, Function<Request, Object>> paramResolvers = new HashMap<>();
 
-	public RouteConfigurationMethod(Controller impl, Router router, Method m) throws InvalidRouteConfiguration {
+	RouteConfigurationMethod(Controller impl, Router router, Method m) throws InvalidRouteConfiguration {
 		super(impl, router, m.getAnnotations());
 		method = m;
 		params = m.getParameters();

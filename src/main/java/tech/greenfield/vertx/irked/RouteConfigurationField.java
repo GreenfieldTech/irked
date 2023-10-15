@@ -12,11 +12,11 @@ import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
  * An implementation of {@link RouteConfiguration} used to configure Vert.x-web for Controller fields
  * @author odeda
  */
-public class RouteConfigurationField extends RouteConfiguration {
+class RouteConfigurationField extends RouteConfiguration {
 
 	private Field field;
 
-	public RouteConfigurationField(Controller impl, Router router, Field f) {
+	RouteConfigurationField(Controller impl, Router router, Field f) {
 		super(impl, router, f.getAnnotations());
 		field = f;
 	}

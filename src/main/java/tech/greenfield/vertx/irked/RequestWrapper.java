@@ -7,7 +7,7 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.OrderListener;
 
-public class RequestWrapper implements Function<RoutingContext, Request>, Handler<RoutingContext>, OrderListener {
+class RequestWrapper implements Function<RoutingContext, Request>, Handler<RoutingContext>, OrderListener {
 	
 	private enum Type { Root, Controller, Handler, Custom }
 
@@ -16,18 +16,18 @@ public class RequestWrapper implements Function<RoutingContext, Request>, Handle
 	protected Function<RoutingContext, Request> wrapper;
 	private Handler<? super Request> handler;
 	
-	public RequestWrapper(Controller ctr) {
+	RequestWrapper(Controller ctr) {
 		this(ctr, Request::new);
 		type = Type.Root;
 	}
 
-	public RequestWrapper(Controller ctr, Function<RoutingContext, Request> requestWrapper) {
+	RequestWrapper(Controller ctr, Function<RoutingContext, Request> requestWrapper) {
 		this.ctr = Objects.requireNonNull(ctr, "Controller instance is not set!");
 		this.wrapper = requestWrapper;
 		type = Type.Controller;
 	}
 	
-	public RequestWrapper(Handler<? super Request> handler, Function<RoutingContext, Request> requestWrapper) {
+	RequestWrapper(Handler<? super Request> handler, Function<RoutingContext, Request> requestWrapper) {
 		this.handler = Objects.requireNonNull(handler, "Handler instance is not set!");
 		this.wrapper = requestWrapper;
 		type = Type.Handler;

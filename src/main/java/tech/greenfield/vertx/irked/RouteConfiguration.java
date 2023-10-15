@@ -27,16 +27,34 @@ import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
-public abstract class RouteConfiguration {
+abstract class RouteConfiguration {
 	static final Package annotationPackage = Endpoint.class.getPackage();
 	static final Class<Annotation>[] routeAnnotations = findRouteAnnotations();
 	
+	/**
+	 * List of routing configuration annotations
+	 */
 	protected Annotation[] annotations;
+	/**
+	 * Owner Irked router
+	 */
 	protected Router router;
+	/**
+	 * Containing Irked controller
+	 */
 	protected Controller impl;
 
+	/**
+	 * Logger implementation to be used by child classes
+	 */
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
+	/**
+	 * Helper constructor for child classes
+	 * @param impl Containing Irked controller
+	 * @param router Owner Irked Router
+	 * @param annotations list of routing configuration annotations
+	 */
 	protected RouteConfiguration(Controller impl, Router router, Annotation[] annotations) {
 		this.annotations = annotations;
 		this.router = router;
@@ -56,7 +74,7 @@ public abstract class RouteConfiguration {
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected String[] uriForAnnotations(Class<?> ...anot) {
+	String[] uriForAnnotations(Class<?> ...anot) {
 		if (anot.length == 0)
 			anot = routeAnnotations;
 		ArrayList<String> uris = new ArrayList<>();
@@ -87,7 +105,7 @@ public abstract class RouteConfiguration {
 		}
 	}
 
-	abstract protected <T extends Annotation> T[] getAnnotation(Class<T> anot);
+	abstract <T extends Annotation> T[] getAnnotation(Class<T> anot);
 
 	abstract boolean isController();
 
@@ -98,7 +116,7 @@ public abstract class RouteConfiguration {
 		return impl.getClass() + "::" + getName();
 	}
 	
-	abstract protected String getName();
+	abstract String getName();
 
 	abstract Handler<? super Request> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
 	abstract Handler<? super WebSocketMessage> getMessageHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration;
@@ -157,7 +175,7 @@ public abstract class RouteConfiguration {
 
 	private List<Route> routes = new ArrayList<>();
 
-	public <T extends Annotation> Stream<String> pathsForAnnotation(String prefix, Class<T> anot) {
+	<T extends Annotation> Stream<String> pathsForAnnotation(String prefix, Class<T> anot) {
 		return Arrays.stream(uriForAnnotation(anot))
 				.filter(s -> Objects.nonNull(s))
 				.map(s -> prefix + s)
@@ -165,7 +183,7 @@ public abstract class RouteConfiguration {
 		;
 	}
 
-	public <T extends Annotation> List<Route> buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method,
+	<T extends Annotation> List<Route> buildRoutesFor(String prefix, Class<T> anot, RoutingMethod method,
 			RequestWrapper requestWrapper) throws InvalidRouteConfiguration {
 		List<Route> out = new LinkedList<>();
 		for (Route r : pathsForAnnotation(prefix, anot)
