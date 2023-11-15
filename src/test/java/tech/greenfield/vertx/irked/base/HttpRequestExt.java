@@ -512,4 +512,24 @@ public class HttpRequestExt<T> implements HttpRequest<T> {
 		return httpRequest.timeout();
 	}
 
+	@Override
+	public HttpRequest<T> idleTimeout(long timeout) {
+		return httpRequest.idleTimeout(timeout);
+	}
+
+	@Override
+	public long idleTimeout() {
+		return httpRequest.idleTimeout();
+	}
+
+	@Override
+	public HttpRequest<T> connectTimeout(long timeout) {
+		return httpRequest.connectTimeout(timeout);
+	}
+
+	@Override
+	public long connectTimeout() {
+		return httpRequest.connectTimeout();
+	}
+
 }
