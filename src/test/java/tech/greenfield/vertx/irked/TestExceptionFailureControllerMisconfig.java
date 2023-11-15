@@ -45,8 +45,9 @@ public class TestExceptionFailureControllerMisconfig extends TestBase {
 		.otherwise(t -> {
 			assertThat(t, is(instanceOf(InvalidRouteConfiguration.class)));
 			// Should be:
-			 // Method brokenHandler contains parameters that cannot be resolved: Parameter 'DecodeException error' on failure handler does not match any @OnFail(exception) registration!"
-			assertThat(t.getMessage(), containsString("Method brokenHandler contains parameters that cannot be resolved"));
+			// Method tech.greenfield.vertx.irked.TestExceptionFailureControllerMisconfig$TestController.brokenHandler contains parameters that cannot be resolved: Parameter 'DecodeException arg1' on failure handler does not match any @OnFail(exception) registration!
+			assertThat(t.getMessage(), containsString(TestController.class.getName()));
+			assertThat(t.getMessage(), containsString("brokenHandler contains parameters that cannot be resolved"));
 			assertThat(t.getMessage(), matchesPattern(".*Parameter 'DecodeException \\w+' on failure handler does not match.*"));
 			return null;
 		})
