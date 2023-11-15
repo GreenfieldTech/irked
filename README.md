@@ -326,6 +326,14 @@ Please keep in mind the following limitations:
    `tech.greenfield.vertx.irked.annotations.Name`. The first strategy only works if the Java class is compiled with debugging
    symbols, so it should not be relied upon.
 
+When building without parameter name debug symbols, the above example would need to have the method declared
+like so:
+
+```java
+@Get("/catalog/:producer/:id")
+public void getCatalogItem(Request r, @Name("producer") String producer, @Name("id") Integer id) {
+```
+
 ### Handle Failures
 
 It is often useful to move failure handling away from the request handler - to keep the code clean
