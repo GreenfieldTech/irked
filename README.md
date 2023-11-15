@@ -329,6 +329,14 @@ Please keep in mind the following limitations:
    command line, or - if using Maven's Java compiler plugin, by setting its configuration to
    `<configuration><parameters>true</parameters></configuration>`.
 
+When building without parameter name debug symbols, the above example would need to have the method declared
+like so:
+
+```java
+@Get("/catalog/:producer/:id")
+public void getCatalogItem(Request r, @Name("producer") String producer, @Name("id") Integer id) {
+```
+
 ### Handle Failures
 
 It is often useful to move failure handling away from the request handler - to keep the code clean

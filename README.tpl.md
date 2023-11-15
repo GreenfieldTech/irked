@@ -295,12 +295,12 @@ of Java reflection. For explicit ordering, useful for both methods and fields, s
 
 When using methods for routing handling, Irked offers automatic conversion of path parameters into method parameters:
 by creating handler methods that accept - in addition to the request context - a set of trivially text convertible
-paramaters, Irked will locate appropriately labeled path parameters, converted them to the desired Java types and provide
+parameters, Irked will locate appropriately labeled path parameters, converted them to the desired Java types and provide
 the values in the method invocation:
 
 ```java
 @Get("/catalog/:producer/:id")
-public void getCatalogItem(Request r, @Name("producer") String producer, @Name("id") Integer id) {
+public void getCatalogItem(Request r, String producer, Integer id) {
     dao.findCatalog(producer).compose(cat -> cat.findItem(id))
             .compose(r::send)
             .recover(err -> r.sendError(new InternalServerError(err)));
@@ -314,7 +314,8 @@ Please keep in mind the following limitations:
    parameter value to `null`. In any case, the raw value can be retrieved using the regular path parameter lookup methods.
  - Primitive parameter types are not supported - i.e. `Integer` is supported but `int` is not, otherwise Irked cannot
    report parse failures. If an unsupported parameter type is found during configuration, it is an error and Irked will
-   throw an `InvalidRouteConfiguration` exception.
+   throw an `InvalidRouteConfiguration` exception. Regardless, Irked will not cause exceptions to be thrown during
+   actual request processing.
  - Handlers can be annotated with multiple annotations with different paths and path parameters (it is not recommended,
    but is supported), and as such the parameters can match to any path parameter on any path annotation set on the method.
    Irked will pass `null` for any parameter that can't be matched on the current active route. If during configuration
@@ -323,8 +324,18 @@ Please keep in mind the following limitations:
  - Irked has two main strategies for matching parameters - either by matching the parameter name as reported by Java
    reflection, or by matching a parameter annotation called `Name` or `Named`. Irked is not bound to a specific annotation
    implementation, it will use whatever annotation type you are already using, or you can use Irked own
-   `tech.greenfield.vertx.irked.annotations.Name`. The first strategy only works if the Java class is compiled with debugging
-   symbols, so it should not be relied upon.
+   `tech.greenfield.vertx.irked.annotations.Name`. The parameter name strategy only works if the Java class was compiled
+   with debug symbols including parameter names - you can do that by adding the `-parameters` option to the `javac`
+   command line, or - if using Maven's Java compiler plugin, by setting its configuration to
+   `<configuration><parameters>true</parameters></configuration>`.
+
+When building without parameter name debug symbols, the above example would need to have the method declared
+like so:
+
+```java
+@Get("/catalog/:producer/:id")
+public void getCatalogItem(Request r, @Name("producer") String producer, @Name("id") Integer id) {
+```
 
 ### Handle Failures
 
