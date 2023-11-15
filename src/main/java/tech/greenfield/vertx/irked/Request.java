@@ -154,12 +154,18 @@ public class Request extends RoutingContextDecorator {
 	}
 	
 	/**
-	 * Helper to easily configure standard failure handlers
+	 * Helper to easily configure standard failure handlers.
+	 * This handler will convert failed requests (contexts with a failure set) to HTTP error responses, and will issue
+	 * {@link RoutingContext#next()} for all other context, including context for which the response has already been
+	 * sent.
 	 * @return a WebHandler that sends Irked status exceptions as HTTP responses
 	 */
 	public static WebHandler failureHandler() {
 		return r -> {
-			r.sendError(HttpError.toHttpError(r));
+			if (r.response().ended() || !r.failed())
+				r.next();
+			else
+				r.sendError(HttpError.toHttpError(r));
 		};
 	}
 	
