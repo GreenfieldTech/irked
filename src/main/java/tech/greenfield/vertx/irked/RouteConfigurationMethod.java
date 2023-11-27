@@ -105,7 +105,8 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			}
 		}
 		if (name == null) // But I still haven't found what I'm looking for
-			return String.format("Cannot associate parameter '%1$s %2$s' with a URI parameter", p.getType(), p.getName());
+			return String.format("Cannot associate parameter '%1$s %2$s' with any of the URI parameter(s) %3$s",
+					p.getType(), p.getName(), routeParams.toString());
 		Function<Request,Object> resolver = null;
 		
 		// create resolvers - note that all these may trivially fail to null (possibly by throwing NPEs) when there

@@ -78,9 +78,9 @@ public class Irked {
 	 * 
 	 * To use - define a field in your main (root) controller like so:
 	 * 
-	 * <code><pre>
-	 * &commat;Endpoint private LoggerHandler accessLog = Irked.logger();
-	 * </pre></code>
+	 * <pre><code>
+	 * &#x0040;Endpoint private LoggerHandler accessLog = Irked.logger();
+	 * </code></pre>
 	 * 
 	 * This method uses the hard coded log name "{@code access}" and the default log format.
 	 * 
@@ -99,9 +99,9 @@ public class Irked {
 	 * 
 	 * To use - define a field in your main (root) controller like so:
 	 * 
-	 * <code><pre>
-	 * &commat;Endpoint private LoggerHandler accessLog = Irked.logger(LoggerFormat.SHORT);
-	 * </pre></code>
+	 * <pre><code>
+	 * &#x0040;Endpoint private LoggerHandler accessLog = Irked.logger(LoggerFormat.SHORT);
+	 * </code></pre>
 	 * 
 	 * This method uses the hard coded log name "{@code access}".
 	 * 
@@ -121,9 +121,9 @@ public class Irked {
 	 * 
 	 * To use - define a field in your main (root) controller like so:
 	 * 
-	 * <code><pre>
-	 * &commat;Endpoint private LoggerHandler accessLog = Irked.logger("access_log", LoggerFormat.SHORT);
-	 * </pre></code>
+	 * <pre><code>
+	 * &#x0040;Endpoint private LoggerHandler accessLog = Irked.logger("access_log", LoggerFormat.SHORT);
+	 * </code></pre>
 	 * 
 	 * @param loggerName text to use for the logger name
 	 * @param format LoggerFormat to use for formatting the log
