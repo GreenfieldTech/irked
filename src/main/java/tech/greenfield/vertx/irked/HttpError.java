@@ -210,13 +210,10 @@ public class HttpError extends Exception {
 	 * @return the first non RuntimeException found
 	 */
 	public static Throwable unwrap(Throwable t) {
-		Throwable orig = t;
-		while (!(t instanceof HttpError)) {
-			t = t.getCause();
-			if (t == null)
-				return orig; // can't find HTTP Error
-		}
-		return t; // must be an HTTP Error
+		for (var ex = t; ex != null; ex = ex.getCause())
+			if (ex instanceof HttpError)
+				return ex;
+		return t;
 	}
 	
 	/**
