@@ -15,7 +15,7 @@ ported to all releases.
 
 ## Installation
 
-Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.5.0.1).
+Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.5.0.2).
 
 If using Maven, add Irked as a dependency in your `pom.xml` file:
 
@@ -23,12 +23,12 @@ If using Maven, add Irked as a dependency in your `pom.xml` file:
 <dependency>
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.5.0.1</version>
+	<version>4.5.0.2</version>
 </dependency>
 ```
 
 For other build tools, see the Maven Central website for the syntax, but it generally
-boils down to just using `tech.greenfield:irked-vertx:4.5.0.1` as the dependency string.
+boils down to just using `tech.greenfield:irked-vertx:4.5.0.2` as the dependency string.
 
 ## Quick Start
 
