@@ -27,6 +27,10 @@ import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
+/**
+ * Internal implementation that handles parsing route annotations and setting up the router.
+ * This is an abstract class that implements the common logic for both routing methods and routing fields.
+ */
 public abstract class RouteConfiguration {
 	static final Package annotationPackage = Endpoint.class.getPackage();
 	static final Class<Annotation>[] routeAnnotations = findRouteAnnotations();
