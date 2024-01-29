@@ -21,9 +21,9 @@ If using Maven, add Irked as a dependency in your `pom.xml` file:
 
 ```xml
 <dependency>
-	<groupId>tech.greenfield</groupId>
-	<artifactId>irked-vertx</artifactId>
-	<version>{{IRKED_VERSION}}</version>
+    <groupId>tech.greenfield</groupId>
+    <artifactId>irked-vertx</artifactId>
+    <version>{{IRKED_VERSION}}</version>
 </dependency>
 ```
 
@@ -61,11 +61,11 @@ irked `Controller` class, define fields or methods to handle HTTP requests and a
 the route matching logic that you want Irked to configure for each handler.
 
 - Most often you'd want to just match on HTTP method and URI, for which Irked offers 
-annotations of the form `@Method("/path")`, such as `@Get("/foo")`.
+  annotations of the form `@Method("/path")`, such as `@Get("/foo")`.
 - You can also use the annotation `@Endpoint("/path")` to match on all methods
-(this very is useful to mount sub-controllers, as detailed below).
+  (this very is useful to mount sub-controllers, as detailed below).
 - The path argument for the both method-specific and `@Endpoint` annotations is optional 
-and omitting it will match requests for all URIs.
+  and omitting it will match requests for all URIs.
 
 #### An Example Controller
 
@@ -309,25 +309,25 @@ public void getCatalogItem(Request r, String producer, Integer id) {
 
 Please keep in mind the following limitations:
 
- - Irked knows how to convert the following parameter types: `Boolean`, `String`, `Integer`, `Long`, `Float`, `Double`,
-   `BigDecimal` and `Instant`. If the value cannot be parsed correctly to the required type, Irked will set that
-   parameter value to `null`. In any case, the raw value can be retrieved using the regular path parameter lookup methods.
- - Primitive parameter types are not supported - i.e. `Integer` is supported but `int` is not, otherwise Irked cannot
-   report parse failures. If an unsupported parameter type is found during configuration, it is an error and Irked will
-   throw an `InvalidRouteConfiguration` exception. Regardless, Irked will not cause exceptions to be thrown during
-   actual request processing.
- - Handlers can be annotated with multiple annotations with different paths and path parameters (it is not recommended,
-   but is supported), and as such the parameters can match to any path parameter on any path annotation set on the method.
-   Irked will pass `null` for any parameter that can't be matched on the current active route. If during configuration
-   Irked cannot locate the requested parameter in any of the configured path annotations, it is an error and Irked will
-   throw an `InvalidRouteConfiguration` exception.
- - Irked has two main strategies for matching parameters - either by matching the parameter name as reported by Java
-   reflection, or by matching a parameter annotation called `Name` or `Named`. Irked is not bound to a specific annotation
-   implementation, it will use whatever annotation type you are already using, or you can use Irked own
-   `tech.greenfield.vertx.irked.annotations.Name`. The parameter name strategy only works if the Java class was compiled
-   with debug symbols including parameter names - you can do that by adding the `-parameters` option to the `javac`
-   command line, or - if using Maven's Java compiler plugin, by setting its configuration to
-   `<configuration><parameters>true</parameters></configuration>`.
+- Irked knows how to convert the following parameter types: `Boolean`, `String`, `Integer`, `Long`, `Float`, `Double`,
+  `BigDecimal` and `Instant`. If the value cannot be parsed correctly to the required type, Irked will set that
+  parameter value to `null`. In any case, the raw value can be retrieved using the regular path parameter lookup methods.
+- Primitive parameter types are not supported - i.e. `Integer` is supported but `int` is not, otherwise Irked cannot
+  report parse failures. If an unsupported parameter type is found during configuration, it is an error and Irked will
+  throw an `InvalidRouteConfiguration` exception. Regardless, Irked will not cause exceptions to be thrown during
+  actual request processing.
+- Handlers can be annotated with multiple annotations with different paths and path parameters (it is not recommended,
+  but is supported), and as such the parameters can match to any path parameter on any path annotation set on the method.
+  Irked will pass `null` for any parameter that can't be matched on the current active route. If during configuration
+  Irked cannot locate the requested parameter in any of the configured path annotations, it is an error and Irked will
+  throw an `InvalidRouteConfiguration` exception.
+- Irked has two main strategies for matching parameters - either by matching the parameter name as reported by Java
+  reflection, or by matching a parameter annotation called `Name` or `Named`. Irked is not bound to a specific annotation
+  implementation, it will use whatever annotation type you are already using, or you can use Irked own
+  `tech.greenfield.vertx.irked.annotations.Name`. The parameter name strategy only works if the Java class was compiled
+  with debug symbols including parameter names - you can do that by adding the `-parameters` option to the `javac`
+  command line, or - if using Maven's Java compiler plugin, by setting its configuration to
+  `<configuration><parameters>true</parameters></configuration>`.
 
 When building without parameter name debug symbols, the above example would need to have the method declared
 like so:
@@ -739,3 +739,34 @@ class Example extends Controller {
     }
 }
 ```
+
+#### Subclassing Controllers
+
+Most examples in this documentation show how to implement a controller by
+directlying extending Irked `Controller` class, though Irked support using a class
+heirarchy by configuring handlers for both the implemenation class as well as any of 
+its super classes.
+
+If it makes sense for you use case to have controller base classes with their own 
+"default" handlers, this would work as expected:
+
+```java
+package com.example.api;
+
+import tech.greenfield.vertx.irked.*;
+import tech.greenfield.vertx.irked.status.*;
+import tech.greenfield.vertx.irked.annotations.*;
+
+abstract class BaseExample extends Controller {
+	@Get("/")
+    WebHandler index = r -> r.sendContent("Base index", new OK());
+}
+
+class SpecificExample extends BaseExample {
+	@Get("/document")
+    WebHandler document = r -> r.sendContent("This document", new OK());
+}
+```
+
+In the above example, when mounting `SpecificExample` in a router, both `/document` 
+(implemented in `SpecificExample.document`) as well as `/` (implemented in `BaseExample.index`) become visible.
