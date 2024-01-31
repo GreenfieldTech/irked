@@ -983,6 +983,7 @@ public class WebSocketMessage implements Buffer {
 	 * @see io.vertx.core.buffer.Buffer#getByteBuf()
 	 * @deprecated removed from public API in Vert.x 5
 	 */
+	@Deprecated
 	public ByteBuf getByteBuf() {
 		return buffer.getByteBuf();
 	}

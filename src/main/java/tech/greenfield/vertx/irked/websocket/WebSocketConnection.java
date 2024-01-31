@@ -366,8 +366,9 @@ public class WebSocketConnection implements ServerWebSocket {
 	/**
 	 * @see io.vertx.core.http.WebSocketBase#writePing(io.vertx.core.buffer.Buffer, io.vertx.core.Handler)
 	 */
-	public ServerWebSocket writePing(Buffer data, Handler<AsyncResult<Void>> handler) {
-		return socket.writePing(data, handler);
+	public WebSocketConnection writePing(Buffer data, Handler<AsyncResult<Void>> handler) {
+		socket.writePing(data, handler);
+		return this;
 	}
 
 	/**
@@ -380,8 +381,9 @@ public class WebSocketConnection implements ServerWebSocket {
 	/**
 	 * @see io.vertx.core.http.WebSocketBase#writePong(io.vertx.core.buffer.Buffer, io.vertx.core.Handler)
 	 */
-	public ServerWebSocket writePong(Buffer data, Handler<AsyncResult<Void>> handler) {
-		return socket.writePong(data, handler);
+	public WebSocketConnection writePong(Buffer data, Handler<AsyncResult<Void>> handler) {
+		socket.writePong(data, handler);
+		return this;
 	}
 
 	/**
