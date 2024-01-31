@@ -46,13 +46,14 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		//	throw new InvalidRouteConfiguration("Method " + m.getName() + " is not public");
 		if (isWebSocketHandler()) return; // satisfies
 		if (params.length < 1 || !RoutingContext.class.isAssignableFrom(params[0].getType()))
-			throw new InvalidRouteConfiguration("Method " + m.getName() + " doesn't take a Vert.x RoutingContext as first parameter");
+			throw new InvalidRouteConfiguration(String.format("Method %1$s.%2$s doesn't take a Vert.x RoutingContext as first parameter",
+					m.getDeclaringClass().getName(), m.getName()));
 		var routeParams = parseRouteParams(uriForAnnotations());
 		Optional<String> paramErrors = Stream.of(params).map(p -> tryResolve(p, routeParams)).filter(Objects::nonNull)
 				.reduce((a,b) -> a + "; " + b);
 		if (paramErrors.isPresent())
-			throw new InvalidRouteConfiguration(String.format("Method %1$s contains parameters that cannot be resolved: %2$s",
-					m.getName(), paramErrors.get()));
+			throw new InvalidRouteConfiguration(String.format("Method %1$s.%2$s contains parameters that cannot be resolved: %3$s",
+					m.getDeclaringClass().getName(), m.getName(), paramErrors.get()));
 	}
 
 	private Set<String> parseRouteParams(String[] possibleURIs) {
@@ -75,8 +76,8 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			// in runtime error handling
 			if (Stream.of(getAnnotation(OnFail.class)).map(f -> f.exception()).filter(Objects::nonNull)
 					.noneMatch(p.getType()::isAssignableFrom))
-				return "Parameter '" + p.getType().getSimpleName() + " " + p.getName() +
-						"' on failure handler does not match any @OnFail(exception) registration!";
+				return String.format("Parameter '%1$s %2$s' on failure handler does not match any @OnFail(exception) registration!",
+						p.getType().getSimpleName(), p.getName());
 			@SuppressWarnings("unchecked")
 			Function<Request,Object> lambda = r -> r.findFailure((Class<? extends Throwable>)p.getType());
 			paramResolvers.put(p.getName(), lambda);
@@ -104,7 +105,8 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			}
 		}
 		if (name == null) // But I still haven't found what I'm looking for
-			return "Cannot associate parameter '" + p.getType() + " " + p.getName() + "' with a URI parameter";
+			return String.format("Cannot associate parameter '%1$s %2$s' with any of the URI parameter(s) %3$s",
+					p.getType(), p.getName(), routeParams.toString());
 		Function<Request,Object> resolver = null;
 		
 		// create resolvers - note that all these may trivially fail to null (possibly by throwing NPEs) when there
@@ -127,7 +129,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		else if (p.getType() == Instant.class)
 			resolver = r -> { try { return Instant.parse(r.pathParam(paramName)); } catch (Exception e) { return null; } };
 		else
-			return "Type '" + p.getType() + "' (for parameter '" + p.getName() + "') is not supported";
+			return String.format("Type '%1$s' (for parameter '%2$s') is not supported", p.getType(), p.getName());
 		paramResolvers.put(p.getName(), resolver);
 		return null;
 	}

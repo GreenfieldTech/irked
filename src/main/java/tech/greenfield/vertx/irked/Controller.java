@@ -11,7 +11,7 @@ import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
-public class Controller {
+abstract public class Controller {
 
 	protected interface RawVertxHandler extends Handler<RoutingContext> {}
 	protected interface WebHandler extends Handler<Request> {}
@@ -38,10 +38,12 @@ public class Controller {
 	 */
 	List<RouteConfiguration> getRoutes(Router router) throws InvalidRouteConfiguration {
 		ArrayList<RouteConfiguration> out = new ArrayList<>();
-		for (Field f : getClass().getDeclaredFields())
-			out.add(RouteConfiguration.wrap(this, router, f));
-		for (Method m : getClass().getDeclaredMethods())
-			out.add(RouteConfiguration.wrap(this, router, m));
+		for (Class<?> ctrClass = getClass(); !ctrClass.equals(Controller.class); ctrClass = ctrClass.getSuperclass()) {
+			for (Field f : ctrClass.getDeclaredFields())
+				out.add(RouteConfiguration.wrap(this, router, f));
+			for (Method m : ctrClass.getDeclaredMethods())
+				out.add(RouteConfiguration.wrap(this, router, m));
+		}
 		return routes = out.stream().filter(RouteConfiguration::isValid).collect(Collectors.toList());
 	}
 

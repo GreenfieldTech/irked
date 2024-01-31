@@ -129,6 +129,31 @@
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<configuration>
+							<target>
+								<fileset id="anot-list" dir="src/main/java/tech/greenfield/vertx/irked/annotations"/>
+								<pathconvert targetos="unix" pathsep="," property="anot-list" refid="anot-list">
+									<map from="${basedir}/src/main/java/tech/greenfield/vertx/irked/annotations/" to=""/>
+								</pathconvert>
+								<echo file="${basedir}/target/classes/tech/greenfield/vertx/irked/annotations/annotations.list">${anot-list}</echo>
+								<replace file="${basedir}/target/classes/tech/greenfield/vertx/irked/annotations/annotations.list">
+									<replacefilter token=".java" value=""/>
+									<replacefilter token="," value="${line.separator}"/>
+								</replace>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<executions>
@@ -160,6 +185,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.4.0</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -179,6 +205,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>generateHTTPStatus</id>
@@ -239,6 +266,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.6.2</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -268,6 +296,7 @@
 							<head>Implementation Note:</head>
 						</tag>
 					</tags>
+					<doclint>all,-missing</doclint>
 				</configuration>
 			</plugin>
 			<plugin>

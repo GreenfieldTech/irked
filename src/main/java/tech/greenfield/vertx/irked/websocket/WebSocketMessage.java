@@ -440,7 +440,7 @@ public class WebSocketMessage implements Buffer {
 
 	/**
 	 * Appends the specified {@code Buffer} to the end of this Buffer. The buffer will expand as necessary to accommodate
-	 * any bytes written.<p>
+	 * any bytes written.
 	 * @param buff buffer to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendBuffer(io.vertx.core.buffer.Buffer)
@@ -452,7 +452,7 @@ public class WebSocketMessage implements Buffer {
 
 	/**
 	 * Appends the specified {@code Buffer} starting at the {@code offset} using {@code len} to the end of this Buffer. The buffer will expand as necessary to accommodate
-	 * any bytes written.<p>
+	 * any bytes written.
 	 * @param buff buffer to append
 	 * @param offset offset where to start appending 
 	 * @param len length of the buffer to append
@@ -465,7 +465,7 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code byte[]} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified {@code byte[]} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.
 	 * @param bytes bytes to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendBytes(byte[])
@@ -477,7 +477,7 @@ public class WebSocketMessage implements Buffer {
 
 	/**
 	 * Appends the specified number of bytes from {@code byte[]} to the end of the Buffer, starting at the given offset.
-	 * The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * The buffer will expand as necessary to accommodate any bytes written.
 	 * @param bytes bytes to append
 	 * @param offset offset where to start appending 
 	 * @param len length of the buffer to append
@@ -490,7 +490,7 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code byte} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified {@code byte} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.
 	 * @param b byte to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendByte(byte)
@@ -501,7 +501,7 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code byte} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified {@code byte} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.
 	 * @param b byte to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendUnsignedByte(short)
@@ -512,7 +512,7 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Appends the specified {@code int} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.<p>
+	 * Appends the specified {@code int} to the end of the Buffer. The buffer will expand as necessary to accommodate any bytes written.
 	 * @param i integer to append
 	 * @return a reference to {@code this} so multiple operations can be appended together.
 	 * @see io.vertx.core.buffer.Buffer#appendInt(int)
@@ -920,7 +920,7 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Sets the bytes at position {@code pos} in the Buffer to the value of {@code str} encoded in encoding {@code enc}.<p>
+	 * Sets the bytes at position {@code pos} in the Buffer to the value of {@code str} encoded in encoding {@code enc}.
 	 * The buffer will expand as necessary to accommodate any value written.
 	 * @param pos position to start modifying the buffer
 	 * @param str value to write in the buffer
@@ -975,7 +975,7 @@ public class WebSocketMessage implements Buffer {
 	}
 
 	/**
-	 * Returns the Buffer as a Netty {@code ByteBuf}.<p>
+	 * Returns the Buffer as a Netty {@code ByteBuf}.
 	 * The returned buffer is a duplicate.<p>
 	 * The returned {@code ByteBuf} might have its {@code readerIndex > 0}
 	 * This method is meant for internal use only.<p>

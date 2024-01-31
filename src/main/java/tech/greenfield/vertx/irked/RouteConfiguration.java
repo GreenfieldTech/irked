@@ -27,9 +27,18 @@ import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 import tech.greenfield.vertx.irked.websocket.WebSocketMessage;
 
+/**
+ * Internal implementation that handles parsing route annotations and setting up the router.
+ * This is an abstract class that implements the common logic for both routing methods and routing fields.
+ */
 public abstract class RouteConfiguration {
 	static final Package annotationPackage = Endpoint.class.getPackage();
 	static final Class<Annotation>[] routeAnnotations = findRouteAnnotations();
+	
+	static {
+		if (routeAnnotations.length == 0)
+			throw new RuntimeException("Irked failed to list routing annotations in " + annotationPackage + "!");
+	}
 	
 	protected Annotation[] annotations;
 	protected Router router;
@@ -293,11 +302,11 @@ public abstract class RouteConfiguration {
 	@SuppressWarnings("unchecked")
 	private static Class<Annotation>[] findRouteAnnotations() {
 		String packageName = annotationPackage.getName();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(Endpoint.class.getClassLoader().getResourceAsStream(packageName.replaceAll("[.]", "/"))));
-		return reader.lines().filter(line -> line.endsWith(".class"))
+		BufferedReader reader = new BufferedReader(new InputStreamReader(Endpoint.class.getClassLoader().getResourceAsStream(packageName.replaceAll("[.]", "/") + "/annotations.list")));
+		return reader.lines().map(name -> packageName + "." + name)
 				.map(className -> {
 					try {
-						return Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.')));
+						return Class.forName(className);
 					} catch (ClassNotFoundException e) {
 						return null;
 					}
