@@ -6,7 +6,7 @@
 
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.5.1.1</version>
+	<version>4.5.2</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -30,7 +30,7 @@
 	</developers>
 
 	<properties>
-		<vertx.version>4.5.1</vertx.version>
+		<vertx.version>4.5.2</vertx.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<maven.compiler.release>11</maven.compiler.release>
@@ -77,14 +77,14 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.15.2</version>
+			<version>2.16.1</version>
 		</dependency>
 
 		<!-- libraries -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.7</version>
+			<version>2.0.9</version>
 		</dependency>
 
 		<!--Test dependencies -->
@@ -97,7 +97,7 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.10.0</version>
+			<version>5.10.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.7</version>
+			<version>2.0.9</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
