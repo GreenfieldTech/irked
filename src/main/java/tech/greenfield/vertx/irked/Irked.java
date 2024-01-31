@@ -31,9 +31,10 @@ public class Irked {
 	
 	/**
 	 * Create new Irked instance that can generate request handlers
-	 * @deprecated please use {@link Irked#irked(Vertx)} instead
+	 * @deprecated Will be removed in 5.0. Please use {@link Irked#irked(Vertx)} instead
 	 * @param vertx Vert.x instance in which to generate routers
 	 */
+	@Deprecated(forRemoval = true)
 	public Irked(Vertx vertx) {
 		this.vertx = vertx;
 	}
