@@ -215,10 +215,11 @@ public class Request extends RoutingContextDecorator {
 		case "application/json":
 		default:
 			try {
-				JsonObject body = body().asJsonObject();
+				T body = body().asPojo(type);
 				if (body == null)
 					throw new MissingBodyException().unchecked();
-				return body.mapTo(type);
+				return body;
+				
 			} catch (DecodeException e) {
 				throw new BadRequest("Unrecognized content-type " + ctParts[0] + 
 						" and content does not decode as JSON: " + e.getMessage()).unchecked();
