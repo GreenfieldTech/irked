@@ -6,7 +6,7 @@
 
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>4.5.6</version>
+	<version>4.5.7</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -30,7 +30,7 @@
 	</developers>
 
 	<properties>
-		<vertx.version>4.5.6</vertx.version>
+		<vertx.version>4.5.7</vertx.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<maven.compiler.release>11</maven.compiler.release>
