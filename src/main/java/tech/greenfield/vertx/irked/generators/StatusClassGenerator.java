@@ -51,7 +51,9 @@ public class StatusClassGenerator {
 	
 	private String loadDefinisions() throws IOException {
 		URL definitions = new URL("https://raw.githubusercontent.com/for-GET/know-your-http-well/master/json/status-codes.json");
-		return new BufferedReader(new InputStreamReader(definitions.openStream())).lines().collect(Collectors.joining("\n"));
+		try (var reader = new BufferedReader(new InputStreamReader(definitions.openStream()))) {
+			return reader.lines().collect(Collectors.joining("\n"));
+		}
 	}
 
 	private void generateMapClass(Map<Integer, String> statusClasses) throws IOException {
