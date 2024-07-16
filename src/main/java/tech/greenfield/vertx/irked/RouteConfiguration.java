@@ -70,19 +70,18 @@ public abstract class RouteConfiguration {
 			anot = routeAnnotations;
 		ArrayList<String> uris = new ArrayList<>();
 		for (var a : anot)
-			uris.addAll(Arrays.asList(uriForAnnotation((Class<Annotation>) a)));
+			uris.addAll(uriForAnnotation((Class<Annotation>) a).collect(Collectors.toList()));
 		return uris.toArray(String[]::new);
 	}
 
-	<T extends Annotation> String[] uriForAnnotation(Class<T> anot) {
+	<T extends Annotation> Stream<String> uriForAnnotation(Class<T> anot) {
 		Annotation[] spec = getAnnotation(anot);
-		if (spec.length == 0) return new String[] {};
+		if (spec.length == 0) return Stream.of();
 		try {
 			// all routing annotations store the URI path in `value()`
 			return Arrays.stream(spec)
 					.map(s -> annotationToValue(s))
-					.filter(s -> Objects.nonNull(s))
-					.toArray(String[]::new);
+					.filter(s -> Objects.nonNull(s));
 		} catch (RuntimeException e) {
 			return null; // I don't know what it failed on, but it means it doesn't fit
 		}
@@ -167,7 +166,7 @@ public abstract class RouteConfiguration {
 	private List<Route> routes = new ArrayList<>();
 
 	public <T extends Annotation> Stream<String> pathsForAnnotation(String prefix, Class<T> anot) {
-		return Arrays.stream(uriForAnnotation(anot))
+		return uriForAnnotation(anot)
 				.filter(s -> Objects.nonNull(s))
 				.map(s -> prefix + s)
 				.map(s -> trailingSlashRemover.matcher(s).find() ? s.substring(0, s.length() - 1) : s) // normalize trailing slashes because https://github.com/vert-x3/vertx-web/issues/786
