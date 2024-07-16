@@ -41,11 +41,8 @@ ossrh:
  only:
   - tags
  script:
-  - base64 -d <<<${GPG_PRIVATE_KEY} | gpg --import --batch
-  - mvn -s m2-settings.xml -B -DskipTests package gpg:sign deploy
-    -DrepositoryId=ossrh -Dmaven.gpg.skip=false
-    -Dgpg.keyname=${GPG_KEYNAME} -Dgpg.passphrase="$(base64 -d <<<${GPG_PASSPHRASE})"
-    -Drepository.username=${REPO_USERNAME} -Drepository.password="$(base64 -d <<<${REPO_PASSWORD})"
+  - mvn -s m2-settings.xml -B -DskipTests package deploy
+    -DrepositoryId=ossrh -Drepository.username=${OSSRH_USERNAME} -Drepository.password="${OSSRH_PASSWORD}"
 
 s3:
  stage: deploy
