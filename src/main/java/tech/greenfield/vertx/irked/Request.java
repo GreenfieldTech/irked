@@ -474,6 +474,8 @@ public class Request extends RoutingContextDecorator {
 			return sendList((List<Object>)object);
 		else if (object instanceof Stream)
 			return sendStream((Stream<Object>)object);
+		else if (object instanceof HttpError)
+			return sendError((HttpError) object);
 		else
 			return sendObject(object);
 	}
