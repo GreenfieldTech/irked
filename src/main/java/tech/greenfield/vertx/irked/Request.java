@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -116,9 +117,9 @@ public class Request extends RoutingContextDecorator {
 	}
 	
 	/**
-	 * Helper failure handler for CompletableFuture users.
-	 * Use at the end of an async chain to succinctly propagate exceptions, as
-	 * thus: <code>.exceptionally(req::handleFailure)</code>.
+	 * Helper failure handler for Promise/CompletableFuture users.
+	 * Use at the end of an async chain to succinctly propagate exceptions, such as:
+	 * <code>.onFailure(r::handleFailure)</code> or <code>.exceptionally(req::handleFailure)</code>.
 	 * This method will call {@link #fail(Throwable)} after unwrapping
 	 * {@link RuntimeException}s as needed.
 	 * @param throwable A {@link Throwable} error to fail on
@@ -451,12 +452,47 @@ public class Request extends RoutingContextDecorator {
 	 */
 	@SuppressWarnings("unchecked")
 	public Future<Void> send(Object object) {
+		Future.succeededFuture(1).onComplete(this::sendOrFail);
+		Future.succeededFuture(2).andThen(this::sendOrFail);
+		Future.succeededFuture(3).transform(this::sendOrFail);
 		if (object instanceof List)
 			return sendList((List<Object>)object);
 		else if (object instanceof Stream)
 			return sendStream((Stream<Object>)object);
 		else
 			return sendObject(object);
+	}
+	
+	/**
+	 * Helper method to terminate request processing with either an HTTP OK (or whatever response status is currently set)
+	 * using {@link #send(Object)} if the result is a successful result, or handle the failure using {@link #handleFailure(Throwable)}
+	 * if the result is of a failure.
+	 * 
+	 * This can be used as a shorthand for the common pattern of <code>.compose(req::send).onFailure(req::handleFailure)</code>,
+	 * instead the request processing chain can be terminated using either of these patterns:
+	 * <ul>
+	 * <li><code>… .onComplete(req::sendOrFail);</code></li>
+	 * <li><code>… .andThen(req::sendOrFail);</code></li>
+	 * <li><code>… .transform(req::sendOrFail);</code></li>
+	 * </ul>
+	 * <p>
+	 * In the first two cases, the {@linkplain sendOrFail()} method has no side effects for the composition. In the last
+	 * case, the result of the transform is a {@code Future<Void>} that will fail if either the previous step has failed
+	 * - with the original cause - or if the {@linkplain #send(Object)} has failed - with the send failure cause - or will
+	 * succeed if the {@linkplain #send(Object)} has succeeded.
+	 * <p>
+	 * @param <T> Type of value in a successful result
+	 * @param result a possible success or failure result
+	 * @return a promise that will fail if the result has failed or if sending a successful result has failed, or will
+	 *   succeed if sending the successful result has succeeded.
+	 */
+	public <T> Future<Void> sendOrFail(AsyncResult<T> result) {
+		if (result.failed()) {
+			handleFailure(result.cause());
+			return Future.failedFuture(result.cause());
+		}
+		return send(result.result())
+				.onFailure(this::handleFailure);
 	}
 
 	/**
