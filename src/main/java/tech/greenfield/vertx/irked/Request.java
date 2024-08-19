@@ -52,7 +52,10 @@ public class Request extends RoutingContextDecorator {
 		throw new RuntimeException("Unexpected parent context that does not implement RoutingContextInternal! This is a bug in vertx-web 4.2.2");
 	}
 	
+	public static final String USE_JSON_PRETTY_ENCODER = "use-json-pretty-encoder";
+	
 	private RoutingContext outerContext;
+	private boolean usePrettyEncoder = false;
 
 	/**
 	 * Create a new request wrapper as a {@link RoutingContextDecorator} around the specified parent routing context
@@ -64,6 +67,12 @@ public class Request extends RoutingContextDecorator {
 	public Request(RoutingContext outerContext) {
 		super(outerContext.currentRoute(), downCastOrFailWithExplanation(outerContext));
 		this.outerContext = outerContext;
+		usePrettyEncoder = this.outerContext.get(USE_JSON_PRETTY_ENCODER, usePrettyEncoder);
+	}
+	
+	public Request setJsonEncoding(boolean usePrettyEncoder) {
+		put(USE_JSON_PRETTY_ENCODER, this.usePrettyEncoder = usePrettyEncoder);
+		return this;
 	}
 	
 	@Override
@@ -270,7 +279,7 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> sendJSON(JsonObject json, HttpError status) {
-		return sendContent(json.encode(), status, "application/json");
+		return sendContent(Json.CODEC.toString(json, usePrettyEncoder), status, "application/json");
 	}
 	
 	/**
@@ -296,7 +305,7 @@ public class Request extends RoutingContextDecorator {
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	public Future<Void> sendJSON(JsonArray json, HttpError status) {
-		return sendContent(json.encode(), status, "application/json");
+		return sendContent(Json.CODEC.toString(json, usePrettyEncoder), status, "application/json");
 	}
 	
 	/**
