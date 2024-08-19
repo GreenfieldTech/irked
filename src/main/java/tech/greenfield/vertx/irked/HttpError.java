@@ -206,13 +206,18 @@ public class HttpError extends Exception {
 	/**
 	 * Unwrap {@link RuntimeException} wrappers around a logical exception
 	 * (hopefully an instance of HttpError)
-	 * @param t Throweable to unwrap
+	 * @param t Throwable to unwrap
 	 * @return the first non RuntimeException found
 	 */
 	public static Throwable unwrap(Throwable t) {
 		for (var ex = t; ex != null; ex = ex.getCause())
 			if (ex instanceof HttpError)
 				return ex;
+		// No HTTP status wrapper found, just unwrap runtimes if relevant
+		for (var ex = t; ex != null; ex = ex.getCause())
+			if (!(ex instanceof RuntimeException))
+				return ex;
+		// In case we have a chain of runtime exceptions, just return the top wrapper
 		return t;
 	}
 	
