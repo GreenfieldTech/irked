@@ -465,7 +465,7 @@ public class Request extends RoutingContextDecorator {
 	
 	/**
 	 * Helper method to terminate request processing with an HTTP OK and a JSON response
-	 * @param object custom object to process through Jackson's {@link ObjectMapper} to generate JSON content
+	 * @param object any object that can be to process through Jackson's {@link ObjectMapper} to generate JSON content
 	 * @return a promise that will complete when the body was sent successfully
 	 */
 	@SuppressWarnings("unchecked")
@@ -474,8 +474,8 @@ public class Request extends RoutingContextDecorator {
 			return sendList((List<Object>)object);
 		else if (object instanceof Stream)
 			return sendStream((Stream<Object>)object);
-		else if (object instanceof HttpError)
-			return sendError((HttpError) object);
+		else if (object instanceof Throwable)
+			return sendError(HttpError.toHttpError((Throwable)object));
 		else
 			return sendObject(object);
 	}
