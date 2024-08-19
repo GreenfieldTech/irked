@@ -452,9 +452,6 @@ public class Request extends RoutingContextDecorator {
 	 */
 	@SuppressWarnings("unchecked")
 	public Future<Void> send(Object object) {
-		Future.succeededFuture(1).onComplete(this::sendOrFail);
-		Future.succeededFuture(2).andThen(this::sendOrFail);
-		Future.succeededFuture(3).transform(this::sendOrFail);
 		if (object instanceof List)
 			return sendList((List<Object>)object);
 		else if (object instanceof Stream)
