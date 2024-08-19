@@ -452,9 +452,6 @@ public class Request extends RoutingContextDecorator {
 	 */
 	@SuppressWarnings("unchecked")
 	public Future<Void> send(Object object) {
-		Future.succeededFuture(1).onComplete(this::sendOrFail);
-		Future.succeededFuture(2).andThen(this::sendOrFail);
-		Future.succeededFuture(3).transform(this::sendOrFail);
 		if (object instanceof List)
 			return sendList((List<Object>)object);
 		else if (object instanceof Stream)
@@ -476,10 +473,11 @@ public class Request extends RoutingContextDecorator {
 	 * <li><code>… .transform(req::sendOrFail);</code></li>
 	 * </ul>
 	 * <p>
-	 * In the first two cases, the {@linkplain sendOrFail()} method has no side effects for the composition. In the last
+	 * In the first two cases, the {@linkplain #sendOrFail(AsyncResult)} method has no side effects for the composition. In the last
 	 * case, the result of the transform is a {@code Future<Void>} that will fail if either the previous step has failed
 	 * - with the original cause - or if the {@linkplain #send(Object)} has failed - with the send failure cause - or will
-	 * succeed if the {@linkplain #send(Object)} has succeeded.
+	 * succeed if the {@linkplain #send(Object)} has succeeded. But you will probably not care about the difference if you
+	 * use this as a terminal operation.
 	 * <p>
 	 * @param <T> Type of value in a successful result
 	 * @param result a possible success or failure result
