@@ -70,6 +70,15 @@ public class Request extends RoutingContextDecorator {
 		usePrettyEncoder = this.outerContext.get(USE_JSON_PRETTY_ENCODER, usePrettyEncoder);
 	}
 	
+	/**
+	 * Set the built-in JSON encoding behavior of {@linkplain Request} to use either the {@link Json#encodePrettily(Object)}
+	 * behavior instead of the standard compact encoding, or not.
+	 * 
+	 * To enable this behavior to an entire controller hierarchy, use it in the controller's
+	 * {@link Controller#getRequestContext(Request)} override.
+	 * @param usePrettyEncoder set to {@code true} to enable the pretty encoder
+	 * @return itself for fluent calls
+	 */
 	public Request setJsonEncoding(boolean usePrettyEncoder) {
 		put(USE_JSON_PRETTY_ENCODER, this.usePrettyEncoder = usePrettyEncoder);
 		return this;
@@ -487,7 +496,7 @@ public class Request extends RoutingContextDecorator {
 	 * - with the original cause - or if the {@linkplain #send(Object)} has failed - with the send failure cause - or will
 	 * succeed if the {@linkplain #send(Object)} has succeeded. But you will probably not care about the difference if you
 	 * use this as a terminal operation.
-	 * <p>
+	 * </p>
 	 * @param <T> Type of value in a successful result
 	 * @param result a possible success or failure result
 	 * @return a promise that will fail if the result has failed or if sending a successful result has failed, or will
