@@ -48,6 +48,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		if (params.length < 1 || !RoutingContext.class.isAssignableFrom(params[0].getType()))
 			throw new InvalidRouteConfiguration(String.format("Method %1$s.%2$s doesn't take a Vert.x RoutingContext as first parameter",
 					m.getDeclaringClass().getName(), m.getName()));
+		trySetRoutingContextType(params[0].getType());
 		var routeParams = parseRouteParams(uriForAnnotations());
 		Optional<String> paramErrors = Stream.of(params).map(p -> tryResolve(p, routeParams)).filter(Objects::nonNull)
 				.reduce((a,b) -> a + "; " + b);
@@ -142,7 +143,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			return false;
 		if (params.length == 1 && WebSocketMessage.class.isAssignableFrom(params[0].getType()))
 			return true;
-		if (params.length == 2 && Request.class.isAssignableFrom(params[0].getType()) && WebSocketMessage.class.isAssignableFrom(params[1].getType()))
+		if (params.length == 2 && Request.class.isAssignableFrom(routingContextType) && WebSocketMessage.class.isAssignableFrom(params[1].getType()))
 			return true;
 		throw new InvalidRouteConfiguration("A WebSocket handler " + method + " must accept (WebSocketMessage) or (Request,WebSocketMessage)");
 	}
@@ -173,16 +174,10 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		return new Handler<Request>() {
 			@Override
 			public void handle(Request r) {
-				// run time check for correct type
-				// we support working with methods that take specializations for Request, we'll rely on the specific implementation's
-				// getRequest() to provide the correct type
-				if (!params[0].getType().isAssignableFrom(r.getClass())) {
-					r.fail(new InternalServerError("Invalid request handler " + this + " - can't handle request of type " + r.getClass()));
-					return;
-				}
-				
 				try {
-					method.invoke(impl, createParamBlock(r));
+					method.invoke(impl, createParamBlock(resolveRequestContext(r)));
+				} catch (RoutingContextImplException e) {
+					r.fail(new InternalServerError(e.getMessage(), e));
 				} catch (InvocationTargetException e) { // user exception
 					handleUserException(r, e.getCause(), "method " + method);
 				} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
@@ -208,7 +203,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 				// run time check for correct type
 				// we support working with methods that take specializations for Request, we'll rely on the specific implementation's
 				// getRequest() to provide the correct type
-				if (!params[0].getType().isAssignableFrom(m.getClass()) && !params[0].getType().isAssignableFrom(req.getClass())) {
+				if (!routingContextType.isAssignableFrom(m.getClass()) && !routingContextType.isAssignableFrom(req.getClass())) {
 					req.fail(new InternalServerError("Invalid request handler " + this + " - can't handle request of type " + req.getClass()));
 					return;
 				}
@@ -240,5 +235,5 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			invokeParams[i] = paramResolvers.computeIfAbsent(params[i].getName(), (req -> null)).apply(r);
 		return invokeParams;
 	}
-
+	
 }

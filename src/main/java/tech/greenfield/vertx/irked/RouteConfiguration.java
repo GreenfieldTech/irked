@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -43,13 +45,25 @@ public abstract class RouteConfiguration {
 	protected Annotation[] annotations;
 	protected Router router;
 	protected Controller impl;
-
+	protected Class<? extends RoutingContext> routingContextType = Request.class;
+	protected Function<Request,Request> routingContextResolver;
+	
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
 	protected RouteConfiguration(Controller impl, Router router, Annotation[] annotations) {
 		this.annotations = annotations;
 		this.router = router;
 		this.impl = impl;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void trySetRoutingContextType(Class<?> type) {
+		if (!RoutingContext.class.isAssignableFrom(type))
+			return;
+		routingContextType = (Class<? extends RoutingContext>) type;
+		// check if we require non-trivial routing context construction and have a local provider available for it
+		if (!routingContextType.isAssignableFrom(Request.class)) // we know that the reverse is true, so requestType must be a Request sub-type
+			routingContextResolver = findRoutingContextResolver();
 	}
 
 	static RouteConfiguration wrap(Controller impl, Router router, Field f) {
@@ -297,7 +311,69 @@ public abstract class RouteConfiguration {
 			m.socket().close((short)1011, cause.getMessage());
 		}
 	}
+	
+	protected class RoutingContextImplException extends RuntimeException {
+		private static final long serialVersionUID = 3549348052777343128L;
+		public RoutingContextImplException(String message) { super(message); }
+		public RoutingContextImplException(Exception e) {
+			super(String.format("Failed to construct routing context param for %s from Request instance", RouteConfiguration.this), e);
+		}
+	}
+	
+	/**
+	 * Check if we can statically locate an appropriate routing context supplier in the controller implementation.
+	 * @return a trivial supplier, or null if none found
+	 */
+	protected Function<Request, Request> findRoutingContextResolver() {
+		// see if there's a provider for this type in the Controller implementation
+		for (Class<?> ctrImpl = impl.getClass(); ctrImpl != Controller.class; ctrImpl = ctrImpl.getSuperclass()) {
+			for (var m : ctrImpl.getDeclaredMethods()) {
+				if (m.getReturnType().equals(routingContextType) && m.getParameterCount() == 1 && m.getParameterTypes()[0].isAssignableFrom(Request.class))
+					return r -> {
+						m.setAccessible(true);
+						try {
+							return (Request) m.invoke(impl, r);
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							throw new RoutingContextImplException(e);
+						}
+					};
+			}
+		}
+		return null;
+	}
 
+	/**
+	 * Try to resolve the handler requested routing context type by instantiating the requested type if needed.
+	 * @param r current routing context instance. This can be in itself a Request sub-type, which the handler's preferred
+	 * context type might require for initialization
+	 * @return the current routing context type if it is already sufficient, or a new instance of the required type if
+	 * it can be successfully trivially constructed.
+	 * @throws RoutingContextImplException if the requested type is not a Request sub-type or it cannot be successfully
+	 * constructed.
+	 */
+	protected Request resolveRequestContext(Request r) throws RoutingContextImplException {
+		if (routingContextResolver != null)
+			r = routingContextResolver.apply(r);
+		if (routingContextType.isAssignableFrom(r.getClass()))
+			return r; // Controller implemented getRequest() correctly, or another supplier, no more work for us
+		// try to instantiate the required type if it has a trivial c'tor that can take our current request type
+		for (var ctor : routingContextType.getConstructors()) {
+			if (ctor.getParameterCount() != 1)
+				continue;
+			var p0 = ctor.getParameterTypes()[0];
+			if (p0.isAssignableFrom(r.getClass()))
+				try {
+					return (Request) ctor.newInstance(r);
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new RoutingContextImplException(e);
+				}
+		}
+		throw new RoutingContextImplException(String.format(
+				"Invalid request handler %s: routing context param %s is not trivially constructed from a Request instance!"
+						+ " If you want to use non-trivially constructed programmable requests contexts, implement Controller.getRequest(Request)",
+				this, routingContextType));
+	}
+	
 	@SuppressWarnings("unchecked")
 	private static Class<Annotation>[] findRouteAnnotations() {
 		String packageName = annotationPackage.getName();

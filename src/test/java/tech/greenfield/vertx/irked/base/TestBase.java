@@ -8,6 +8,8 @@ import java.util.Random;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
@@ -22,6 +24,8 @@ import tech.greenfield.vertx.irked.Controller;
 import tech.greenfield.vertx.irked.server.Server;
 
 public class TestBase {
+	
+	protected Logger log = LoggerFactory.getLogger(getClass());
 
 	// client max message
 	private static final int MAX_WEBSOCKET_MESSAGE_SIZE = 1024 * 1024 * 1024; // 1G. Frame size is 64K
