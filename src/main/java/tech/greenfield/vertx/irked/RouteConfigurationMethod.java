@@ -35,6 +35,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	private final Method method;
 	private final Parameter[] params;
 	private final Map<String, Function<Request, Object>> paramResolvers = new HashMap<>();
+	private Function<Request,Request> routingContextResolver;
 
 	public RouteConfigurationMethod(Controller impl, Router router, Method m) throws InvalidRouteConfiguration {
 		super(impl, router, m.getAnnotations());
@@ -54,6 +55,10 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		if (paramErrors.isPresent())
 			throw new InvalidRouteConfiguration(String.format("Method %1$s.%2$s contains parameters that cannot be resolved: %3$s",
 					m.getDeclaringClass().getName(), m.getName(), paramErrors.get()));
+		// check if we require non-trivial routing context construction and have a local provider available for it
+		var requestType = params[0].getType();
+		if (!requestType.isAssignableFrom(Request.class)) // we know that the reverse is true, so requestType must be a Request sub-type
+			routingContextResolver = findRoutingContextResolver(impl, requestType);
 	}
 
 	private Set<String> parseRouteParams(String[] possibleURIs) {
@@ -173,16 +178,10 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		return new Handler<Request>() {
 			@Override
 			public void handle(Request r) {
-				// run time check for correct type
-				// we support working with methods that take specializations for Request, we'll rely on the specific implementation's
-				// getRequest() to provide the correct type
-				if (!params[0].getType().isAssignableFrom(r.getClass())) {
-					r.fail(new InternalServerError("Invalid request handler " + this + " - can't handle request of type " + r.getClass()));
-					return;
-				}
-				
 				try {
-					method.invoke(impl, createParamBlock(r));
+					method.invoke(impl, createParamBlock(resolveRequestContext(r, params[0].getType())));
+				} catch (RoutingContextImplException e) {
+					r.fail(new InternalServerError(e.getMessage(), e));
 				} catch (InvocationTargetException e) { // user exception
 					handleUserException(r, e.getCause(), "method " + method);
 				} catch (IllegalAccessException e) { // shouldn't happen because we setAccessible above
@@ -239,6 +238,76 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		for (int i = 1; i < params.length; i++)
 			invokeParams[i] = paramResolvers.computeIfAbsent(params[i].getName(), (req -> null)).apply(r);
 		return invokeParams;
+	}
+
+	public class RoutingContextImplException extends RuntimeException {
+		private static final long serialVersionUID = 3549348052777343128L;
+		public RoutingContextImplException(String message) { super(message); }
+		public RoutingContextImplException(Exception e) {
+			super(String.format("Failed to construct routing context param for %s from Request instance", RouteConfigurationMethod.this), e);
+		}
+	}
+	
+	/**
+	 * Try to resolve the handler requested routing context type by instantiating the requested type if needed.
+	 * @param r current routing context instance. This can be in itself a Request sub-type, which the handler's preferred
+	 * context type might require for initialization
+	 * @param programableContext The routing context type required by the handler
+	 * @return the current routing context type if it is already sufficient, or a new instance of the required type if
+	 * it can be successfully trivially constructed.
+	 * @throws RoutingContextImplException if the requested type is not a Request sub-type or it cannot be successfully
+	 * constructed.
+	 */
+	private Request resolveRequestContext(Request r, Class<?> programableContext) throws RoutingContextImplException {
+		if (routingContextResolver != null)
+			r = routingContextResolver.apply(r);
+		if (programableContext.isAssignableFrom(r.getClass()))
+			return r; // Controller implemented getRequest() correctly, or another supplier, no more work for us
+		// try to instantiate the required type if it is a specialization of Request and contains a trivial c'tor
+		if (!Request.class.isAssignableFrom(programableContext))
+			throw new RoutingContextImplException(String.format(
+					"Invalid request handler %s: routing context param %s is not a Request sub-type!",
+					this, programableContext));
+		for (var ctor : programableContext.getConstructors()) {
+			if (ctor.getParameterCount() != 1)
+				continue;
+			var p0 = ctor.getParameterTypes()[0];
+			if (p0.isAssignableFrom(r.getClass()))
+				try {
+					return (Request) ctor.newInstance(r);
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new RoutingContextImplException(e);
+				}
+		}
+		throw new RoutingContextImplException(String.format(
+				"Invalid request handler %s: routing context param %s is not trivially constructed from a Request instance!"
+						+ " If you want to use non-trivially constructed programmable requests contexts, implement Controller.getRequest(Request)",
+				this, programableContext));
+
+	}
+	
+	/**
+	 * Check if we can statically locate an appropriate routing context supplier in the controller implementation.
+	 * @param impl The controller implementation which will be used to call the supplier
+	 * @param requestType the Request sub-type that we need to resolve
+	 * @return a trivial supplier, or null if none found
+	 */
+	private Function<Request, Request> findRoutingContextResolver(Controller impl, Class<?> requestType) {
+		// see if there's a provider for this type in the Controller implementation
+		for (Class<?> ctrImpl = impl.getClass(); ctrImpl != Controller.class; ctrImpl = ctrImpl.getSuperclass()) {
+			for (var m : ctrImpl.getDeclaredMethods()) {
+				if (m.getReturnType().equals(requestType) && m.getParameterCount() == 1 && m.getParameterTypes()[0].isAssignableFrom(Request.class))
+					return r -> {
+						m.setAccessible(true);
+						try {
+							return (Request) m.invoke(impl, r);
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							throw new RoutingContextImplException(e);
+						}
+					};
+			}
+		}
+		return null;
 	}
 
 }
