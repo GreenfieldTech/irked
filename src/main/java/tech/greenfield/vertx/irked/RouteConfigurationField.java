@@ -2,6 +2,7 @@ package tech.greenfield.vertx.irked;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.impl.OrderListener;
@@ -19,6 +20,15 @@ public class RouteConfigurationField extends RouteConfiguration {
 	public RouteConfigurationField(Controller impl, Router router, Field f) {
 		super(impl, router, f.getAnnotations());
 		field = f;
+		var type = field.getGenericType();
+		if (type instanceof ParameterizedType) {
+			ParameterizedType pType = (ParameterizedType)type;
+			var rtype = pType.getActualTypeArguments()[0];
+			try {
+				trySetRoutingContextType(Class.forName(rtype.getTypeName()));
+			} catch (ClassNotFoundException e) {
+			}
+		}
 	}
 
 	@Override
@@ -84,7 +94,7 @@ public class RouteConfigurationField extends RouteConfiguration {
 		@Override
 		public void handle(Request r) {
 			try {
-				handler.handle(r);
+				handler.handle(resolveRequestContext(r));
 			} catch (Throwable cause) {
 				handleUserException(r, cause, "field " + field);
 			}

@@ -241,15 +241,17 @@ class BlockApi extends Controller {
 
 #### Handler-specific Request Context Re-Programming
 
-By having a controller implement `getRequestContext()` it declares the Request sub-type to be used
-by all handlers in that controller or controllers mounted under it. Method handlers (in contrast to
-field handlers, due to Java reflection limitations) can also require additional specialization of the
-request context, on a per-handler basis. That allows different handlers to use different
-specializations - if makes sense. Irked will automatically construct such specializations using one
+By having a controller implement `getRequestContext()` it can create a specific Request sub-type to be used 
+by all handlers in that controller or controllers mounted under it. Handlers can also require additional specialization
+of the request context, on a per-handler basis. That allows different handlers to use different
+specializations - if it makes sense. Irked will automatically construct such specializations using one
 of two methods:
 1. If the specialization can be trivially constructed from the current request context - either
-`Request` or a controller-level specialization created by a custom `getRequestContext()` - i.e. the specialized Request sub-type class has a constructor that takes a single such parameter.
-2. The current controller class provides a creator method that accepts a `Request` instance (not a sub-type) and returns the needed type.
+   `Request` or a controller-level specialization created by a custom `getRequestContext()` - i.e. the specialized
+   Request sub-type class has a constructor that takes a single such parameter.
+2. If the current controller class provides a creator method that accepts a `Request` instance (not a sub-type) and
+   returns the needed type.
+
 Both methods are demonstrated in the following examples:
 
 ##### Trivially Constructed Request Context Specialization Example
@@ -268,15 +270,15 @@ class Api extends Controller {
         String id;
 
         public MyRequest(Request req) {
-            	super(req);
-            	id = req.pathParam("id");
+              super(req);
+              id = req.pathParam("id");
         }
         
         public String getId() {
             return id;
         }
-	}
-	
+    }
+
     public Request getRequestContext(Request req) {
         return new MyRequest(req);
     }
@@ -295,6 +297,10 @@ class Api extends Controller {
     }
     
     @Get("/:id/hash")
+    Handler<MyHashingRequest> calcHash = req -> req.sendContent(req.getHash());
+
+    // Method handlers are also supported
+    @Get("/:id/hash2")
     public void generateHash(MyHashingRequest req) {
         req.sendContent(req.getHash());
     }
@@ -357,10 +363,13 @@ class Api extends Controller {
     }
     
     @Get("/:id/hash")
+    Handler<MyHashingRequest> calcHash = req -> req.sendContent(req.getHash());
+
+    // Method handlers are also supported
+    @Get("/:id/hash2")
     public void generateHash(MyHashingRequest req) {
         req.sendContent(req.getHash());
     }
-
 }
 ```
 

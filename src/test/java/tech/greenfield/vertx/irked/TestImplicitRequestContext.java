@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -98,6 +99,22 @@ public class TestImplicitRequestContext extends TestBase {
 					.put("preset", r.getPreset()));
 		}
 
+		@Get("/good-field/:id")
+		Handler<IdContext> retrieveField = r -> {
+			r.sendJSON(new JsonObject().put("id", r.getId()));
+		};
+		
+		@Get("/good-field/:id/:foo")
+		Handler<ExtendedIdContext> checkFooField = r -> {
+			r.sendJSON(new JsonObject().put("id", r.getId()).put("foo", r.getFoo()));
+		};
+		
+		@Get("/good-with-preset-field/:id/:foo")
+		Handler<NonTrivialContext> retrievePresetField = r -> {
+			r.sendJSON(new JsonObject().put("id", r.getId()).put("foo", r.getFoo())
+					.put("preset", r.getPreset()));
+		};
+		
 		@Get("/bad/not-constructible")
 		public void badHandler(BadContext ctx) {
 			System.err.println("This bad handler will never be called");
@@ -163,7 +180,48 @@ public class TestImplicitRequestContext extends TestBase {
 			return null;
 		})
 		.onComplete(ctx.succeedingThenComplete());
+	}
+	
+	@Test
+	public void testPassIdToField(VertxTestContext context, Vertx vertx) {
+		log.info("Testing get ID");
+		String id = "item-name";
+		getClient(vertx).get(port, "localhost", "/good-field/" + id).send().map(res -> {
+			assertThat(res, isSuccess());
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getString("id"), equalTo(id));
+			return null;
+		})
+		.onComplete(context.succeedingThenComplete());
+	}
 
+	@Test
+	public void testPassFooToField(VertxTestContext context, Vertx vertx) {
+		log.info("Testing get extended ID");
+		String id = "item-name"; String foo = "bar";
+		getClient(vertx).get(port, "localhost", "/good-field/" + id + "/" + foo).send().map(res -> {
+			assertThat(res, isSuccess());
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getString("id"), is(equalTo(id)));
+			assertThat(o.getString("foo"), is(equalTo(foo)));
+			return null;
+		})
+		.onComplete(context.succeedingThenComplete());
+	}
+	
+	@Test
+	public void testPassWithPresetField(VertxTestContext ctx, Vertx vertx) {
+		log.info("Testing get with preset");
+		String id = "item-name"; String foo = "baz";
+		getClient(vertx).get(port, "localhost", "/good-with-preset-field/" + id + "/" + foo).send().map(res -> {
+			assertThat(res, isSuccess());
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getString("id"), is(equalTo(id)));
+			assertThat(o.getString("foo"), is(equalTo(foo)));
+			assertThat(o.getString("preset"), is(equalTo("magic")));
+			return null;
+		})
+		.onComplete(ctx.succeedingThenComplete());
 	}
 	
 	@Test
