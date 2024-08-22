@@ -15,7 +15,7 @@ ported to all releases.
 
 ## Installation
 
-Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.5.9.3).
+Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.5.9.4).
 
 If using Maven, add Irked as a dependency in your `pom.xml` file:
 
@@ -23,12 +23,12 @@ If using Maven, add Irked as a dependency in your `pom.xml` file:
 <dependency>
     <groupId>tech.greenfield</groupId>
     <artifactId>irked-vertx</artifactId>
-    <version>4.5.9.3</version>
+    <version>4.5.9.4</version>
 </dependency>
 ```
 
 For other build tools, see the Maven Central website for the syntax, but it generally
-boils down to just using `tech.greenfield:irked-vertx:4.5.9.3` as the dependency string.
+boils down to just using `tech.greenfield:irked-vertx:4.5.9.4` as the dependency string.
 
 ## Quick Start
 
@@ -173,7 +173,10 @@ A parent controller can define path parameters and then extract the data and han
 handlers and sub-controllers through a well defined API, by overriding the
 `Controller.getRequestContext()` method.
 
-#### Route Context Re-programming Example
+This functionality is also just useful to DRY repeatable data access pattern by encapsulating them
+in a request context type.
+
+#### Request Context Re-programming Example
 
 ```java
 package com.example.api;
@@ -235,6 +238,151 @@ class BlockApi extends Controller {
     };
 }
 ```
+
+#### Handler-specific Request Context Re-Programming
+
+By having a controller implement `getRequestContext()` it can create a specific Request sub-type to be used 
+by all handlers in that controller or controllers mounted under it. Handlers can also require additional specialization
+of the request context, on a per-handler basis. That allows different handlers to use different
+specializations - if it makes sense. Irked will automatically construct such specializations using one
+of two methods:
+1. If the specialization can be trivially constructed from the current request context - either
+   `Request` or a controller-level specialization created by a custom `getRequestContext()` - i.e. the specialized
+   Request sub-type class has a constructor that takes a single such parameter.
+2. If the current controller class provides a creator method that accepts a `Request` instance (not a sub-type) and
+   returns the needed type.
+
+Both methods are demonstrated in the following examples:
+
+##### Trivially Constructed Request Context Specialization Example
+
+```java
+package com.example.api;
+
+import tech.greenfield.vertx.irked.*;
+import tech.greenfield.vertx.irked.status.*;
+import tech.greenfield.vertx.irked.annotations.*;
+import com.example.api.Hasher;
+
+class Api extends Controller {
+
+    public static class MyReqeust extends Request {
+        String id;
+
+        public MyRequest(Request req) {
+              super(req);
+              id = req.pathParam("id");
+        }
+        
+        public String getId() {
+            return id;
+        }
+    }
+
+    public Request getRequestContext(Request req) {
+        return new MyRequest(req);
+    }
+    
+    public static class MyHashingRequest extends MyRequest {
+        String hash;
+        
+        public MyHashingRequest(MyRequest req) {
+            super(req);
+            hash = Hasher.hash(req.getId());
+        }
+        
+        public String getHash() {
+            return hash;
+        }
+    }
+    
+    @Get("/:id/hash")
+    Handler<MyHashingRequest> calcHash = req -> req.sendContent(req.getHash());
+
+    // Method handlers are also supported
+    @Get("/:id/hash2")
+    public void generateHash(MyHashingRequest req) {
+        req.sendContent(req.getHash());
+    }
+
+}
+```
+
+In the above example, when entering the controller, Irked calls `getRequestContext()` to generate
+the current request context type - which is `MyRequest` in this case - then when it resolves the
+route `/:id/hash` and needs to call `generateHash()` - it identifies `MyHashingRequest` a request context specialization that can be constructed from the current request context type (`MyRequest`)
+and does so.
+
+Because this example uses embedded classes for the request contexts, it is important that these can
+be statically constructed, as Irked cannot currently construct non-static embedded classes.
+
+##### Provided Request Context Specialization Example
+
+```java
+package com.example.api;
+
+import tech.greenfield.vertx.irked.*;
+import tech.greenfield.vertx.irked.status.*;
+import tech.greenfield.vertx.irked.annotations.*;
+import com.example.api.Hasher;
+
+class Api extends Controller {
+
+    public class MyReqeust extends Request {
+        String id;
+
+        public MyRequest(Request req) {
+            	super(req);
+            	id = req.pathParam("id");
+        }
+        
+        public String getId() {
+            return id;
+        }
+	}
+	
+    public Request getRequestContext(Request req) {
+        return new MyRequest(req);
+    }
+    
+    public class MyHashingRequest extends MyRequest {
+        String hash;
+        
+        public MyHashingRequest(MyRequest req, String secret) {
+            super(req);
+            hash = Hasher.hash(secret + req.getId());
+        }
+        
+        public String getHash() {
+            return hash;
+        }
+    }
+    
+    public MyHashingRequest createSecretHasherContext(Request req) {
+        return new MyHashingRequest((MyRequest)req, "SECRET");
+    }
+    
+    @Get("/:id/hash")
+    Handler<MyHashingRequest> calcHash = req -> req.sendContent(req.getHash());
+
+    // Method handlers are also supported
+    @Get("/:id/hash2")
+    public void generateHash(MyHashingRequest req) {
+        req.sendContent(req.getHash());
+    }
+}
+```
+
+In the above example, when entering the controller, Irked calls `getRequestContext()` to generate
+the current request context type - which is `MyRequest` in this case - then when it resolves the
+route `/:id/hash` and needs to call `generateHash()` - it identifies `MyHashRequest` a request context specialization that _cannot_ be constructed from just the current request context type
+(`MyRequest`) but there is a provider method that can create that specialization, so it calls it
+and then passes the generated instance as the request context to `generateHash()`.
+
+Because Irked attempts to do reflection-based lookups during setup - instead of in run time - then it
+can't know the exact current request context type, and it can only locate provider methods that
+take a top-level `Request` object. In this case the local provider implementation is adjacent to the
+`getRequestContext()` implementation and can safely assume the specific instance type it will get.
 
 ### Cascading Request Handling
 
