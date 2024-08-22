@@ -356,11 +356,7 @@ public abstract class RouteConfiguration {
 			r = routingContextResolver.apply(r);
 		if (routingContextType.isAssignableFrom(r.getClass()))
 			return r; // Controller implemented getRequest() correctly, or another supplier, no more work for us
-		// try to instantiate the required type if it is a specialization of Request and contains a trivial c'tor
-		if (!Request.class.isAssignableFrom(routingContextType))
-			throw new RoutingContextImplException(String.format(
-					"Invalid request handler %s: routing context param %s is not a Request sub-type!",
-					this, routingContextType));
+		// try to instantiate the required type if it has a trivial c'tor that can take our current request type
 		for (var ctor : routingContextType.getConstructors()) {
 			if (ctor.getParameterCount() != 1)
 				continue;
