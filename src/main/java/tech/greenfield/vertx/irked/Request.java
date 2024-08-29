@@ -477,6 +477,10 @@ public class Request extends RoutingContextDecorator {
 			return sendStream((Stream<Object>)object);
 		else if (object instanceof Throwable)
 			return sendError(HttpError.toHttpError((Throwable)object));
+		else if (object instanceof JsonObject)
+			return sendJSON((JsonObject)object);
+		else if (object instanceof JsonArray)
+			return sendJSON((JsonArray)object);
 		else
 			return sendObject(object);
 	}
