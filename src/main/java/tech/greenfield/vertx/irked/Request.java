@@ -50,7 +50,7 @@ public class Request extends RoutingContextDecorator {
 		throw new RuntimeException("Unexpected parent context that does not implement RoutingContextInternal! This is a bug in vertx-web 4.2.2");
 	}
 	
-	public static final String USE_JSON_PRETTY_ENCODER = "use-json-pretty-encoder";
+	public static final String USE_JSON_PRETTY_ENCODER = "irked.json-pretty-encoder";
 	
 	private RoutingContext outerContext;
 	private boolean usePrettyEncoder = false;
@@ -65,7 +65,7 @@ public class Request extends RoutingContextDecorator {
 	public Request(RoutingContext outerContext) {
 		super(outerContext.currentRoute(), downCastOrFailWithExplanation(outerContext));
 		this.outerContext = outerContext;
-		usePrettyEncoder = this.outerContext.get(USE_JSON_PRETTY_ENCODER, usePrettyEncoder);
+		usePrettyEncoder = Objects.requireNonNullElse(this.outerContext.get(USE_JSON_PRETTY_ENCODER), usePrettyEncoder);
 	}
 	
 	/**
