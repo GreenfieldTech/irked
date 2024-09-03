@@ -268,20 +268,29 @@ class Api extends Controller {
 
     public static class MyReqeust extends Request {
         String id;
+        String context;
 
-        public MyRequest(Request req) {
+        public MyRequest(Request req, String context) {
               super(req);
               id = req.pathParam("id");
+              this.context = context
         }
         
         public String getId() {
             return id;
         }
+        
+        public String getContext() {
+            return context;
+        }
     }
 
     public Request getRequestContext(Request req) {
-        return new MyRequest(req);
+        return new MyRequest(req, "foo");
     }
+    
+    @Get("/:id/context")
+    Handler<MyRequest> getContext = r -> r.sendContent(r.getContext());
     
     public static class MyHashingRequest extends MyRequest {
         String hash;
