@@ -182,7 +182,7 @@ public class TestWebSocketPayloads extends TestBase {
 			req.pause();
 			req.toWebSocket().onFailure(t -> log.error("Failed to upgrade",t))
 			.onSuccess(ws -> {
-				ws.accept();
+//				ws.accept();
 				ws.binaryMessageHandler(data -> {
 					log.info("Got a binary message", data);
 					ws.writeBinaryMessage(ctr.response);

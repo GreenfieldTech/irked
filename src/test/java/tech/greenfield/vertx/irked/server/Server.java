@@ -22,7 +22,7 @@ public class Server extends AbstractVerticle {
 		Promise<HttpServer> async = Promise.promise();
 		(server = vertx.createHttpServer(getHttpServerOptions())).requestHandler(
 				Irked.router(vertx).configure(test).configReport(System.out))
-				.listen(config().getInteger("port"), async);
+				.listen(config().getInteger("port")).andThen(async);
 		async.future().map((Void) null).onComplete(startFuture);
 	}
 
@@ -32,7 +32,7 @@ public class Server extends AbstractVerticle {
 
 	@Override
 	public void stop(Promise<Void> stopFuture) throws Exception {
-		server.close(stopFuture);
+		server.close().andThen(stopFuture);
 	}
 	
 }

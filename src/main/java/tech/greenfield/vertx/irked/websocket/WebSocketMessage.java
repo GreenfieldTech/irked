@@ -3,7 +3,6 @@ package tech.greenfield.vertx.irked.websocket;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import io.netty.buffer.ByteBuf;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
@@ -974,18 +973,36 @@ public class WebSocketMessage implements Buffer {
 		return buffer.slice(start, end);
 	}
 
-	/**
-	 * Returns the Buffer as a Netty {@code ByteBuf}.
-	 * <p>The returned buffer is a duplicate.</p>
-	 * <p>The returned {@code ByteBuf} might have its {@code readerIndex > 0}
-	 * This method is meant for internal use only.</p>
-	 * @return a Netty {@code ByteBuf}
-	 * @see io.vertx.core.buffer.Buffer#getByteBuf()
-	 * @deprecated removed from public API in Vert.x 5
-	 */
-	@Deprecated
-	public ByteBuf getByteBuf() {
-		return buffer.getByteBuf();
+	public Object toJsonValue() {
+		return buffer.toJsonValue();
+	}
+
+	public String toJson() {
+		return buffer.toJson();
+	}
+
+	public double getDoubleLE(int pos) {
+		return buffer.getDoubleLE(pos);
+	}
+
+	public float getFloatLE(int pos) {
+		return buffer.getFloatLE(pos);
+	}
+
+	public Buffer appendFloatLE(float f) {
+		return buffer.appendFloatLE(f);
+	}
+
+	public Buffer appendDoubleLE(double d) {
+		return buffer.appendDoubleLE(d);
+	}
+
+	public Buffer setDoubleLE(int pos, double d) {
+		return buffer.setDoubleLE(pos, d);
+	}
+
+	public Buffer setFloatLE(int pos, float f) {
+		return buffer.setFloatLE(pos, f);
 	}
 
 }

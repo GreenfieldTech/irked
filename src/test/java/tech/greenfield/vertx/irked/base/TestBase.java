@@ -40,14 +40,14 @@ public class TestBase {
 	protected static WebClientExt getClient(Vertx vertx) {
 		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions()
 				.setIdleTimeout(0)
-				.setMaxWebSocketMessageSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
+				.setMaxChunkSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
 	}
 	
 	protected void deployController(Controller controller, Vertx vertx, Handler<AsyncResult<String>> handler) {
 		Server server = new Server(controller);
 
 		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("port", port));
-		vertx.deployVerticle(server, options, handler);
+		vertx.deployVerticle(server, options).andThen(handler);
 	}
 
 	protected static Function<Throwable, Void> failureHandler(VertxTestContext context) {

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
@@ -80,16 +79,13 @@ public class TestInvalidMethod extends TestBase {
 	 */
 	@Test
 	public void privateMethod(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		deployController(new PrivateController(), vertx, context.succeeding(deploymentID -> {
-			getClient(vertx).get(port, "localhost", "/private").send().map(res -> {
+			getClient(vertx).get(port, "localhost", "/private").send().compose(res -> {
 				assertThat(res, isSuccess());
 				assertThat(res.bodyAsString(), equalTo("OK"));
-				vertx.undeploy(deploymentID, context.succeedingThenComplete());
-				return null;
+				return vertx.undeploy(deploymentID);
 			})
-			.onFailure(context::failNow)
-			.onSuccess(flag(async));
+			.andThen(context.succeedingThenComplete());
 		}));
 	}
 	
@@ -111,17 +107,14 @@ public class TestInvalidMethod extends TestBase {
 	
 	@Test
 	public void routingMethodWantsWrongType(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		deployController(new InvalidTypeController(), vertx, context.succeeding(deploymentID -> {
 			
-			getClient(vertx).get(port, "localhost", "/invalid").send().map(res -> {
+			getClient(vertx).get(port, "localhost", "/invalid").send().compose(res -> {
 				assertThat(res, is(status(new InternalServerError())));
 				assertThat(res.bodyAsJsonObject().getString("message"), startsWith("Invalid request handler"));
-				vertx.undeploy(deploymentID, context.succeedingThenComplete());
-				return null;
+				return vertx.undeploy(deploymentID);
 			})
-			.onFailure(context::failNow)
-			.onSuccess(flag(async));
+			.andThen(context.succeedingThenComplete());
 		}));
 	}
 }
