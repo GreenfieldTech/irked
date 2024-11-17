@@ -31,6 +31,8 @@ public class JsonDecodingExceptionFormatter {
 	}
 	
 	public static String describeLocation(List<Reference> path, JsonLocation loc) {
+		if (loc == null)
+			return String.format("[path: %s]", describePath(path));
 		return String.format("[path: %s, %s]", describePath(path), loc.offsetDescription());
 	}
 
