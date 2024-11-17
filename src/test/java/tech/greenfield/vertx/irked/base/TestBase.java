@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import static tech.greenfield.vertx.irked.Matchers.notFound;
 
 import java.util.Random;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -19,7 +18,6 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.Controller;
 import tech.greenfield.vertx.irked.server.Server;
 
@@ -50,13 +48,6 @@ public class TestBase {
 		vertx.deployVerticle(server, options).andThen(handler);
 	}
 
-	protected static Function<Throwable, Void> failureHandler(VertxTestContext context) {
-		return  t -> {
-			context.failNow(t);
-			return null;
-		};
-	}
-	
 	protected void verifyNotFound(HttpResponse<Buffer> r) {
 		assertThat(r, is(notFound()));
 	}
