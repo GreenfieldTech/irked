@@ -7,6 +7,8 @@ stages:
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2"
 
+image: maven:3-jdk-11
+
 cache:
   paths:
     - .m2/
@@ -35,7 +37,6 @@ package:
    - target/*
 
 maven-repo:
- image: maven:3-jdk-11
  stage: build
  needs: [ package ]
  script:
@@ -45,7 +46,6 @@ maven-repo:
 
 ossrh:
  stage: deploy
- image: maven:3-jdk-11
  only:
   - tags
  script:
