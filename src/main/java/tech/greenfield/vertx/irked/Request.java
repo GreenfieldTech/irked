@@ -19,6 +19,7 @@ import io.vertx.ext.web.impl.RoutingContextInternal;
 import tech.greenfield.vertx.irked.Controller.WebHandler;
 import tech.greenfield.vertx.irked.auth.AuthorizationToken;
 import tech.greenfield.vertx.irked.exceptions.MissingBodyException;
+import tech.greenfield.vertx.irked.helpers.JsonDecodingExceptionFormatter;
 import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.HttpStatuses;
 
@@ -208,6 +209,10 @@ public class Request extends RoutingContextDecorator {
 	 * @param <T> Result type into which the body will be decoded
 	 * @param type The class from which an instance should be created to hold the body content
 	 * @return An object of the specified type that was initialized using the Vert.x JSON decoder API
+	 * @throws RuntimeException in case of a JSON decoding problem. The thrown exception wraps a
+	 *   {@linkplain BadRequest} exception with a REST API friendly error message (so it can be handled
+	 *   automatically by {@link #handleFailure(Throwable)}) and that wraps the original {@link DecodeException}
+	 *   if the caller wants to extract it and parse it themselves
 	 */
 	public <T> T getBodyAs(Class<T> type) {
 		String contentType = this.request().getHeader("Content-Type");
@@ -236,10 +241,8 @@ public class Request extends RoutingContextDecorator {
 				if (body == null)
 					throw new MissingBodyException().unchecked();
 				return body;
-				
 			} catch (DecodeException e) {
-				throw new BadRequest("Unrecognized content-type " + ctParts[0] + 
-						" and content does not decode as JSON: " + e.getMessage()).unchecked();
+				throw new BadRequest(JsonDecodingExceptionFormatter.formatFriendlyErrorMessage(e), e).unchecked();
 			}
 		}
 	}
