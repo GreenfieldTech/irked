@@ -35,6 +35,14 @@ package:
    - maven-repo/*
    - target/*
 
+maven-repo:
+  stage: build
+  needs: [ package ]
+  script:
+    mvn -DskipTests -Dmaven.gpg.skip=true deploy
+  rules:
+    - if: $CI_COMMIT_TAG
+
 ossrh:
  stage: deploy
  image: maven:3-jdk-11
