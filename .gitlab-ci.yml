@@ -26,7 +26,6 @@ get-repo:
 
 package:
  stage: build
- image: maven:3-jdk-11
  script:
   - mvn -s m2-settings.xml -B package
   - mvn -s m2-settings.xml -B -DskipTests -DaltDeploymentRepository=repo::default::file:./maven-repo/$(grep -q SNAPSHOT pom.xml && echo snapshots || echo releases) deploy
@@ -36,12 +35,13 @@ package:
    - target/*
 
 maven-repo:
-  stage: build
-  needs: [ package ]
-  script:
-    mvn -DskipTests -Dmaven.gpg.skip=true deploy
-  rules:
-    - if: $CI_COMMIT_TAG
+ image: maven:3-jdk-11
+ stage: build
+ needs: [ package ]
+ script:
+  mvn -DskipTests -Dmaven.gpg.skip=true deploy
+ rules:
+  - if: $CI_COMMIT_TAG
 
 ossrh:
  stage: deploy
