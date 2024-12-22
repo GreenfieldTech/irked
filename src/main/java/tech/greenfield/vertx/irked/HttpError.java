@@ -2,6 +2,7 @@ package tech.greenfield.vertx.irked;
 
 import java.util.*;
 
+import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
@@ -201,6 +202,23 @@ public class HttpError extends Exception {
 	 */
 	public RuntimeException unchecked() {
 		return new UncheckedHttpError();
+	}
+	
+	/**
+	 * Helper method to return this HTTP error in a Vert.x async processing chain.
+	 * So instead of:
+	 * <code><pre>
+	 * return Future.failedFuture(new BadRequest("description"));
+	 * </pre></code>
+	 * Do:
+	 * <code><pre>
+	 * return new BadRequest("description").toFailure();
+	 * </pre></code>
+	 * @param <T>
+	 * @return
+	 */
+	public <T> Future<T> toFailure() {
+		return Future.failedFuture(this);
 	}
 	
 	/**
