@@ -175,7 +175,7 @@ public abstract class RouteConfiguration {
 		return Arrays.stream(getAnnotation(Order.class)).findAny().map(Order::value).orElse(0);
 	}
 
-	Pattern trailingSlashRemover = Pattern.compile("./$");
+	private static Pattern trailingSlashRemover = Pattern.compile("./$");
 
 	private List<Route> routes = new ArrayList<>();
 
