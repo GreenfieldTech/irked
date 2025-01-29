@@ -484,6 +484,8 @@ public class Request extends RoutingContextDecorator {
 			return sendJSON((JsonObject)object);
 		else if (object instanceof JsonArray)
 			return sendJSON((JsonArray)object);
+		else if (object instanceof String)
+			return sendContent((String)object);
 		else
 			return sendObject(object);
 	}
