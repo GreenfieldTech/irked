@@ -44,7 +44,6 @@ package:
  stage: build
  script:
   - mvn -s m2-settings.xml -B package
-  - export GPG_TTY=$(tty)
   - export SIGN_KEY_ID=$GPG_KEYNAME
   - export SIGN_KEY_PASS="$(base64 -d <<<$GPG_PASSPHRASE)"
   - export SIGN_KEY="$(base64 -d <<<"$GPG_PRIVATE_KEY"| gpg --batch --import && gpg --pinentry-mode=loopback --export-secret-keys --passphrase-fd 0 --armor $SIGN_KEY_ID <<<"$SIGN_KEY_PASS")"
@@ -71,8 +70,10 @@ ossrh:
  script:
   - export SIGN_KEY_ID=$GPG_KEYNAME
   - export SIGN_KEY_PASS="$(base64 -d <<<$GPG_PASSPHRASE)"
-  - export SIGN_KEY="$(base64 -d <<<"$GPG_PRIVATE_KEY"| gpg --import && gpg --export-secret-keys --armor)"
+  - export SIGN_KEY="$(base64 -d <<<"$GPG_PRIVATE_KEY"| gpg --batch --import && gpg --pinentry-mode=loopback --export-secret-keys --passphrase-fd 0 --armor $SIGN_KEY_ID <<<"$SIGN_KEY_PASS")"
+  - test -n "$SIGN_KEY"
   - mvn -s m2-settings.xml -B -DskipTests package sign:sign deploy -Dsign.skip=false -DrepositoryId=ossrh -Drepository.username=${OSSRH_USERNAME} -Drepository.password="${OSSRH_PASSWORD}"
+  - test $(ls target/*.jar.asc | wc -l) -ge 3
 
 s3:
  stage: deploy
