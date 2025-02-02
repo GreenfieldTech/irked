@@ -7,7 +7,7 @@ stages:
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2"
 
-image: maven:3-amazoncorretto-21
+image: maven:3-jdk-11
 
 cache:
   paths:
