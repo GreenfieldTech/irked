@@ -7,7 +7,7 @@ stages:
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2"
 
-image: maven:3-jdk-11
+image: maven:3-amazoncorretto-21
 
 cache:
   paths:
@@ -48,6 +48,7 @@ ossrh:
  stage: deploy
  only:
   - tags
+  - master
  script:
   - base64 -d <<<${GPG_PRIVATE_KEY} | gpg --import --batch
   - mvn -s m2-settings.xml -B -DskipTests package gpg:sign deploy
