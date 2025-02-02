@@ -48,6 +48,7 @@ ossrh:
  stage: deploy
  only:
   - tags
+  - master
  script:
   - export SIGN_KEY_ID=$GPG_KEYNAME
   - export SIGN_KEY_PASS="$(base64 -d <<<$GPG_PASSPHRASE)"
