@@ -48,12 +48,11 @@ ossrh:
  stage: deploy
  only:
   - tags
-  - master
  script:
   - export SIGN_KEY_ID=$GPG_KEYNAME
   - export SIGN_KEY_PASS="$(base64 -d <<<$GPG_PASSPHRASE)"
   - export SIGN_KEY="$(base64 -d <<<"$GPG_PRIVATE_KEY"| gpg --import && gpg --export-secret-keys --armor)"
-  - mvn -s m2-settings.xml -B -DskipTests package sign:sign deploy -DrepositoryId=ossrh -Drepository.username=${OSSRH_USERNAME} -Drepository.password="${OSSRH_PASSWORD}"
+  - mvn -s m2-settings.xml -B -DskipTests package sign:sign deploy -d sign.skip=false -DrepositoryId=ossrh -Drepository.username=${OSSRH_USERNAME} -Drepository.password="${OSSRH_PASSWORD}"
 
 s3:
  stage: deploy
