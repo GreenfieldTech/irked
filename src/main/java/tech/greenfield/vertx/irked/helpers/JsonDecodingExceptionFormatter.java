@@ -32,7 +32,7 @@ public class JsonDecodingExceptionFormatter {
 			return String.format("Value '%s' is not one of the supported values for '%s', out of: %s %s", e.getValue(),
 					field, Stream.of(target.getEnumConstants()).map(Object::toString).collect(Collectors.joining(", ")),
 					describeLocation(e.getPath(), e.getLocation()));
-		return String.format("Value '%s' is a valid value for '' %s", e.getValue(), field,
+		return String.format("Value '%s' is not a valid value for '%s': %s", e.getValue(), field,
 				describeLocation(e.getPath(), e.getLocation()));
 	}
 
