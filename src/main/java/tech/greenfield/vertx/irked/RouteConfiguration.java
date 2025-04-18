@@ -89,11 +89,9 @@ public abstract class RouteConfiguration {
 	}
 
 	<T extends Annotation> Stream<String> uriForAnnotation(Class<T> anot) {
-		Annotation[] spec = getAnnotation(anot);
-		if (spec.length == 0) return Stream.of();
 		try {
 			// all routing annotations store the URI path in `value()`
-			return Arrays.stream(spec)
+			return Arrays.stream(getAnnotation(anot))
 					.map(s -> annotationToValue(s))
 					.filter(s -> Objects.nonNull(s));
 		} catch (RuntimeException e) {
