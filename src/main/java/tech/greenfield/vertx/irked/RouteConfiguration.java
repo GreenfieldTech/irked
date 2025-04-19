@@ -174,6 +174,7 @@ public abstract class RouteConfiguration {
 	}
 
 	private static Pattern trailingSlashRemover = Pattern.compile("./$");
+	private static boolean normalizeSlashWildcardEnd = System.getProperty("irked.disable-normalize-wildcard-path-end") == null;
 
 	private List<Route> routes = new ArrayList<>();
 
@@ -181,6 +182,11 @@ public abstract class RouteConfiguration {
 		return uriForAnnotation(anot)
 				.filter(s -> Objects.nonNull(s))
 				.map(s -> prefix + s)
+				.flatMap(s -> {
+					if (normalizeSlashWildcardEnd && s.contains(":") && s.endsWith("/*")) // "/*" should mean "/?*" even for pattern paths
+						return Stream.of(s, s.substring(0, s.length() - 1));
+					return Stream.of(s);
+				})
 				.map(s -> trailingSlashRemover.matcher(s).find() ? s.substring(0, s.length() - 1) : s) // normalize trailing slashes because https://github.com/vert-x3/vertx-web/issues/786
 		;
 	}
