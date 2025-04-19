@@ -15,7 +15,7 @@ ported to all releases.
 
 ## Installation
 
-Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.5.14).
+Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.5.14.1).
 
 If using Maven, add Irked as a dependency in your `pom.xml` file:
 
@@ -23,12 +23,12 @@ If using Maven, add Irked as a dependency in your `pom.xml` file:
 <dependency>
     <groupId>tech.greenfield</groupId>
     <artifactId>irked-vertx</artifactId>
-    <version>4.5.14</version>
+    <version>4.5.14.1</version>
 </dependency>
 ```
 
 For other build tools, see the Maven Central website for the syntax, but it generally
-boils down to just using `tech.greenfield:irked-vertx:4.5.14` as the dependency string.
+boils down to just using `tech.greenfield:irked-vertx:4.5.14.1` as the dependency string.
 
 ## Quick Start
 
@@ -772,8 +772,6 @@ BodyHandler bodyHandler = BodyHandler.create();
 This will cause all requests to first be captured by the `BodyHandler` before being passed to
 other handlers.
 
-Middlewares are very useful for all kinds of pre-processing, for example - checking authorization.
-
 #### Easily Pass Business Logic Errors To Clients
 
 Sometimes it is necessary for the REST API to actually generate error responses to communicate
@@ -929,39 +927,3 @@ class SpecificExample extends BaseExample {
 
 In the above example, when mounting `SpecificExample` in a router, both `/document` 
 (implemented in `SpecificExample.document`) as well as `/` (implemented in `BaseExample.index`) become visible.
-
-### Optional Configuration
-
-#### Handling of wildcard path ending ("rest" capture) and parametrized paths
-
-Irked uses the "`/*`" path part as the default path for annotations (when you don't
-specify a path, for example `@Endpoint` without parenthesis). This is supposed to
-match both paths that end with "`/`" and paths that don't. Consider this example:
-
-```java
-class Main extends Controller {
-	@Endpoint("/foo")
-	FooContronller foo = new FooController();
-}
-
-class FooController extends Controller {
-	@Endpoint
-	WebHandler sayThanks = r -> r.send("Thanks");
-}
-```
-
-The `sayThanks` handler will be executed for all of these requests: `/foo`, `/foo/`, `/foo/bar`.
-
-This behavior works well enough in classic Vert.x (when using paths that end in "`/*`") -
-as long as the path does not include dynamic parameters. If the path does include parameters,
-the path is compiled to a regular expression that captures "the rest of that request URL" into
-a parameter named "`rest`", but as a result it will reject requests without the beginning "`/`".
-So in the example above, it would not accept `/foo` as a valid request.
-
-Irked works around this problem by detecting parameterized paths that end with "/*" and
-converts them into two handlers - one with the original "`/*`" suffix and another without
-it, to match requests where we expect the "`/*`" to match an empty string.
-
-This may induce unexpected behaviors in some edge cases, so this workaround can be disabled
-by setting the Java system property `irked.disable-normalize-wildcard-path-end` to any
-value.
