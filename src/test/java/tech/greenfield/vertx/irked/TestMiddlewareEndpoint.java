@@ -33,8 +33,11 @@ public class TestMiddlewareEndpoint extends TestBase {
 	}
 	
 	public class TestMainController extends Controller {
-		@Endpoint("/test/:param")
-		TestController subController = new TestController();
+		@Endpoint("/static-test")
+		TestController subController1 = new TestController();
+
+		@Endpoint("/dynamic-test/:param")
+		TestController subController2 = new TestController();
 	}
 	
 	@BeforeEach
@@ -43,8 +46,17 @@ public class TestMiddlewareEndpoint extends TestBase {
 	}
 	
 	@Test
-	public void testMiddlewareEndpointIsCalled(VertxTestContext context, Vertx vertx) {
-		getClient(vertx).get(port, "localhost", "/test/foo").send().map(res -> {
+	public void testMiddlewareEndpointIsCalledWithParam(VertxTestContext context, Vertx vertx) {
+		getClient(vertx).get(port, "localhost", "/dynamic-test/foo").send().map(res -> {
+			assertThat(res, isSuccess());
+			return null;
+		})
+		.onComplete(context.succeedingThenComplete());
+	}
+	
+	@Test
+	public void testMiddlewareEndpointIsCalledWithoutParam(VertxTestContext context, Vertx vertx) {
+		getClient(vertx).get(port, "localhost", "/static-test").send().map(res -> {
 			assertThat(res, isSuccess());
 			return null;
 		})
