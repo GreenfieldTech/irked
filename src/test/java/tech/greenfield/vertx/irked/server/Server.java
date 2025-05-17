@@ -1,13 +1,13 @@
 package tech.greenfield.vertx.irked.server;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
+import io.vertx.core.Future;
+import io.vertx.core.VerticleBase;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import tech.greenfield.vertx.irked.Controller;
 import tech.greenfield.vertx.irked.Irked;
 
-public class Server extends AbstractVerticle {
+public class Server extends VerticleBase {
 
 	private Controller test;
 	private HttpServer server;
@@ -18,21 +18,19 @@ public class Server extends AbstractVerticle {
 	}
 
 	@Override
-	public void start(Promise<Void> startFuture) throws Exception {
-		Promise<HttpServer> async = Promise.promise();
-		(server = vertx.createHttpServer(getHttpServerOptions())).requestHandler(
+	public Future<HttpServer> start() throws Exception {
+		return (server = vertx.createHttpServer(getHttpServerOptions())).requestHandler(
 				Irked.router(vertx).configure(test).configReport(System.out))
-				.listen(config().getInteger("port")).andThen(async);
-		async.future().map((Void) null).onComplete(startFuture);
+				.listen(config().getInteger("port"));
 	}
 
 	public static HttpServerOptions getHttpServerOptions() {
 		return httpServerOptions;
 	}
-
-	@Override
-	public void stop(Promise<Void> stopFuture) throws Exception {
-		server.close().andThen(stopFuture);
-	}
 	
+	@Override
+	public Future<Void> stop() throws Exception {
+		return server.close();
+	}
+
 }
