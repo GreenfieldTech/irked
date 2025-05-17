@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.impl.RouteImplHelper;
@@ -175,7 +176,14 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			@Override
 			public void handle(Request r) {
 				try {
-					method.invoke(impl, createParamBlock(resolveRequestContext(r)));
+					Object retValue = method.invoke(impl, createParamBlock(resolveRequestContext(r)));
+					if (method.getReturnType().equals(void.class)) // no return value expected
+						return;
+					Future<?> resultHandler = retValue instanceof Future ? (Future<?>) retValue : Future.succeededFuture(retValue);
+					resultHandler.onComplete(val -> {
+						if (!r.response().headWritten())
+							r.sendOrFail(val);
+					});
 				} catch (RoutingContextImplException e) {
 					r.fail(new InternalServerError(e.getMessage(), e));
 				} catch (InvocationTargetException e) { // user exception

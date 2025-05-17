@@ -26,11 +26,30 @@ get-repo:
   paths:
    - maven-repo/*
 
+## Signing:
+## The Gitlab CI has the signing private key and its passphrase stored in secure variables.
+## The signing key is set to expire every year. If the key expires, and has not been leaked,
+## You may renew it:
+## 1. Import the private key on your local machine - the same way as the CI below is using it.
+## 2. Run `gpg --edit-key $GPG_KEYNAME` to edit the key
+## 3. Type `expire` to set a new expiration date, and set it to January 1st of the next year.
+## 4. Hit CTRL+D to exit and approve to save change.
+## 5. Run `gpg -K` to verify that the changes have been saved.
+## 6. Run `gpg --keyserver keyserver.ubuntu.com --send-keys $GPG_KEYNAME` to update the key
+##    with the new expiration date in the key server Maven central uses.
+## 7. Re-export the private key by running `gpg --export-secret-keys 1D16F5A572DF7D328F542DC931248CD415E6C70A | base64 -w0`
+##    and copy the resulting text into the Gitlab CI `GPG_PRIVATE_KEY` variable.
+
 package:
  stage: build
  script:
   - mvn -s m2-settings.xml -B package
-  - mvn -s m2-settings.xml -B -DskipTests -DaltDeploymentRepository=repo::default::file:./maven-repo/$(grep -q SNAPSHOT pom.xml && echo snapshots || echo releases) deploy
+  - export SIGN_KEY_ID=$GPG_KEYNAME
+  - export SIGN_KEY_PASS="$(base64 -d <<<$GPG_PASSPHRASE)"
+  - export SIGN_KEY="$(base64 -d <<<"$GPG_PRIVATE_KEY"| gpg --batch --import && gpg --pinentry-mode=loopback --export-secret-keys --passphrase-fd 0 --armor $SIGN_KEY_ID <<<"$SIGN_KEY_PASS")"
+  - test -n "$SIGN_KEY"
+  - mvn -s m2-settings.xml -B -DskipTests -DaltDeploymentRepository=repo::default::file:./maven-repo/$(grep -q SNAPSHOT pom.xml && echo snapshots || echo releases) deploy sign:sign -Dsign.skip=false
+  - test $(ls target/*.jar.asc | wc -l) -ge 3
  artifacts:
   paths:
    - maven-repo/*
@@ -49,10 +68,12 @@ ossrh:
  only:
   - tags
  script:
-  - base64 -d <<<${GPG_PRIVATE_KEY} | gpg --import --batch
-  - mvn -s m2-settings.xml -B -DskipTests package gpg:sign deploy
-    -Dmaven.gpg.skip=false -Dgpg.keyname=${GPG_KEYNAME} -Dgpg.passphrase="$(base64 -d <<<${GPG_PASSPHRASE})"
-    -DrepositoryId=ossrh -Drepository.username=${OSSRH_USERNAME} -Drepository.password="${OSSRH_PASSWORD}"
+  - export SIGN_KEY_ID=$GPG_KEYNAME
+  - export SIGN_KEY_PASS="$(base64 -d <<<$GPG_PASSPHRASE)"
+  - export SIGN_KEY="$(base64 -d <<<"$GPG_PRIVATE_KEY"| gpg --batch --import && gpg --pinentry-mode=loopback --export-secret-keys --passphrase-fd 0 --armor $SIGN_KEY_ID <<<"$SIGN_KEY_PASS")"
+  - test -n "$SIGN_KEY"
+  - mvn -s m2-settings.xml -B -DskipTests package sign:sign deploy -Dsign.skip=false -DrepositoryId=ossrh -Drepository.username=${OSSRH_USERNAME} -Drepository.password="${OSSRH_PASSWORD}"
+  - test $(ls target/*.jar.asc | wc -l) -ge 3
 
 s3:
  stage: deploy

@@ -30,12 +30,12 @@
 	</developers>
 
 	<properties>
-		<vertx.version>5.0.0.CR1</vertx.version>
+		<vertx.version>5.0.0</vertx.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<maven.compiler.release>11</maven.compiler.release>
 		<generated.statuses.directory>${project.build.directory}/generated-sources/irked</generated.statuses.directory>
-		<maven.gpg.skip>true</maven.gpg.skip>
+		<sign.skip>true</sign.skip>
 	</properties>
 
 	<licenses>
@@ -328,17 +328,12 @@
 				<version>3.0.0-M1</version>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>3.1.0</version>
-				<configuration>
-					<skip>${maven.gpg.skip}</skip>
-					<gpgArguments><arg>--pinentry-mode</arg><arg>loopback</arg></gpgArguments>
-				</configuration>
+				<groupId>org.simplify4u.plugins</groupId>
+				<artifactId>sign-maven-plugin</artifactId>
+				<version>1.1.0</version>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
-						<phase>verify</phase>
 						<goals>
 							<goal>sign</goal>
 						</goals>

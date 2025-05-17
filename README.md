@@ -15,7 +15,7 @@ ported to all releases.
 
 ## Installation
 
-Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.5.11.3).
+Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/4.5.14.2).
 
 If using Maven, add Irked as a dependency in your `pom.xml` file:
 
@@ -23,18 +23,18 @@ If using Maven, add Irked as a dependency in your `pom.xml` file:
 <dependency>
     <groupId>tech.greenfield</groupId>
     <artifactId>irked-vertx</artifactId>
-    <version>4.5.11.3</version>
+    <version>4.5.14.2</version>
 </dependency>
 ```
 
 For other build tools, see the Maven Central website for the syntax, but it generally
-boils down to just using `tech.greenfield:irked-vertx:4.5.11.3` as the dependency string.
+boils down to just using `tech.greenfield:irked-vertx:4.5.14.2` as the dependency string.
 
 ## Quick Start
 
 You may want to take a look at the example application at [`src/example/java/tech/greenfield/vertx/irked/example/App.java`](src/example/java/tech/greenfield/vertx/irked/example/App.java) which shows how to create a new Vert.x Verticle using an Irked `Router` and a few very simple APIs. Then you may want to read the rest of this document for explanations, rationale and more complex API examples.
 
-To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.5.11 installation:
+To run the example application, after compiling (for example, using `mvn compile`) run it with your full Vert.x 4.5.14 installation:
 
 ```
 vertx run -cp target/classes/ tech.greenfield.vertx.irked.example.App
@@ -89,6 +89,11 @@ class Root extends Controller {
         // the irked Request object offers some useful helper methods over the
         // standard Vert.x RoutingContext
         r.send(new BadRequest("Creating resources is not yet implemented"));
+    }
+    
+    @Put("/update")
+    String update(Request r) {
+        return "Updated completed";
     }
 }
 ```
@@ -493,6 +498,17 @@ like so:
 @Get("/catalog/:producer/:id")
 public void getCatalogItem(Request r, @Name("producer") String producer, @Name("id") Integer id) {
 ```
+
+### Routing Methods Return Values (aka "lazy methods")
+
+When using methods for routing handling, Irked can handle the sending itself - you don't need to call any of the `Request`
+sending methods.
+
+If the return value from a method is a Vert.x `Future`, then Irked will chain on an `.onComplete(Request::sendOrFail)`,
+otherwise Irked will use `Request.send(result)` with the result.
+
+Please note that if a routing method returns a `null`,
+then Irked will send that as an `application/json` result whose value is a JSON `null`.
 
 ### Handle Failures
 

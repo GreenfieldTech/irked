@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static tech.greenfield.vertx.irked.Matchers.notFound;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Random;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -33,7 +35,7 @@ public class TestBase {
 	}
 	@RegisterExtension
 	private static VertxExtension vertxExtension = new VertxExtension();
-	protected final Integer port = new Random().nextInt(30000)+20000;
+	protected Integer port = getNextPort();
 
 	protected static WebClientExt getClient(Vertx vertx) {
 		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions()
@@ -44,8 +46,21 @@ public class TestBase {
 	protected void deployController(Controller controller, Vertx vertx, Handler<AsyncResult<String>> handler) {
 		Server server = new Server(controller);
 
+		while (true) {
+			try {
+				var testSocket = new ServerSocket(port);
+				testSocket.close();
+				break;
+			} catch (IOException e) {
+				port = getNextPort();
+			}
+		}
 		DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("port", port));
 		vertx.deployVerticle(server, options).andThen(handler);
+	}
+	
+	private static int getNextPort() {
+		return new Random().nextInt(30000)+20000;
 	}
 
 	protected void verifyNotFound(HttpResponse<Buffer> r) {
