@@ -207,13 +207,13 @@ public class HttpError extends Exception {
 	/**
 	 * Helper method to return this HTTP error in a Vert.x async processing chain.
 	 * So instead of:
-	 * <code><pre>
+	 * {@code
 	 * return Future.failedFuture(new BadRequest("description"));
-	 * </pre></code>
+	 * }
 	 * Do:
-	 * <code><pre>
+	 * {@code
 	 * return new BadRequest("description").toFailure();
-	 * </pre></code>
+	 * }
 	 * @param <T>
 	 * @return
 	 */
