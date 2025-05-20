@@ -57,7 +57,7 @@ public class TestFieldController extends TestBase {
 		Function<Request,Result> createFunc = r -> new Result() {{ message = "created"; }};
 		
 		@Delete("/delete-function")
-		Function<Request,Future<Void>> deleteFunc = r -> Future.failedFuture(new Unauthorized());
+		Function<Request,?> deleteFunc = r -> Future.failedFuture(new Unauthorized());
 	}
 
 	@BeforeEach
