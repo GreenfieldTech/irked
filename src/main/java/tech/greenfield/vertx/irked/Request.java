@@ -474,8 +474,8 @@ public class Request extends RoutingContextDecorator {
 	 */
 	@SuppressWarnings("unchecked")
 	public Future<Void> send(Object object) {
-		if (object instanceof List)
-			return sendList((List<Object>)object);
+		if (object instanceof Collection)
+			return sendStream(((Collection<Object>)object).stream());
 		else if (object instanceof Stream)
 			return sendStream((Stream<Object>)object);
 		else if (object instanceof Throwable)
