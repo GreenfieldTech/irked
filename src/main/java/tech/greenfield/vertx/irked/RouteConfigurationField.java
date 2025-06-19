@@ -3,7 +3,9 @@ package tech.greenfield.vertx.irked;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.util.function.Function;
 
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.impl.OrderListener;
 import tech.greenfield.vertx.irked.exceptions.InvalidRouteConfiguration;
@@ -51,13 +53,28 @@ public class RouteConfigurationField extends RouteConfiguration {
 		return field.getName();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	Handler<? super Request> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
-		if (!Handler.class.isAssignableFrom(field.getType()))
-			throw new InvalidRouteConfiguration(this + " is not a valid handler or controller");
+		if (Handler.class.isAssignableFrom(field.getType()))
+			return getFieldHandler();
+		if (Function.class.isAssignableFrom(field.getType()))
+			return getFunctionHandler();
+		throw new InvalidRouteConfiguration(this + " is not a valid handler or controller");
+	}
+	
+	Handler<? super Request> getFieldHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
 		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
 		final Handler<Request> handler = (Handler<Request>) field.get(impl);
+		if (handler instanceof OrderListener)
+			return new FieldHandlerWithOrderListener(handler);
+		return new FieldHandler(handler);
+	}
+	
+	Handler<? super Request> getFunctionHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		final Function<Request, Object> handler = (Function<Request,Object>) field.get(impl);
 		if (handler instanceof OrderListener)
 			return new FieldHandlerWithOrderListener(handler);
 		return new FieldHandler(handler);
@@ -91,6 +108,20 @@ public class RouteConfigurationField extends RouteConfiguration {
 		public FieldHandler(Handler<Request> handler) {
 			this.handler = handler;
 		}
+		public FieldHandler(Function<Request, Object> handler) {
+			this.handler = r -> {
+				try {
+					Object retValue = handler.apply(r);
+					Future<?> resultHandler = retValue instanceof Future ? (Future<?>) retValue : Future.succeededFuture(retValue);
+					resultHandler.onComplete(val -> {
+						if (!r.response().headWritten())
+							r.sendOrFail(val);
+					});
+				} catch (Throwable cause) {
+					r.fail(cause);
+				}
+			};
+		}
 		@Override
 		public void handle(Request r) {
 			try {
@@ -108,6 +139,10 @@ public class RouteConfigurationField extends RouteConfiguration {
 	private class FieldHandlerWithOrderListener extends FieldHandler implements OrderListener {
 
 		public FieldHandlerWithOrderListener(Handler<Request> handler) {
+			super(handler);
+		}
+
+		public FieldHandlerWithOrderListener(Function<Request, Object> handler) {
 			super(handler);
 		}
 

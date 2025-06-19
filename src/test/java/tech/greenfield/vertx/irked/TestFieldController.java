@@ -6,9 +6,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static tech.greenfield.vertx.irked.Matchers.*;
 
+import java.util.function.Function;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Checkpoint;
@@ -20,6 +23,8 @@ import tech.greenfield.vertx.irked.annotations.Put;
 import tech.greenfield.vertx.irked.base.TestBase;
 import tech.greenfield.vertx.irked.status.BadRequest;
 import tech.greenfield.vertx.irked.status.NoContent;
+import tech.greenfield.vertx.irked.status.OK;
+import tech.greenfield.vertx.irked.status.Unauthorized;
 
 public class TestFieldController extends TestBase {
 
@@ -43,6 +48,16 @@ public class TestFieldController extends TestBase {
 		WebHandler delete = r -> {
 			r.response(new NoContent()).end();
 		};
+		
+		class Result {
+			public String message;
+		}
+		
+		@Post("/post-function")
+		Function<Request,Result> createFunc = r -> new Result() {{ message = "created"; }};
+		
+		@Delete("/delete-function")
+		Function<Request,?> deleteFunc = r -> Future.failedFuture(new Unauthorized());
 	}
 
 	@BeforeEach
@@ -99,5 +114,29 @@ public class TestFieldController extends TestBase {
 		.onFailure(context::failNow)
 		.onSuccess(flag(async));
 	}
+
+	@Test
+	public void testPostFunction(VertxTestContext context, Vertx vertx) {
+		getClient(vertx).post(port, "localhost", "/post-function").send("{}").map(res -> {
+			assertThat(res, is(status(new OK())));
+			JsonObject o = res.bodyAsJsonObject();
+			assertThat(o.getValue("message"), equalTo("created"));
+			return null;
+		})
+		.onComplete(context.succeedingThenComplete());
+	}
+
+	@Test
+	public void testDeleteFunction(VertxTestContext context, Vertx vertx) {
+		Checkpoint async = context.checkpoint();
+		getClient(vertx).delete(port, "localhost", "/delete-function").send().map(res -> {
+			assertThat(res, is(status(new Unauthorized())));
+			assertThat(res.bodyAsString(), is(equalTo("Unauthorized")));
+			return null;
+		})
+		.onFailure(context::failNow)
+		.onSuccess(flag(async));
+	}
+
 
 }
