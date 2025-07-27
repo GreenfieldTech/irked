@@ -1,6 +1,7 @@
 package tech.greenfield.vertx.irked;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -381,7 +382,10 @@ public abstract class RouteConfiguration {
 	@SuppressWarnings("unchecked")
 	private static Class<Annotation>[] findRouteAnnotations() {
 		String packageName = annotationPackage.getName();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(Endpoint.class.getClassLoader().getResourceAsStream(packageName.replaceAll("[.]", "/") + "/annotations.list")));
+		InputStream annotationsList = Endpoint.class.getClassLoader().getResourceAsStream(packageName.replaceAll("[.]", "/") + "/annotations.list");
+		if (annotationsList == null)
+			return new Class[] {};
+		BufferedReader reader = new BufferedReader(new InputStreamReader(annotationsList));
 		return reader.lines().map(name -> packageName + "." + name)
 				.map(className -> {
 					try {

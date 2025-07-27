@@ -34,7 +34,7 @@ public class TestWebSocket extends TestBase {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerTextPinger(), vertx, context.succeeding(s -> {
 			getClient(vertx).websocket(port, "localhost", "/ping")
-			.thenAccept(ws -> {
+			.onSuccess(ws -> {
 				ws.writeTextMessage(PING);
 				ws.handler(buf -> {
 					assertThat(buf.toString(), equalTo(PONG));
@@ -42,7 +42,8 @@ public class TestWebSocket extends TestBase {
 					vertx.undeploy(s);
 					async.flag();
 				});
-			}).exceptionally(failureHandler(context));
+			})
+			.onFailure(context::failNow);
 		}));
 	}
 
@@ -60,7 +61,7 @@ public class TestWebSocket extends TestBase {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerBinaryPinger(), vertx, context.succeeding(s -> {
 			getClient(vertx).websocket(port, "localhost", "/binary-ping")
-			.thenAccept(ws -> {
+			.onSuccess(ws -> {
 				ws.write(Buffer.buffer(BPING));
 				ws.handler(buf -> {
 					assertThat(buf.getBytes(), equalTo(BPONG));
@@ -68,7 +69,8 @@ public class TestWebSocket extends TestBase {
 					vertx.undeploy(s);
 					async.flag();
 				});
-			}).exceptionally(failureHandler(context));
+			})
+			.onFailure(context::failNow);
 		}));
 	}
 	
@@ -84,7 +86,7 @@ public class TestWebSocket extends TestBase {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerMethodPinger(), vertx, context.succeeding(s -> {
 			getClient(vertx).websocket(port, "localhost", "/ping-method", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
-			.thenAccept(ws -> {
+			.onSuccess(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
 					assertThat(text, equalTo(PONG));
@@ -92,7 +94,8 @@ public class TestWebSocket extends TestBase {
 					vertx.undeploy(s);
 					async.flag();
 				});
-			}).exceptionally(failureHandler(context));
+			})
+			.onFailure(context::failNow);
 		}));
 	}
 	
@@ -121,7 +124,7 @@ public class TestWebSocket extends TestBase {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAdvancedMethodPinger(), vertx, context.succeeding(s -> {
 			getClient(vertx).websocket(port, "localhost", "/ping-adv-method", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
-			.thenAccept(ws -> {
+			.onSuccess(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
 					assertThat(text, equalTo(PONG));
@@ -129,7 +132,8 @@ public class TestWebSocket extends TestBase {
 					vertx.undeploy(s);
 					async.flag();
 				});
-			}).exceptionally(failureHandler(context));
+			})
+			.onFailure(context::failNow);
 		}));
 	}
 	
@@ -157,7 +161,7 @@ public class TestWebSocket extends TestBase {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAuthorizePing(), vertx, context.succeeding(s -> {
 			getClient(vertx).websocket(port, "localhost", "/with-auth", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
-			.thenAccept(ws -> {
+			.onSuccess(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
 					assertThat(text, equalTo(PONG));
@@ -165,7 +169,8 @@ public class TestWebSocket extends TestBase {
 					vertx.undeploy(s);
 					async.flag();
 				});
-			}).exceptionally(failureHandler(context));
+			})
+			.onFailure(context::failNow);
 		}));
 	}
 
@@ -174,9 +179,9 @@ public class TestWebSocket extends TestBase {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAuthorizePing(), vertx, context.succeeding(s -> {
 			getClient(vertx).websocket(port, "localhost", "/with-auth", HeadersMultiMap.httpHeaders().add("Authorization","invalid"))
-			.thenAccept(ws -> {
+			.onSuccess(ws -> {
 				context.failNow(new Exception("Invalid authorization should not succeed"));
-			}).exceptionally(t -> {
+			}).onFailure(t -> {
 				while (t instanceof RuntimeException && t.getCause() != null) t = t.getCause();
 				if (t instanceof UpgradeRejectedException) {
 					var e = (UpgradeRejectedException)t;
@@ -185,7 +190,6 @@ public class TestWebSocket extends TestBase {
 					async.flag();
 				} else
 					context.failNow(t);
-				return null;
 			});
 		}));
 	}
@@ -203,14 +207,15 @@ public class TestWebSocket extends TestBase {
 		vertx.exceptionHandler(context::failNow);
 		deployController(new TestMessageHandlingFailure(), vertx, context.succeeding(s -> {
 			getClient(vertx).websocket(port, "localhost", "/failures", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
-			.thenAccept(ws -> {
+			.onSuccess(ws -> {
 				ws.closeHandler(v -> {
 					assertThat(ws.closeStatusCode(), is(equalTo((short)1011)));
 					assertThat(ws.closeReason(), is(equalTo("Unexpected exception")));
 					async.flag();
 				});
 				ws.writeTextMessage(PING);
-			}).exceptionally(failureHandler(context));
+			})
+			.onFailure(context::failNow);
 		}));
 	}
 

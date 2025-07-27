@@ -1,7 +1,8 @@
 package tech.greenfield.vertx.irked.example;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
+import io.vertx.core.Future;
+import io.vertx.core.VerticleBase;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import tech.greenfield.vertx.irked.Controller;
 import tech.greenfield.vertx.irked.Irked;
@@ -14,12 +15,12 @@ import tech.greenfield.vertx.irked.helpers.Redirect;
  * Example Irked verticle
  * @author odeda
  */
-public class App extends AbstractVerticle {
+public class App extends VerticleBase {
 
 	@Override
-	public void start(Promise<Void> startFuture) throws Exception {
+	public Future<HttpServer> start() throws Exception {
 		System.out.println("Starting Irked example app listening on port " + config().getInteger("port", 8000));
-		vertx.createHttpServer(new HttpServerOptions())
+		return vertx.createHttpServer(new HttpServerOptions())
 				.requestHandler(Irked.irked(vertx).router()
 						.configure(new ExampleAPIv1(), "/v1")
 						.configure(new ExampleAPIv2(), "/v2")
@@ -32,9 +33,7 @@ public class App extends AbstractVerticle {
 							@Endpoint("/*")
 							WebHandler failureHandler = Request.failureHandler();
 						}))
-				.listen(config().getInteger("port", 8000))
-				.onSuccess(v -> startFuture.complete())
-				.onFailure(t -> startFuture.fail(t));
+				.listen(config().getInteger("port", 8000));
 	}
 
 }

@@ -191,7 +191,7 @@ public class Request extends RoutingContextDecorator {
 	 * Convert request body to an instance of the specified POJO
 	 * 
 	 * Currently the followed request body content types are supported:
-	 *  * <code>application/json</code> - the body is read using {@link RoutingContext#getBodyAsJson()} then
+	 *  * <code>application/json</code> - the body is read using {@link RequestBody#asJsonObject()} then
 	 *    mapped to the bean type using {@link JsonObject#mapTo(Class)}
 	 *  * <code>application/x-www-form-urlencoded</code> - the body is read using {@link HttpServerRequest#formAttributes()}
 	 *   into a {@link JsonObject} as keys with string values, then mapped to the bean type using {@link JsonObject#mapTo(Class)}.

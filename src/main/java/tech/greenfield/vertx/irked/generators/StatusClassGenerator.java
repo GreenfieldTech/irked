@@ -51,6 +51,7 @@ public class StatusClassGenerator {
 	
 	private String loadDefinisions() throws IOException {
 		URL definitions = new URL("https://raw.githubusercontent.com/for-GET/know-your-http-well/master/json/status-codes.json");
+		System.out.println("Loading status code definitions from github:for-GET/know-your-http-well/master/json/status-codes.json");
 		try (var reader = new BufferedReader(new InputStreamReader(definitions.openStream()))) {
 			return reader.lines().collect(Collectors.joining("\n"));
 		}
