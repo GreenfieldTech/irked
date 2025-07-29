@@ -71,25 +71,24 @@
 				</snapshotRepository>
 			</distributionManagement>
 		</profile>
+		
+		<profile>
+			<id>maven-central</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>0.8.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
-
-
-	<distributionManagement>
-		<!--
-		<repository>
-			<id>default</id>
-			<url>file:./maven-repo/releases</url>
-		</repository>
-		-->
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
 
 	<dependencies>
 		<!-- upstream stacks -->
@@ -323,10 +322,12 @@
 					<doclint>all,-missing</doclint>
 				</configuration>
 			</plugin>
+			<!--
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>3.0.0-M1</version>
 			</plugin>
+			-->
 			<plugin>
 				<groupId>org.simplify4u.plugins</groupId>
 				<artifactId>sign-maven-plugin</artifactId>
