@@ -59,20 +59,20 @@ maven-repo:
  stage: build
  needs: [ package ]
  script:
-  mvn -s ci-settings.xml -DskipTests -Dmaven.gpg.skip=true deploy -Pgitlab-maven
+  mvn -s ci-settings.xml -DskipTests -Dmaven.gpg.skip=true deploy
+ rules:
+  - when: never # disable for now, this is supposed to be OSSRH, I believe
+
+maven-central:
+ stage: deploy
  rules:
   - if: $CI_COMMIT_TAG
-
-ossrh:
- stage: deploy
- only:
-  - tags
  script:
   - export SIGN_KEY_ID=$GPG_KEYNAME
   - export SIGN_KEY_PASS="$(base64 -d <<<$GPG_PASSPHRASE)"
   - export SIGN_KEY="$(base64 -d <<<"$GPG_PRIVATE_KEY"| gpg --batch --import && gpg --pinentry-mode=loopback --export-secret-keys --passphrase-fd 0 --armor $SIGN_KEY_ID <<<"$SIGN_KEY_PASS")"
   - test -n "$SIGN_KEY"
-  - mvn -s m2-settings.xml -B -DskipTests package sign:sign deploy -Dsign.skip=false -DrepositoryId=ossrh -Drepository.username=${OSSRH_USERNAME} -Drepository.password="${OSSRH_PASSWORD}"
+  - mvn -s m2-settings.xml -B -DskipTests package sign:sign deploy -Dsign.skip=false -Pmaven-central -Drepository.username=${CENTRAL_USERNAME} -Drepository.password="${CENTRAL_PASSWORD}"
   - test $(ls target/*.jar.asc | wc -l) -ge 3
 
 s3:
