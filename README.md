@@ -15,7 +15,7 @@ ported to all releases.
 
 ## Installation
 
-Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/5.0.1).
+Irked is available from the [Maven Central Repository](https://central.sonatype.com/artifact/tech.greenfield/irked-vertx/5.0.1.1).
 
 If using Maven, add Irked as a dependency in your `pom.xml` file:
 
@@ -23,12 +23,12 @@ If using Maven, add Irked as a dependency in your `pom.xml` file:
 <dependency>
     <groupId>tech.greenfield</groupId>
     <artifactId>irked-vertx</artifactId>
-    <version>5.0.1</version>
+    <version>5.0.1.1</version>
 </dependency>
 ```
 
 For other build tools, see the Maven Central website for the syntax, but it generally
-boils down to just using `tech.greenfield:irked-vertx:5.0.1` as the dependency string.
+boils down to just using `tech.greenfield:irked-vertx:5.0.1.1` as the dependency string.
 
 ## Quick Start
 
@@ -713,8 +713,8 @@ If you are interested in a [Sock.JS](http://sockjs.org) server implementation, V
 can be mounted directly in an Irked controller as any other Vert.x middle-ware (see below for more about middle-ware):
 
 ```java
-@Get("/listener")
-SockJSHandler listener = SockJSHandler.create(vertx).socketHandler(sock -> {
+@Get("/listener/*")
+Router listener = SockJSHandler.create(vertx).socketHandler(sock -> {
     sock.handler(buf -> {
         sock.write("You said: " + buf.toString().trim() + "\n");
     });
