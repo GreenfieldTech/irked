@@ -198,20 +198,26 @@ public abstract class RouteConfiguration {
 		for (Route r : pathsForAnnotation(prefix, anot)
 				.flatMap(s -> getRoutes(method, s))
 				.collect(Collectors.toList())) {
-			try {
-				if (anot.equals(WebSocket.class))
-					r.handler(getWebSocketHandler(requestWrapper));
-				else if (isFailHandler())
-					r.failureHandler(wrapHandler(requestWrapper, getFailureHandler()));
-				else
-					r.handler(wrapHandler(requestWrapper, getHandler()));
-			} catch (IllegalAccessException e) {
-				throw new InvalidRouteConfiguration("Illegal access error while trying to configure " + this);
-			}
+			if (anot.equals(WebSocket.class))
+				r.handler(getWebSocketHandler(requestWrapper));
+			else
+				configureRoute(requestWrapper, r);
 			routes.add(r);
 			out.add(r);
 		}
 		return out;
+	}
+
+	protected void configureRoute(RequestWrapper requestWrapper, Route r)
+			throws InvalidRouteConfiguration {
+		try {
+			if (isFailHandler())
+				r.failureHandler(wrapHandler(requestWrapper, getFailureHandler()));
+			else
+				r.handler(wrapHandler(requestWrapper, getHandler()));
+		} catch (IllegalAccessException e) {
+			throw new InvalidRouteConfiguration("Illegal access error while trying to configure " + this);
+		}
 	}
 
 	private Stream<Route> getRoutes(RoutingMethod method, String s) {
