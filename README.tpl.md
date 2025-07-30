@@ -713,8 +713,8 @@ If you are interested in a [Sock.JS](http://sockjs.org) server implementation, V
 can be mounted directly in an Irked controller as any other Vert.x middle-ware (see below for more about middle-ware):
 
 ```java
-@Get("/listener")
-SockJSHandler listener = SockJSHandler.create(vertx).socketHandler(sock -> {
+@Get("/listener/*")
+Router listener = SockJSHandler.create(vertx).socketHandler(sock -> {
     sock.handler(buf -> {
         sock.write("You said: " + buf.toString().trim() + "\n");
     });
