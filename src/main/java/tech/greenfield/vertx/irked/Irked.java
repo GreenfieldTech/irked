@@ -26,19 +26,11 @@ public class Irked {
 	 * @return a new Irked instance that can generate {@link Router}s and request handlers
 	 */
 	public static Irked irked(Vertx vertx) {
-		return new Irked(vertx);
+		var irked = new Irked();
+		irked.vertx = vertx;
+		return irked;
 	}
 	
-	/**
-	 * Create new Irked instance that can generate request handlers
-	 * @deprecated Will be removed in 5.0. Please use {@link Irked#irked(Vertx)} instead
-	 * @param vertx Vert.x instance in which to generate routers
-	 */
-	@Deprecated(forRemoval = true)
-	public Irked(Vertx vertx) {
-		this.vertx = vertx;
-	}
-
 	/**
 	 * Create an HTTP request handler, that can be used in {@link HttpServer#requestHandler()},
 	 * with the provided set of APIs configured
