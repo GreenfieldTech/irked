@@ -8,7 +8,7 @@ import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.client.impl.WebClientBase;
 
-public class WebClientExt extends WebClientBase {
+public class WebClientExt extends WebClientBase<WebClientExt> {
 
 	private WebSocketClient websocket;
 
