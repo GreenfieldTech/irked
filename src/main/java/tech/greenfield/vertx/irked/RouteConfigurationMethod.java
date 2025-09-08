@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -130,6 +131,8 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			resolver = r -> { try { return new BigDecimal(r.pathParam(paramName)); } catch (Exception e) { return null; } };
 		else if (p.getType() == Instant.class)
 			resolver = r -> { try { return Instant.parse(r.pathParam(paramName)); } catch (Exception e) { return null; } };
+		else if (p.getType() == LocalDate.class)
+			resolver = r -> { try { return LocalDate.parse(r.pathParam(paramName)); } catch (Exception e) { return null; } };
 		else
 			return String.format("Type '%1$s' (for parameter '%2$s') is not supported", p.getType(), p.getName());
 		paramResolvers.put(p.getName(), resolver);
