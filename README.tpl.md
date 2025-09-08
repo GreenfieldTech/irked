@@ -1,4 +1,4 @@
-# Irked Vert.x Web Framework 4.x
+# Irked Vert.x Web Framework 5.x
 
 Irked is a very opinionated framework for configuring Vert.x-web routing and call dispatch.
 
@@ -6,7 +6,7 @@ It allows you to write your REST API code without writing routing boiler plate b
 annotations, auto-discovery through reflection and optionally (if you're into that as well)
 dependency injection.
 
-This version supports Vert.x 4. To use with earlier Vert.x versions, try Irked 2 for Vert.x 3.9
+This version supports Vert.x 5. To use with earlier Vert.x versions, try Irked 4 for Vert.x 4 support, Irked 2 for Vert.x 3.9
 support or Irked 1 for earlier versions (Vert.x 3.9 has changed its API in a non-backward compatible
 way - method return types were changed - which required that 1 + 2 split).
 
