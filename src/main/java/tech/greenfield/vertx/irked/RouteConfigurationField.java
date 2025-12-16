@@ -53,6 +53,20 @@ public class RouteConfigurationField extends RouteConfiguration {
 		return field.getName();
 	}
 	
+	protected void configureRoute(RequestWrapper requestWrapper, io.vertx.ext.web.Route r) throws InvalidRouteConfiguration {
+		if (io.vertx.ext.web.Router.class.isAssignableFrom(field.getType()))
+			try {
+				var router = (io.vertx.ext.web.Router) field.get(impl);
+				if (router == null)
+					throw new InvalidRouteConfiguration(this + " is not set!");
+				r.subRouter(router);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new InvalidRouteConfiguration("Error configuring subrouter on " + this + ": " + e);
+			}
+		else
+			super.configureRoute(requestWrapper, r);
+	};
+	
 	@Override
 	Handler<? super Request> getHandler() throws IllegalArgumentException, IllegalAccessException, InvalidRouteConfiguration {
 		if (Handler.class.isAssignableFrom(field.getType()))
