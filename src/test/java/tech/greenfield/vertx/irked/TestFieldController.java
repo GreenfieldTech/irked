@@ -54,10 +54,10 @@ public class TestFieldController extends TestBase {
 		}
 		
 		@Post("/post-function")
-		Function<Request,Result> createFunc = r -> new Result() {{ message = "created"; }};
+		WebResult<Request> createFunc = r -> new Result() {{ message = "created"; }};
 		
 		@Delete("/delete-function")
-		Function<Request,?> deleteFunc = r -> Future.failedFuture(new Unauthorized());
+		SimpleWebResult deleteFunc = r -> Future.failedFuture(new Unauthorized());
 	}
 
 	@BeforeEach
