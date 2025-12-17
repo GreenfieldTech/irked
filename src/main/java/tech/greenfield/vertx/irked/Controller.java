@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.vertx.core.Handler;
@@ -16,6 +17,8 @@ abstract public class Controller {
 	protected interface RawVertxHandler extends Handler<RoutingContext> {}
 	protected interface WebHandler extends Handler<Request> {}
 	protected interface MessageHandler extends Handler<WebSocketMessage> {}
+	protected interface WebResult<RequestType extends Request> extends Function<RequestType, Object> {}
+	protected interface SimpleWebResult extends WebResult<Request> {}
 
 	private List<RouteConfiguration> routes;
 	
