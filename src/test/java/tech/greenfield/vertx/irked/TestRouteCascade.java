@@ -1,9 +1,10 @@
 package tech.greenfield.vertx.irked;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static tech.greenfield.vertx.irked.Matchers.*;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.base.TestBase;
+import tech.greenfield.vertx.irked.status.Created;
 import tech.greenfield.vertx.irked.status.InternalServerError;
 
 public class TestRouteCascade extends TestBase {
@@ -88,6 +90,21 @@ public class TestRouteCascade extends TestBase {
 		};
 
 	}
+	
+	public class TestControllerCascadeChangedStatusCode extends Controller {
+		@Post("/items")
+		WebHandler createItem = r -> {
+			// item may be created here
+			r.response(new Created());
+			r.next();
+		};
+		
+		@Post("/items")
+		@Get("/items")
+		WebHandler listItems = r -> {
+			r.send(List.of("item 1", "item 2"));
+		};
+	}
 
 	@Test
 	public void testCascadingFieldHandlers(VertxTestContext context, Vertx vertx) {
@@ -143,4 +160,29 @@ public class TestRouteCascade extends TestBase {
 		.mapEmpty();
 	}
 	
+	@Test
+	public void testCascadeChangedStatusCode(VertxTestContext context, Vertx vertx) {
+		deployController(new TestControllerCascadeChangedStatusCode(), vertx, context.succeeding(s -> executeTestCascadeChangedStatusCode(context, vertx)));
+	}
+
+	private Future<Void> executeTestCascadeChangedStatusCode(VertxTestContext context, Vertx vertx) {
+		var client = getClient(vertx);
+		return client.get(port, "localhost", "/items").send()
+				.map(r -> {
+					assertThat(r, isSuccess());
+					assertThat(r.bodyAsString(), is(equalTo("[\"item 1\",\"item 2\"]")));
+					assertThat(r.statusCode(), is(equalTo(200)));
+					return null;
+				})
+				.compose(__ -> client.post(port, "localhost", "/items").send("foo"))
+				.map(r -> {
+					assertThat(r, isSuccess());
+					assertThat(r.bodyAsString(), is(equalTo("[\"item 1\",\"item 2\"]")));
+					assertThat(r.statusCode(), is(equalTo(201)));
+					return null;
+				})
+				.onSuccess(__ -> log.warn("done with test"))
+				.onComplete(context.succeedingThenComplete())
+				.mapEmpty();
+	}
 }
