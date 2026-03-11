@@ -499,16 +499,41 @@ like so:
 public void getCatalogItem(Request r, @Name("producer") String producer, @Name("id") Integer id) {
 ```
 
-### Routing Methods Return Values (aka "lazy methods")
+### Routing Function Return Values (aka "WebResult")
 
-When using methods for routing handling, Irked can handle the sending itself - you don't need to call any of the `Request`
-sending methods.
+Whether using methods or lambda fields for route handling, Irked can handle the sending part itself - if all you want to
+do is return a value to be serialized by Irked `Request.send*` methods, you don't need mess with that - just have your
+function return the value you want sent.
 
-If the return value from a method is a Vert.x `Future`, then Irked will chain on an `.onComplete(Request::sendOrFail)`,
+If the return value is a Vert.x `Future`, then Irked will chain on an `.onComplete(Request::sendOrFail)`,
 otherwise Irked will use `Request.send(result)` with the result.
 
 Please note that if a routing method returns a `null`,
 then Irked will send that as an `application/json` result whose value is a JSON `null`.
+
+#### Field Handlers
+
+Field handlers can be declared as `WebResult<Request>" (or any specialized context class), like so:
+
+```java
+@Get("/:id")
+WebResult<Request> retrieve = r -> load(r.pathParam("id"));
+```
+
+In the above example, if `load(id)` return a `Future<Type>`, or just a synchronous `Type`, Irked will handle the
+result correctly.
+
+#### Method Handlers
+
+Method handlers can be just be declared to return whatever type make sense - though if the method should be async, often
+ just using `Future<?>` is all the context that is needed, like so:
+
+```java
+@Get("/:id")
+public Future<?> retrieve(Request r, String id) {
+	return load(id);
+}
+```
 
 ### Handle Failures
 
