@@ -1,7 +1,7 @@
 package tech.greenfield.vertx.irked;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -388,11 +388,9 @@ public abstract class RouteConfiguration {
 	@SuppressWarnings("unchecked")
 	private static Class<Annotation>[] findRouteAnnotations() {
 		String packageName = annotationPackage.getName();
-		InputStream annotationsList = Endpoint.class.getClassLoader().getResourceAsStream(packageName.replaceAll("[.]", "/") + "/annotations.list");
-		if (annotationsList == null)
-			return new Class[] {};
-		BufferedReader reader = new BufferedReader(new InputStreamReader(annotationsList));
-		return reader.lines().map(name -> packageName + "." + name)
+		try (var pkgsdir = new BufferedReader(new InputStreamReader(
+				Endpoint.class.getClassLoader().getResourceAsStream(packageName.replaceAll("[.]", "/"))))) {
+			return pkgsdir.lines().map(s -> packageName + "." + s.replaceAll("\\.class$", ""))
 				.map(className -> {
 					try {
 						return Class.forName(className);
@@ -405,6 +403,9 @@ public abstract class RouteConfiguration {
 				.filter(c -> c.getAnnotation(RouteSpec.class) != null)
 				.map(c -> (Class<Annotation>)c)
 				.collect(Collectors.toSet()).toArray(Class[]::new);
+		} catch (IOException e) {
+			throw new RuntimeException("Irked failed to list routing annotations in " + annotationPackage + " due to IO error!");
+		}
 	}
 
 }

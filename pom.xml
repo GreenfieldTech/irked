@@ -6,7 +6,7 @@
 
 	<groupId>tech.greenfield</groupId>
 	<artifactId>irked-vertx</artifactId>
-	<version>5.0.8</version>
+	<version>5.0.8.1</version>
 	<packaging>jar</packaging>
 	<name>irked-vertx</name>
 	<description>Opinionated framework for vertx-web route configuration and dispatch</description>
@@ -152,31 +152,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<configuration>
-							<target>
-								<fileset id="anot-list" dir="src/main/java/tech/greenfield/vertx/irked/annotations"/>
-								<pathconvert targetos="unix" pathsep="," property="anot-list" refid="anot-list">
-									<map from="${basedir}/src/main/java/tech/greenfield/vertx/irked/annotations/" to=""/>
-								</pathconvert>
-								<echo file="${basedir}/target/classes/tech/greenfield/vertx/irked/annotations/annotations.list">${anot-list}</echo>
-								<replace file="${basedir}/target/classes/tech/greenfield/vertx/irked/annotations/annotations.list">
-									<replacefilter token=".java" value=""/>
-									<replacefilter token="," value="${line.separator}"/>
-								</replace>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
