@@ -51,7 +51,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			throw new InvalidRouteConfiguration(String.format("Method %1$s.%2$s doesn't take a Vert.x RoutingContext as first parameter",
 					m.getDeclaringClass().getName(), m.getName()));
 		trySetRoutingContextType(params[0].getType());
-		var routeParams = parseRouteParams(uriForAnnotations());
+		var routeParams = parseRouteParams(uriForAllAnnotations());
 		Optional<String> paramErrors = Stream.of(params).map(p -> tryResolve(p, routeParams)).filter(Objects::nonNull)
 				.reduce((a,b) -> a + "; " + b);
 		if (paramErrors.isPresent())
@@ -77,7 +77,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			// check that the user has requested one of the failure types that they registered,
 			// otherwise its a misconfiguration and we should abort before sending nulls to the handler
 			// in runtime error handling
-			if (Stream.of(getAnnotation(OnFail.class)).map(f -> f.exception()).filter(Objects::nonNull)
+			if (getAnnotation(OnFail.class).stream().map(f -> f.exception()).filter(Objects::nonNull)
 					.noneMatch(p.getType()::isAssignableFrom))
 				return String.format("Parameter '%1$s %2$s' on failure handler does not match any @OnFail(exception) registration!",
 						p.getType().getSimpleName(), p.getName());
@@ -153,8 +153,10 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	}
 	
 	@Override
-	protected <T extends Annotation> T[] getAnnotation(Class<T> anot) {
-		return method.getDeclaredAnnotationsByType(anot);
+	protected <T extends Annotation> List<T> getAnnotation(Class<T> anot) {
+		if (anot == null)
+			return this.<T>extractIrkedAnnotations(method.getAnnotations());
+		return List.of(method.getDeclaredAnnotationsByType(anot));
 	}
 	
 	@Override
