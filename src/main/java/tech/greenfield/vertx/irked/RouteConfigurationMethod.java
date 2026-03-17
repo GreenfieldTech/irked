@@ -118,7 +118,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		if (p.getType() == String.class)
 			resolver = r -> r.pathParam(paramName);
 		else if (p.getType() == Boolean.class)
-			resolver = r -> { try { return r.pathParam(paramName).toLowerCase().equals("true"); } catch (Exception e) { return null; } };
+			resolver = r -> { try { return r.pathParams().getOrDefault(paramName, "").toLowerCase().equals("true"); } catch (Exception e) { return null; } };
 		else if (p.getType() == Long.class)
 			resolver = r -> { try { return Long.parseLong(r.pathParam(paramName)); } catch (Exception e) { return null; } };
 		else if (p.getType() == Integer.class)
@@ -155,7 +155,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	@Override
 	protected <T extends Annotation> List<T> getAnnotation(Class<T> anot) {
 		if (anot == null)
-			return this.<T>extractIrkedAnnotations(method.getAnnotations());
+			return this.<T>extractIrkedAnnotations(method.getDeclaredAnnotations());
 		return List.of(method.getDeclaredAnnotationsByType(anot));
 	}
 	
