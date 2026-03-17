@@ -551,7 +551,8 @@ public class Request extends RoutingContextDecorator {
 	 */
 	public boolean needUpgrade(String type) {
 		HttpServerRequest req = request();
-		return req.getHeader("Connection").equalsIgnoreCase("upgrade") && (Objects.isNull(type) || req.getHeader("Upgrade").equalsIgnoreCase(type));
+		return String.valueOf(req.getHeader("Connection")).equalsIgnoreCase("upgrade") && 
+				(type == null || type.equalsIgnoreCase(req.getHeader("Upgrade")));
 	}
 	
 	/**
