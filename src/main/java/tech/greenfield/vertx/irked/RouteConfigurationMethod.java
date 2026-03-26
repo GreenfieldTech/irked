@@ -51,7 +51,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			throw new InvalidRouteConfiguration(String.format("Method %1$s.%2$s doesn't take a Vert.x RoutingContext as first parameter",
 					m.getDeclaringClass().getName(), m.getName()));
 		trySetRoutingContextType(params[0].getType());
-		var routeParams = parseRouteParams(uriForAllAnnotations());
+		var routeParams = parseRouteParams(uriForAnnotations());
 		Optional<String> paramErrors = Stream.of(params).map(p -> tryResolve(p, routeParams)).filter(Objects::nonNull)
 				.reduce((a,b) -> a + "; " + b);
 		if (paramErrors.isPresent())
@@ -77,7 +77,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 			// check that the user has requested one of the failure types that they registered,
 			// otherwise its a misconfiguration and we should abort before sending nulls to the handler
 			// in runtime error handling
-			if (getAnnotation(OnFail.class).stream().map(f -> f.exception()).filter(Objects::nonNull)
+			if (Stream.of(getAnnotation(OnFail.class)).map(f -> f.exception()).filter(Objects::nonNull)
 					.noneMatch(p.getType()::isAssignableFrom))
 				return String.format("Parameter '%1$s %2$s' on failure handler does not match any @OnFail(exception) registration!",
 						p.getType().getSimpleName(), p.getName());
@@ -118,7 +118,7 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 		if (p.getType() == String.class)
 			resolver = r -> r.pathParam(paramName);
 		else if (p.getType() == Boolean.class)
-			resolver = r -> { try { return r.pathParams().getOrDefault(paramName, "").toLowerCase().equals("true"); } catch (Exception e) { return null; } };
+			resolver = r -> { try { return r.pathParam(paramName).toLowerCase().equals("true"); } catch (Exception e) { return null; } };
 		else if (p.getType() == Long.class)
 			resolver = r -> { try { return Long.parseLong(r.pathParam(paramName)); } catch (Exception e) { return null; } };
 		else if (p.getType() == Integer.class)
@@ -153,10 +153,8 @@ public class RouteConfigurationMethod extends RouteConfiguration {
 	}
 	
 	@Override
-	protected <T extends Annotation> List<T> getAnnotation(Class<T> anot) {
-		if (anot == null)
-			return this.<T>extractIrkedAnnotations(method.getDeclaredAnnotations());
-		return List.of(method.getDeclaredAnnotationsByType(anot));
+	protected <T extends Annotation> T[] getAnnotation(Class<T> anot) {
+		return method.getDeclaredAnnotationsByType(anot);
 	}
 	
 	@Override
