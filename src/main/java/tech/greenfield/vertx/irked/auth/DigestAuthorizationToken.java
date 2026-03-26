@@ -75,7 +75,7 @@ public class DigestAuthorizationToken extends ParameterEncodedAuthorizationToken
 		parameters.put("uri", uri);
 		if (Objects.nonNull(opaque))
 			parameters.put("opaque", opaque);
-		if (Objects.nonNull("cnonce")) {
+		if (Objects.nonNull(cnonce)) {
 			parameters.put("qop", Objects.isNull(entityBody) ? "auth" : "auth-int");
 			parameters.put("nc", "00000001");
 			parameters.put("cnonce", cnonce);
