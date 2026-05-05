@@ -4,8 +4,10 @@ import java.util.*;
 
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
+import io.vertx.core.VertxException;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.InternalServerError;
@@ -233,7 +235,10 @@ public class HttpError extends Exception {
 				return ex;
 		// No HTTP status wrapper found, just unwrap runtimes if relevant
 		for (var ex = t; ex != null; ex = ex.getCause())
-			if (!(ex instanceof RuntimeException))
+			if (ex instanceof VertxException && ex.getCause() == null)
+				// Its the new NoStackTraceThrowable
+				return ex;
+			else if (!(ex instanceof RuntimeException))
 				return ex;
 		// In case we have a chain of runtime exceptions, just return the top wrapper
 		return t;
@@ -247,10 +252,13 @@ public class HttpError extends Exception {
 	 * @return the wrapped HttpError instance or a new {@link InternalServerError} wrapping
 	 *   the real exception
 	 */
+	@SuppressWarnings("removal")
 	public static HttpError toHttpError(Throwable t) {
 		t = unwrap(t);
 		if (t instanceof HttpError)
 			return (HttpError)t;
+		if (t instanceof NoStackTraceThrowable || t instanceof VertxException)
+			return new InternalServerError(t.getMessage(), t);
 		return new InternalServerError(t);
 	}
 	
