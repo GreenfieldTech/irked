@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Delete;
 import tech.greenfield.vertx.irked.annotations.Get;
@@ -65,52 +64,44 @@ public class TestFieldController extends TestBase {
 
 	@Test
 	public void testGet(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/get").send().map(res -> {
 			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), equalTo(Boolean.TRUE));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testPost(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).post(port, "localhost", "/post").send("{}").map(res -> {
 			assertThat(res, is(status(new BadRequest())));
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("message"), equalTo(new BadRequest().getMessage()));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testPut(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).put(port, "localhost", "/put").send("{}").map(res -> {
 			assertThat(res, isSuccess());
 			assertThat(res.bodyAsString(), equalTo("success"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testDelete(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).delete(port, "localhost", "/delete").send("{}").map(res -> {
 			assertThat(res, is(status(new NoContent())));
 			assertThat(res.body(), is(nullValue()));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
@@ -126,14 +117,12 @@ public class TestFieldController extends TestBase {
 
 	@Test
 	public void testDeleteFunction(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).delete(port, "localhost", "/delete-function").send().map(res -> {
 			assertThat(res, is(status(new Unauthorized())));
 			assertThat(res.bodyAsString(), is(equalTo("Unauthorized")));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 

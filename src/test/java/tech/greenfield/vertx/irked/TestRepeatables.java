@@ -6,7 +6,6 @@ import static tech.greenfield.vertx.irked.Matchers.*;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Post;
 import tech.greenfield.vertx.irked.base.TestBase;
@@ -28,24 +27,19 @@ public class TestRepeatables extends TestBase {
 	}
 
 	private void executeTest(VertxTestContext context, Vertx vertx) {
-		Checkpoint asyncRed = context.checkpoint();
-		Checkpoint asyncBlue = context.checkpoint();
-		
 		getClient(vertx).post(port, "localhost", "/red").send().map(r -> {
 			assertThat(r, isSuccess());
 			assertThat(r, bodyContains("red"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(asyncRed));
+		.onComplete(context.succeedingThenComplete());
 		
 		getClient(vertx).post(port, "localhost", "/blue").send().map(r -> {
 			assertThat(r, isSuccess());
 			assertThat(r, bodyContains("blue"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(asyncBlue));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

@@ -13,7 +13,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.*;
 import tech.greenfield.vertx.irked.base.TestBase;
@@ -113,14 +112,12 @@ public class TestRouteCascade extends TestBase {
 
 	private void executeTest(VertxTestContext context, Vertx vertx) {
 		int newVal = 5;
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).put(port, "localhost", "/").send(new JsonObject().put(fieldName, newVal)).map(r -> {
 			assertThat(r, isSuccess());
 			assertThat(r.bodyAsJsonObject().getInteger(fieldName), equalTo(newVal));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
@@ -129,15 +126,13 @@ public class TestRouteCascade extends TestBase {
 	}
 
 	private Future<Void> executeTestNoCascade(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		return getClient(vertx).get(port, "localhost", "/foo").send().map(r -> {
 			assertThat(r, isSuccess());
 			assertThat(r.bodyAsString(), equalTo("ok"));
 			assertThat(failedTests.get(), equalTo(0));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async))
+		.onComplete(context.succeedingThenComplete())
 		.mapEmpty();
 	}
 
@@ -148,15 +143,13 @@ public class TestRouteCascade extends TestBase {
 	}
 
 	private Future<Void> executeTestNoCascadeOnFail(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		return getClient(vertx).get(port, "localhost", "/foo").send().map(r -> {
 			assertThat(r, isSuccess());
 			assertThat(r.bodyAsString(), equalTo("ok"));
 			assertThat(failedTests.get(), equalTo(0));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async))
+		.onComplete(context.succeedingThenComplete())
 		.mapEmpty();
 	}
 	

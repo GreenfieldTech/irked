@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Consumes;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
@@ -81,20 +80,17 @@ public class TestConsumes extends TestBase {
 	@Test
 	public void testNoConsumes(VertxTestContext context, Vertx vertx) {
 		deployController(new TestNoConsumes(), vertx, context.succeeding(s -> {
-			Checkpoint f = context.checkpoint();
 			getClient(vertx).post(port, "localhost", "/none")
 					.putHeader("Content-Type", "application/octet-stream")
 					.send()
 					.map(compareBodyHandler(TestNoConsumes.message, context))
-					.onFailure(context::failNow)
-					.onSuccess(flag(f));
+					.onComplete(context.succeedingThenComplete());
 		}));
 	}
 	
 	@Test
 	public void testConsumesOne(VertxTestContext context, Vertx vertx) {
 		deployController(new TestConsumesOne(), vertx, context.succeeding(s -> {
-			Checkpoint f = context.checkpoint();
 			getClient(vertx).post(port, "localhost", "/one")
 			.putHeader("Content-Type", "text/plain")
 			.send()
@@ -106,16 +102,13 @@ public class TestConsumes extends TestBase {
 				assertThat(r, is(status(new UnsupportedMediaType())));
 				return null;
 			})
-			.onFailure(context::failNow)
-			.onSuccess(flag(f));
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 	
 	@Test
 	public void testConsumesMultiple(VertxTestContext context, Vertx vertx) {
 		deployController(new TestConsumesMultiple(), vertx, context.succeeding(s -> {
-			Checkpoint f = context.checkpoint();
-			
 			getClient(vertx).post(port, "localhost", "/multiple")
 			.putHeader("Content-Type", "application/json")
 			.send()
@@ -131,16 +124,13 @@ public class TestConsumes extends TestBase {
 				assertThat(r, is(status(UnsupportedMediaType.class)));
 				return null;
 			})
-			.onFailure(context::failNow)
-			.onSuccess(flag(f));
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 	
 	@Test
 	public void testConsumesGlob(VertxTestContext context, Vertx vertx) {
 		deployController(new TestConsumesGlob(), vertx, context.succeeding(s -> {
-			Checkpoint f = context.checkpoint();
-			
 			getClient(vertx).post(port, "localhost", "/glob")
 			.putHeader("Content-Type", "image/png")
 			.send()
@@ -160,16 +150,13 @@ public class TestConsumes extends TestBase {
 				assertThat(r, is(status(new UnsupportedMediaType())));
 				return null;
 			})
-			.onFailure(context::failNow)
-			.onSuccess(flag(f));
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 	
 	@Test
 	public void testConsumesWithFallback(VertxTestContext context, Vertx vertx) {
 		deployController (new TestConsumesFallback(), vertx, context.succeeding(s -> {
-			Checkpoint f = context.checkpoint();
-			
 			getClient(vertx).post(port, "localhost", "/fallback")
 			.putHeader("Content-Type", "application/xml")
 			.send()
@@ -182,8 +169,7 @@ public class TestConsumes extends TestBase {
 				.putHeader("Content-Type", "text/plain")
 				.send())
 			.map(compareBodyHandler(TestConsumesFallback.messageFallback, context))
-			.onFailure(context::failNow)
-			.onSuccess(flag(f));
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 	

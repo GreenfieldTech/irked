@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
@@ -38,15 +37,13 @@ public class TestFailController extends TestBase {
 
 	@Test
 	public void testFail(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/").send().map(res -> {
 			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), equalTo(Boolean.FALSE));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

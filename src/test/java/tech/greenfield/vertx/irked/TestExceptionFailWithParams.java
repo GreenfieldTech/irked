@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.OnFail;
@@ -63,7 +62,6 @@ public class TestExceptionFailWithParams extends TestBase {
 
 	@Test
 	public void testFailureUsingMethods(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).post(port, "localhost", "/test-ok-error").send("boo!").map(res -> {
 			System.out.println("response: " + res.bodyAsString());
 			assertThat(res, is(status(new Locked())));
@@ -71,8 +69,7 @@ public class TestExceptionFailWithParams extends TestBase {
 			assertThat(body, is(equalTo("77")));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

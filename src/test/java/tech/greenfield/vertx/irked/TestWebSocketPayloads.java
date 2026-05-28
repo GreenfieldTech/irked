@@ -142,7 +142,7 @@ public class TestWebSocketPayloads extends TestBase {
 				vertx.undeploy(s);
 				async.flag();
 			})
-			.onFailure(context::failNow);
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 

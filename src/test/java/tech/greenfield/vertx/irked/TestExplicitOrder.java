@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.annotations.Order;
@@ -53,14 +52,12 @@ public class TestExplicitOrder extends TestBase {
 
 	@Test
 	public void testOrderedComposition(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/").send().map(res -> {
 			assertThat(res, isSuccess());
 			assertThat(res.bodyAsString(), equalTo("bca"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.base.TestBase;
@@ -65,64 +64,54 @@ public class TestSending extends TestBase {
 
 	@Test
 	public void testTextSending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendtext").send().map(res -> {
 			assertThat(res, isSuccess());
 			assertThat(res.bodyAsString(), equalTo("hello world"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testBinarySending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendbinary").send("{}").map(res -> {
 			assertThat(res, isSuccess());
 			assertThat(res.body().getBytes(), equalTo(data));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testListSending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendlist").send("{}").map(res -> {
 			assertThat(res, isSuccess());
 			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 
 	@Test
 	public void testStreamSending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendstream").send("{}").map(res -> {
 			assertThat(res, isSuccess());
 			assertThat(res.body().toJsonArray(), is(equalTo(new JsonArray().add("hello").add("world"))));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 	
 	@Test
 	public void testSendHonorsResponseStatusCode(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/send-created").send().map(res -> {
 			assertThat(res, isSuccess());
 			assertThat(res.statusCode(), is(equalTo(Created.code)));
 			assertThat(res.bodyAsString(), is(equalTo("Created")));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

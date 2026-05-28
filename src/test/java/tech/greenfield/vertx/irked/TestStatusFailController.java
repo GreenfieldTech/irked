@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
@@ -72,78 +71,66 @@ public class TestStatusFailController extends TestBase {
 
 	@Test
 	public void testToFail(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/correctfail").send().map(res -> {
 			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), is(equalTo(Boolean.FALSE)));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testToWrongFail1(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/wrongfail1").send().map(res -> {
 			assertThat(res, is(status(new InternalServerError())));
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("did-default"), is(equalTo(Boolean.TRUE)));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testToWrongFail2(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/wrongfail2").send().map(res -> {
 			assertThat(res, is(status(new InternalServerError())));
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("did-default"), is(equalTo(Boolean.TRUE)));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testToWrongFail3(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/wrongfail3").send().map(res -> {
 			assertThat(res, is(status(new InternalServerError())));
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("did-default"), is(equalTo(Boolean.TRUE)));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testForExceptionFail(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/httpexceptionfail").send().map(res -> {
 			assertThat(res, isSuccess());
 			JsonObject o = res.bodyAsJsonObject();
 			assertThat(o.getValue("success"), equalTo(Boolean.FALSE));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testToNotFail(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/notfailing").send().map(res -> {
 			assertThat(res, is(status(new Created())));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

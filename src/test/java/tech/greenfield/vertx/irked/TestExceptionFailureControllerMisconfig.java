@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.DecodeException;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.annotations.OnFail;
@@ -35,7 +34,6 @@ public class TestExceptionFailureControllerMisconfig extends TestBase {
 
 	@Test
 	public void testToFail1(VertxTestContext context, Vertx vertx) {
-		Checkpoint cp = context.checkpoint();
 		Promise<Void> p = Promise.promise();
 		deployController(new TestController(), vertx, context.failing(p::fail));
 		p.future()
@@ -51,8 +49,7 @@ public class TestExceptionFailureControllerMisconfig extends TestBase {
 			assertThat(t.getMessage(), matchesPattern(".*Parameter 'DecodeException \\w+' on failure handler does not match.*"));
 			return null;
 		})
-		.onSuccess(__ -> cp.flag())
-		.onFailure(t -> context.failNow(t));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }
