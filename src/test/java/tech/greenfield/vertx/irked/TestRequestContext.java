@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.annotations.Put;
@@ -64,7 +63,6 @@ public class TestRequestContext extends TestBase {
 
 	@Test
 	public void testPassIdToMethod(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		String id = "item-name";
 		getClient(vertx).get(port, "localhost", "/" + id).send().map(res -> {
 			assertThat(res, isSuccess());
@@ -72,13 +70,11 @@ public class TestRequestContext extends TestBase {
 			assertThat(o.getString("id"), equalTo(id));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testPassIdToField(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		String id = "item-name";
 		getClient(vertx).put(port, "localhost", "/" + id).send("{}").map(res -> {
 			assertThat(res, isSuccess());
@@ -86,8 +82,7 @@ public class TestRequestContext extends TestBase {
 			assertThat(o.getString("id"), equalTo(id));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

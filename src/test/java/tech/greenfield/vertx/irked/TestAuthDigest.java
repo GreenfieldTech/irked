@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
@@ -80,7 +79,6 @@ public class TestAuthDigest extends TestBase {
 
 	@Test
 	public void testGetAuthed(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/auth").send()
 		.compose(res -> {
 			assertThat(res, is(status(Unauthorized.class)));
@@ -94,13 +92,11 @@ public class TestAuthDigest extends TestBase {
 			assertThat(res.body().toString(), is(equalTo("OK")));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testPostAuthed(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).post(port, "localhost", "/auth-int").putHeader("Content-Length", String.valueOf(postdata.length())).send(postdata)
 		.compose(res -> {
 			assertThat(res, is(status(new Unauthorized())));
@@ -115,8 +111,7 @@ public class TestAuthDigest extends TestBase {
 			assertThat(res.body().toString(), is(equalTo("OK")));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	private Map<String,String> parseAuthHeader(String authHeader) {

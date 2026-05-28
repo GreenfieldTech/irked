@@ -6,7 +6,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.base.TestBase;
@@ -28,24 +27,19 @@ public class TestMultipleEndpoints extends TestBase {
 	}
 
 	private void executeTest(VertxTestContext context, Vertx vertx) {
-		Checkpoint asyncRed = context.checkpoint();
-		Checkpoint asyncBlue = context.checkpoint();
-		
 		getClient(vertx).get(port, "localhost", "/red").send().map(r -> {
 			assertThat(r, isSuccess());
 			assertThat(r, bodyContains("red"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(asyncRed));
+		.onComplete(context.succeedingThenComplete());
 		
 		getClient(vertx).get(port, "localhost", "/blue").send().map(r -> {
 			assertThat(r, isSuccess());
 			assertThat(r, bodyContains("blue"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(asyncBlue));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

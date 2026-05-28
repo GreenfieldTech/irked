@@ -319,8 +319,9 @@ public class Router implements io.vertx.ext.web.Router {
 	}
 
 	@Override
-	public io.vertx.ext.web.Router clear() {
-		return router.clear();
+	public Router clear() {
+		router.clear();
+		return this;
 	}
 
 	@Override
@@ -357,13 +358,20 @@ public class Router implements io.vertx.ext.web.Router {
 	}
 
 	@Override
-	public io.vertx.ext.web.Router putMetadata(String key, Object value) {
-		return router.putMetadata(key, value);
+	public Router putMetadata(String key, Object value) {
+		router.putMetadata(key, value);
+		return this;
 	}
 
 	@Override
 	public Map<String, Object> metadata() {
 		return router.metadata();
+	}
+
+	@Override
+	public Router uncaughtErrorHandler(Handler<RoutingContext> errorHandler) {
+		router.uncaughtErrorHandler(errorHandler);
+		return this;
 	}
 
 }

@@ -1,18 +1,18 @@
 package tech.greenfield.vertx.irked.base;
 
 import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
-import io.vertx.core.http.impl.headers.HeadersMultiMap;
-import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.ext.web.client.WebClientConfig;
 import io.vertx.ext.web.client.impl.WebClientBase;
 
 public class WebClientExt extends WebClientBase<WebClientExt> {
 
 	private WebSocketClient websocket;
 
-	public WebClientExt(Vertx vertx, WebClientOptions options) {
+	public WebClientExt(Vertx vertx, WebClientConfig options) {
 		super(vertx.createHttpClient(), options);
 		websocket = vertx.createWebSocketClient();
 	}
@@ -46,7 +46,7 @@ public class WebClientExt extends WebClientBase<WebClientExt> {
 		return websocket.connect(port, host, requestURI);
 	}
 
-	public Future<WebSocket> websocket(int port, String host, String requestURI, HeadersMultiMap headers) {
+	public Future<WebSocket> websocket(int port, String host, String requestURI, MultiMap headers) {
 		return websocket.connect(new WebSocketConnectOptions()
 				.setPort(port)
 				.setHost(host)

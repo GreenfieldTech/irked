@@ -8,10 +8,10 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.UpgradeRejectedException;
-import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
@@ -43,7 +43,7 @@ public class TestWebSocket extends TestBase {
 					async.flag();
 				});
 			})
-			.onFailure(context::failNow);
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 
@@ -70,7 +70,7 @@ public class TestWebSocket extends TestBase {
 					async.flag();
 				});
 			})
-			.onFailure(context::failNow);
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 	
@@ -85,7 +85,7 @@ public class TestWebSocket extends TestBase {
 	public void testMethodPinger(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerMethodPinger(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/ping-method", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			getClient(vertx).websocket(port, "localhost", "/ping-method", MultiMap.caseInsensitiveMultiMap().add("Authorization","ok"))
 			.onSuccess(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
@@ -95,7 +95,7 @@ public class TestWebSocket extends TestBase {
 					async.flag();
 				});
 			})
-			.onFailure(context::failNow);
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 	
@@ -123,7 +123,7 @@ public class TestWebSocket extends TestBase {
 	public void testAdvancedMethodPinger(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAdvancedMethodPinger(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/ping-adv-method", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			getClient(vertx).websocket(port, "localhost", "/ping-adv-method", MultiMap.caseInsensitiveMultiMap().add("Authorization","ok"))
 			.onSuccess(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
@@ -133,7 +133,7 @@ public class TestWebSocket extends TestBase {
 					async.flag();
 				});
 			})
-			.onFailure(context::failNow);
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 	
@@ -160,7 +160,7 @@ public class TestWebSocket extends TestBase {
 	public void testAuthorizedPing(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAuthorizePing(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/with-auth", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			getClient(vertx).websocket(port, "localhost", "/with-auth", MultiMap.caseInsensitiveMultiMap().add("Authorization","ok"))
 			.onSuccess(ws -> {
 				ws.writeTextMessage(PING);
 				ws.textMessageHandler(text -> {
@@ -170,7 +170,7 @@ public class TestWebSocket extends TestBase {
 					async.flag();
 				});
 			})
-			.onFailure(context::failNow);
+			.onComplete(context.succeedingThenComplete());
 		}));
 	}
 
@@ -178,7 +178,7 @@ public class TestWebSocket extends TestBase {
 	public void testFailedToAuthorizedPing(VertxTestContext context, Vertx vertx) {
 		Checkpoint async = context.checkpoint();
 		deployController(new TestControllerAuthorizePing(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/with-auth", HeadersMultiMap.httpHeaders().add("Authorization","invalid"))
+			getClient(vertx).websocket(port, "localhost", "/with-auth", MultiMap.caseInsensitiveMultiMap().add("Authorization","invalid"))
 			.onSuccess(ws -> {
 				context.failNow(new Exception("Invalid authorization should not succeed"));
 			}).onFailure(t -> {
@@ -206,7 +206,7 @@ public class TestWebSocket extends TestBase {
 		Checkpoint async = context.checkpoint();
 		vertx.exceptionHandler(context::failNow);
 		deployController(new TestMessageHandlingFailure(), vertx, context.succeeding(s -> {
-			getClient(vertx).websocket(port, "localhost", "/failures", HeadersMultiMap.httpHeaders().add("Authorization","ok"))
+			getClient(vertx).websocket(port, "localhost", "/failures", MultiMap.caseInsensitiveMultiMap().add("Authorization","ok"))
 			.onSuccess(ws -> {
 				ws.closeHandler(v -> {
 					assertThat(ws.closeStatusCode(), is(equalTo((short)1011)));
