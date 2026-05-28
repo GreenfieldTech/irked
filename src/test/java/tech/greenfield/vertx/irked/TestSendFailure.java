@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
@@ -44,15 +43,12 @@ public class TestSendFailure extends TestBase {
 	}
 
 	private void executeFailingTest(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
-		
 		getClient(vertx).get(port, "localhost", "/failed-to-encode").send().map(r -> {
 			assertThat(r, is(status(new InternalServerError())));
 			assertThat(r, bodyContains("Cannot get result"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

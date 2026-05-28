@@ -6,6 +6,7 @@ import static tech.greenfield.vertx.irked.Matchers.notFound;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.time.Duration;
 import java.util.Random;
 
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -14,10 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientConfig;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.ext.web.client.WebClientConfig;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import tech.greenfield.vertx.irked.Controller;
@@ -27,9 +28,6 @@ public class TestBase {
 	
 	protected Logger log = LoggerFactory.getLogger(getClass());
 
-	// client max message
-	private static final int MAX_WEBSOCKET_MESSAGE_SIZE = 1024 * 1024 * 1024; // 1G. Frame size is 64K
-
 	static {
 		System.setProperty("vertx.parameter.filename", "vertx-test-options.json");
 	}
@@ -38,9 +36,8 @@ public class TestBase {
 	protected Integer port = getNextPort();
 
 	protected static WebClientExt getClient(Vertx vertx) {
-		return new WebClientExt(vertx, new WebClientOptions(new HttpClientOptions()
-				.setIdleTimeout(0)
-				.setMaxChunkSize(MAX_WEBSOCKET_MESSAGE_SIZE)));
+		return new WebClientExt(vertx, new WebClientConfig(new HttpClientConfig()
+				.setIdleTimeout(Duration.ofSeconds(10))));
 	}
 	
 	protected void deployController(Controller controller, Vertx vertx, Handler<AsyncResult<String>> handler) {

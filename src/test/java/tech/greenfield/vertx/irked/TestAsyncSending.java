@@ -16,7 +16,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Get;
 import tech.greenfield.vertx.irked.base.TestBase;
@@ -60,7 +59,6 @@ public class TestAsyncSending extends TestBase {
 			.exceptionally(r::handleFailure);
 		};
 
-		@SuppressWarnings("serial")
 		@Get("/sendjsonl")
 		public void jsonl(Request r) {
 			CompletableFuture.completedFuture(new ArrayList<Integer>() {{ add(1); add(2); }})
@@ -99,7 +97,6 @@ public class TestAsyncSending extends TestBase {
 
 	@Test
 	public void testTextSending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendtext")
 		.send()
 		.map(res -> {
@@ -108,13 +105,11 @@ public class TestAsyncSending extends TestBase {
 			assertThat(res, hasBody("hello world"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testBinarySending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendbinary")
 		.send()
 		.map(res -> {
@@ -123,13 +118,11 @@ public class TestAsyncSending extends TestBase {
 			assertThat(res, hasBody(data));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testJsonObjectSending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendjsono")
 		.send()
 		.map(res -> {
@@ -139,13 +132,11 @@ public class TestAsyncSending extends TestBase {
 			assertThat(res.bodyAsJsonObject().getString("foo"), equalTo("bar"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testJsonArraySending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendjsonl")
 		.send()
 		.map(res -> {
@@ -156,13 +147,11 @@ public class TestAsyncSending extends TestBase {
 			assertThat(res.bodyAsJsonArray().getInteger(1), equalTo(2));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testMappedObjectSending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendmapped")
 		.send()
 		.map(res -> {
@@ -173,13 +162,11 @@ public class TestAsyncSending extends TestBase {
 			assertThat(res.bodyAsJsonObject().mapTo(TestValue.class).value, equalTo("OK"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testStatusSending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendempty")
 		.send()
 		.map(res -> {
@@ -187,13 +174,11 @@ public class TestAsyncSending extends TestBase {
 			assertThat(res, is(bodyEmpty()));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testCustomStatusSending(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/sendcustomok")
 		.send()
 		.map(res -> {
@@ -204,8 +189,7 @@ public class TestAsyncSending extends TestBase {
 			assertThat(res.bodyAsJsonObject().getString("message"), equalTo("Still OK"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

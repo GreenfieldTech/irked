@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.Vertx;
-import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxTestContext;
 import tech.greenfield.vertx.irked.annotations.Endpoint;
 import tech.greenfield.vertx.irked.annotations.Get;
@@ -60,20 +59,17 @@ public class TestMountController extends TestBase {
 
 	@Test
 	public void testParentIndex(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/")
 			.send().map(r -> {
 				assertThat(r, isSuccess());
 				assertThat(r, hasBody("index"));
 				return null;
 			})
-			.onFailure(context::failNow)
-			.onSuccess(flag(async));
+			.onComplete(context.succeedingThenComplete());
 	}
 	
 	@Test
 	public void testChild(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/child")
 			.send()
 			.map(r -> {
@@ -81,13 +77,11 @@ public class TestMountController extends TestBase {
 				assertThat(r, hasBody("child index"));
 				return null;
 			})
-			.onFailure(context::failNow)
-			.onSuccess(flag(async));
+			.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testChildIndex(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/child/")
 		.send()
 		.map(r -> {
@@ -95,13 +89,11 @@ public class TestMountController extends TestBase {
 			assertThat(r, hasBody("child index"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testChildTest(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/child/test")
 		.send()
 		.map(r -> {
@@ -109,13 +101,11 @@ public class TestMountController extends TestBase {
 			assertThat(r, hasBody("child test"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testParamChild(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/value/paramChild")
 		.send()
 		.map(r -> {
@@ -123,14 +113,12 @@ public class TestMountController extends TestBase {
 			assertThat(r, hasBody("param child index"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	@Disabled("Wait for bug https://github.com/vert-x3/vertx-web/issues/786 to be fixed")
 	public void testParamChildIndex(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/value/paramChild/")
 		.send()
 		.map(r -> {
@@ -138,13 +126,11 @@ public class TestMountController extends TestBase {
 			assertThat(r, hasBody("param child index"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 	@Test
 	public void testParamChildTest(VertxTestContext context, Vertx vertx) {
-		Checkpoint async = context.checkpoint();
 		getClient(vertx).get(port, "localhost", "/value/paramChild/test")
 		.send()
 		.map(r -> {
@@ -152,8 +138,7 @@ public class TestMountController extends TestBase {
 			assertThat(r, hasBody("param child test"));
 			return null;
 		})
-		.onFailure(context::failNow)
-		.onSuccess(flag(async));
+		.onComplete(context.succeedingThenComplete());
 	}
 
 }

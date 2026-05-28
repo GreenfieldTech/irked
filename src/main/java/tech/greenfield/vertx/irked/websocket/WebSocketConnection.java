@@ -1,6 +1,7 @@
 package tech.greenfield.vertx.irked.websocket;
 
 import java.security.cert.Certificate;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -368,6 +369,11 @@ public class WebSocketConnection implements ServerWebSocket {
 	@Override
 	public WebSocket pongHandler(Handler<Buffer> handler) {
 		return socket.pongHandler(handler);
+	}
+
+	@Override
+	public Future<Void> shutdown(Duration timeout, short statusCode, String reason) {
+		return socket.shutdown(timeout, statusCode, reason);
 	}
 
 }

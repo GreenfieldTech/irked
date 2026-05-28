@@ -6,8 +6,6 @@ import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.VertxException;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.http.impl.headers.HeadersMultiMap;
-import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.ext.web.RoutingContext;
 import tech.greenfield.vertx.irked.status.HttpStatuses;
 import tech.greenfield.vertx.irked.status.InternalServerError;
@@ -39,7 +37,7 @@ public class HttpError extends Exception {
 	
 	private int statusCode;
 	private String statusText;
-	private HeadersMultiMap headers = HeadersMultiMap.httpHeaders();
+	private MultiMap headers = MultiMap.caseInsensitiveMultiMap();
 	
 	/**
 	 * Creates a new HttpError instance with the specified status code and status text.
@@ -252,12 +250,11 @@ public class HttpError extends Exception {
 	 * @return the wrapped HttpError instance or a new {@link InternalServerError} wrapping
 	 *   the real exception
 	 */
-	@SuppressWarnings("removal")
 	public static HttpError toHttpError(Throwable t) {
 		t = unwrap(t);
 		if (t instanceof HttpError)
 			return (HttpError)t;
-		if (t instanceof NoStackTraceThrowable || t instanceof VertxException)
+		if (t instanceof VertxException)
 			return new InternalServerError(t.getMessage(), t);
 		return new InternalServerError(t);
 	}
