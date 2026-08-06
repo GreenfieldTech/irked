@@ -91,7 +91,7 @@ public class WebSocketMessage implements Buffer {
 	 */
 	@Override
 	public void writeToBuffer(Buffer buffer) {
-		buffer.writeToBuffer(buffer);
+		this.buffer.writeToBuffer(buffer);
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class WebSocketMessage implements Buffer {
 	 */
 	@Override
 	public int readFromBuffer(int pos, Buffer buffer) {
-		return buffer.readFromBuffer(pos, buffer);
+		return this.buffer.readFromBuffer(pos, buffer);
 	}
 
 	/**

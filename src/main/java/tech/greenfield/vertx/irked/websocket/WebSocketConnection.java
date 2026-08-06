@@ -353,7 +353,7 @@ public class WebSocketConnection implements ServerWebSocket {
 
 	@Override
 	public Future<Void> shutdown(long timeout, TimeUnit unit, short statusCode, String reason) {
-		return shutdown(timeout, unit, statusCode, reason);
+		return socket.shutdown(timeout, unit, statusCode, reason);
 	}
 
 	@Override
