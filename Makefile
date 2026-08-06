@@ -34,6 +34,9 @@ update-readme:
 	$(eval VERTX_VER := $(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="properties"]/*[local-name()="vertx.version"]/text()' pom.xml))
 	perl -pe 'use v5.16;use experimental "switch";BEGIN{sub get($$){my$$t=shift;for($$t){return"$(IRKED_VER)"when/IRKED/;return"$(VERTX_VER)"when/VERTX/;}}}s/\{\{([A-Z_]+)\}\}/get($$1)/eg' < README.tpl.md > README.md
 
+update-vertx:
+	perl -pi -e 's,<vertx.version>[^<]+</vertx.version>,<vertx.version>$(VERSION)</vertx.version>,' pom.xml
+
 current-version:
 	@echo $(CURRENT_VERSION)
 
@@ -41,6 +44,7 @@ release:
 	$(eval SHELL := /bin/bash)
 	$(eval VERSION := $(if $(RELEASE_ARGS),$(RELEASE_ARGS),$(subst -SNAPSHOT,,$(CURRENT_VERSION))))
 	git flow release start "$(VERSION)"
+	$(MAKE) update-vertx VERSION=$(VERSION)
 	perl -pi -e 's,<version>$(CURRENT_VERSION)</version>,<version>'"$(VERSION)"'</version>,' pom.xml
 	$(MAKE) update-readme IRKED_VER=$(VERSION)
 	@read -p 'Please verify that README.md was updated correctly [ENTER to continue]'
