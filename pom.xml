@@ -30,7 +30,7 @@
 	</developers>
 
 	<properties>
-		<vertx.version>5.2.0</vertx.version>
+		<vertx.version>5.2.1</vertx.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<maven.compiler.release>11</maven.compiler.release>
