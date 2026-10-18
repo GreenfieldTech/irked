@@ -1108,4 +1108,14 @@ public class WebSocketMessage implements Buffer {
 		return buffer.setFloatLE(pos, f);
 	}
 
+	@Override
+	public void writeToBuffer(Buffer buffer) {
+		this.buffer.writeToBuffer(buffer);
+	}
+
+	@Override
+	public int readFromBuffer(int pos, Buffer buffer) {
+		return this.buffer.readFromBuffer(pos, buffer);
+	}
+
 }

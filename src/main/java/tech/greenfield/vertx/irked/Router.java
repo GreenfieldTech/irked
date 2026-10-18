@@ -374,19 +374,4 @@ public class Router implements io.vertx.ext.web.Router {
 		return this;
 	}
 
-	@Override
-	public Route query() {
-		return router.query();
-	}
-
-	@Override
-	public Route query(String path) {
-		return router.query(path);
-	}
-
-	@Override
-	public Route queryWithRegex(String regex) {
-		return router.queryWithRegex(regex);
-	}
-
 }
