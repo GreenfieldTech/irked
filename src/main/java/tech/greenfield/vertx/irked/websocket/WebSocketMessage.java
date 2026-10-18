@@ -7,7 +7,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.ClusterSerializable;
 import tech.greenfield.vertx.irked.Request;
 
 public class WebSocketMessage implements Buffer {
@@ -83,26 +82,6 @@ public class WebSocketMessage implements Buffer {
 	 */
 	public boolean isBinary() {
 		return isBinary;
-	}
-
-	/**
-	 * @param buffer Buffer to marshal into
-	 * @see ClusterSerializable#writeToBuffer(Buffer)
-	 */
-	@Override
-	public void writeToBuffer(Buffer buffer) {
-		this.buffer.writeToBuffer(buffer);
-	}
-
-	/**
-	 * @param pos Position in the buffer to start unmarshaling from
-	 * @param buffer Buffer to unmarshal from
-	 * @return amount of bytes read from the buffer
-	 * @see ClusterSerializable#readFromBuffer(int, Buffer)
-	 */
-	@Override
-	public int readFromBuffer(int pos, Buffer buffer) {
-		return this.buffer.readFromBuffer(pos, buffer);
 	}
 
 	/**
